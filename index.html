@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Promotion Calculator & KPI Tracker — Clarks</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+<style>
+:root{--navy:#0f172a;--navy2:#1e293b;--accent:#f97316;--accent2:#fb923c}
+body{font-family:'Segoe UI',Tahoma,sans-serif;background:#f1f5f9;color:#1e293b;margin:0}
+.sidebar{background:var(--navy);min-height:100vh;width:220px;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
+.tab-btn{display:block;width:100%;text-align:left;padding:11px 20px;color:#94a3b8;border-left:3px solid transparent;cursor:pointer;background:none;border-top:none;border-right:none;border-bottom:none;font-size:13px;transition:all .2s}
+.tab-btn:hover,.tab-btn.active{color:#fff;background:rgba(249,115,22,.15);border-left-color:var(--accent)}
+.tab-content{display:none}.tab-content.active{display:block}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:#f8fafc;padding:7px 9px;text-align:left;border-bottom:2px solid #e2e8f0;white-space:nowrap;font-weight:600;color:#475569}
+td{padding:6px 9px;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+tr:hover td{background:#f0f9ff}
+.badge{display:inline-block;padding:1px 7px;border-radius:5px;font-size:11px;font-weight:700}
+.badge-green{background:#dcfce7;color:#16a34a}.badge-red{background:#fee2e2;color:#dc2626}.badge-amber{background:#fef3c7;color:#d97706}
+.kpi-card{background:#fff;border-radius:12px;padding:14px 18px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+input,select,textarea{border:1.5px solid #cbd5e1;border-radius:7px;padding:5px 8px;font-size:13px;outline:none;background:#fff;font-family:inherit}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+.calc-box{background:#fff;border-radius:14px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.logo-text{font-size:20px;font-weight:800;color:#fff;letter-spacing:1px;padding:18px 20px 6px}
+.logo-sub{font-size:11px;color:#64748b;padding:0 20px 14px}
+.mix-step{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:14px;margin-bottom:10px;position:relative}
+.mix-step-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.mix-step-num{background:var(--accent);color:#fff;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.sub-row{display:grid;gap:5px;align-items:center;margin-bottom:6px;border-bottom:1px solid #f1f5f9;padding-bottom:6px}
+</style>
+</head>
+<body>
+<div style="display:flex">
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="logo-text">CLARKS</div>
+  <div class="logo-sub">Promotion Tools</div>
+  <nav>
+    <button class="tab-btn active" onclick="showTab('c')">🧮 Promo Calculator</button>
+    <button class="tab-btn" onclick="showTab('d')">🎯 KPI Tracker</button>
+  </nav>
+  <div style="padding:20px;margin-top:auto;border-top:1px solid #1e293b">
+    <div style="color:#64748b;font-size:11px">Clarks Brand Team</div>
+    <div style="color:#94a3b8;font-size:12px;margin-top:4px">คำนวณโปรโมชั่น Real-time</div>
+  </div>
+</div>
+
+<!-- Main -->
+<div style="flex:1;overflow-x:hidden">
+
+<!-- ════ TAB C: PROMO CALCULATOR ════ -->
+<div id="tab-c" class="tab-content active" style="padding:22px">
+  <div style="font-size:20px;font-weight:800;margin-bottom:4px">🧮 Promotion Calculator</div>
+  <div style="color:#64748b;font-size:12px;margin-bottom:16px">คำนวณโปรโมชันแบบ Real-time</div>
+
+  <!-- ── Mix Promotion ── -->
+  <div style="margin-bottom:20px">
+  <div class="calc-box">
+    <div style="font-size:15px;font-weight:700;margin-bottom:4px">🔀 Mix Promotion</div>
+    <div style="color:#64748b;font-size:12px;margin-bottom:14px">ผสมโปรโมชั่นได้สูงสุด 5 Step — คำนวณต่อเนื่องจากราคาตั้งต้น</div>
+
+    <!-- Base inputs -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;background:#f8fafc;border-radius:10px;padding:12px;border:1px solid #e2e8f0">
+      <div>
+        <label style="font-size:11px;font-weight:600;color:#64748b">ราคาตั้งต้น (Full Price ฿)</label>
+        <input type="number" id="mixBasePrice" value="3990" min="0" style="width:100%;margin-top:3px" oninput="calcMix()">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:600;color:#64748b">GP%</label>
+        <input type="number" id="mixGP" value="" placeholder="e.g. 40" min="0" max="100" style="width:100%;margin-top:3px" oninput="calcMix()">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:600;color:#64748b">Voucher Platform (฿)</label>
+        <input type="number" id="mixVoucherAmt" value="" placeholder="e.g. 200" min="0" style="width:100%;margin-top:3px" oninput="calcMix()">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:600;color:#64748b">Voucher Platform (%)</label>
+        <input type="number" id="mixVoucherPct" value="" placeholder="e.g. 5" min="0" max="100" style="width:100%;margin-top:3px" oninput="calcMix()">
+      </div>
+    </div>
+
+    <!-- Steps container -->
+    <div id="mixStepsContainer"></div>
+
+    <!-- Add step button -->
+    <div style="display:flex;gap:8px;margin-bottom:14px;align-items:center">
+      <button onclick="addMixStep()" id="mixAddBtn" style="padding:7px 18px;background:#0ea5e9;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600">+ เพิ่ม Step</button>
+      <button onclick="clearMixSteps()" style="padding:7px 14px;background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;border-radius:8px;cursor:pointer;font-size:12px">🗑 ล้างทั้งหมด</button>
+      <span id="mixStepCount" style="font-size:12px;color:#94a3b8"></span>
+    </div>
+
+    <!-- Result -->
+    <div id="mixResult" style="background:#f8fafc;border-radius:10px;padding:14px;border:1px solid #e2e8f0;font-size:13px">
+      <span style="color:#94a3b8;font-size:12px">เพิ่ม Step และกรอกข้อมูลเพื่อคำนวน</span>
+    </div>
+  </div>
+  </div>
+
+  <!-- ── ลดเพิ่ม + ของแถม ── -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px">
+
+    <!-- Box: ลดเพิ่ม -->
+    <div class="calc-box">
+      <div style="font-size:15px;font-weight:700;margin-bottom:14px">🏷️ ลดเพิ่ม (Step Discount)</div>
+      <div style="font-size:12px;font-weight:600;color:#475569;margin-bottom:6px">รุ่นสินค้า</div>
+      <div id="stepDiscRows"></div>
+      <button onclick="addStepDiscRow()" style="padding:5px 14px;background:#0ea5e9;color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:13px;margin-bottom:12px">+ เพิ่มรุ่น</button>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div>
+          <label style="font-size:11px;font-weight:600;color:#64748b">Step 1 – ส่วนลด (%)</label>
+          <input type="number" id="stepDisc1" placeholder="e.g. 20" min="0" max="100" style="width:100%;margin-top:3px" oninput="calcStepDisc()">
+        </div>
+        <div></div>
+      </div>
+      <div style="margin-bottom:8px">
+        <label style="font-size:11px;font-weight:600;color:#64748b">Step 2 – ส่วนลดเพิ่ม</label>
+        <div style="display:flex;gap:8px;margin-top:4px;align-items:center">
+          <label style="font-size:12px;display:flex;align-items:center;gap:4px;cursor:pointer">
+            <input type="radio" name="stepDiscMode" value="pct" checked onchange="calcStepDisc()"> % ส่วนลด
+          </label>
+          <label style="font-size:12px;display:flex;align-items:center;gap:4px;cursor:pointer">
+            <input type="radio" name="stepDiscMode" value="thb" onchange="calcStepDisc()"> ฿ ส่วนลด
+          </label>
+        </div>
+        <input type="number" id="stepDisc2Val" placeholder="ใส่ค่า..." min="0" style="width:100%;margin-top:5px" oninput="calcStepDisc()">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div>
+          <label style="font-size:11px;font-weight:600;color:#64748b">GP%</label>
+          <input type="number" id="stepDiscGP" placeholder="e.g. 40" min="0" max="100" style="width:100%;margin-top:3px" oninput="calcStepDisc()">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:#64748b">Voucher Platform (฿)</label>
+          <input type="number" id="stepDiscVoucher" placeholder="e.g. 100" min="0" style="width:100%;margin-top:3px" oninput="calcStepDisc()">
+        </div>
+      </div>
+      <div id="stepDiscResult" style="margin-top:10px;background:#f8fafc;border-radius:8px;padding:12px;font-size:13px;border:1px solid #e2e8f0"></div>
+    </div>
+
+    <!-- Box: ของแถม -->
+    <div class="calc-box">
+      <div style="font-size:15px;font-weight:700;margin-bottom:14px">🎁 ของแถม (Free Gift)</div>
+      <div style="font-size:12px;font-weight:600;color:#475569;margin-bottom:6px">สินค้าหลัก (ที่ซื้อ)</div>
+      <div id="giftMainRows"></div>
+      <button onclick="addGiftMain()" style="padding:5px 14px;background:#3b82f6;color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:13px;margin-bottom:14px">+ เพิ่มสินค้าหลัก</button>
+      <div style="font-size:12px;font-weight:600;color:#475569;margin-bottom:6px">ของแถม (ที่แจก)</div>
+      <div id="giftItemRows"></div>
+      <button onclick="addGiftItem()" style="padding:5px 14px;background:#10b981;color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:13px;margin-bottom:12px">+ เพิ่มของแถม</button>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div>
+          <label style="font-size:11px;font-weight:600;color:#64748b">GP%</label>
+          <input type="number" id="giftGP" placeholder="e.g. 40" min="0" max="100" style="width:100%;margin-top:3px" oninput="calcGift()">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:#64748b">Voucher Platform (฿)</label>
+          <input type="number" id="giftVoucher" placeholder="e.g. 100" min="0" style="width:100%;margin-top:3px" oninput="calcGift()">
+        </div>
+      </div>
+      <div id="giftResult" style="margin-top:10px;background:#f8fafc;border-radius:8px;padding:12px;font-size:13px;border:1px solid #e2e8f0"></div>
+    </div>
+  </div>
+
+  <!-- ── ลดเพิ่ม แสดงรายรุ่น SKU ── -->
+  <div style="margin-bottom:20px">
+    <div class="calc-box">
+      <div style="font-size:15px;font-weight:700;margin-bottom:14px">🏷️ ลดเพิ่ม แสดงส่วนลดรายรุ่น SKU</div>
+      <div style="color:#64748b;font-size:11px;margin-bottom:12px">ใช้เงื่อนไขเดียวกับ Step Discount — แสดงผลแยกรายรุ่น</div>
+      <div style="font-size:12px;font-weight:600;color:#475569;margin-bottom:6px">รุ่นสินค้า</div>
+      <div id="skuDiscRows"></div>
+      <button onclick="addSkuDiscRow()" style="padding:5px 14px;background:#0ea5e9;color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:13px;margin-bottom:12px">+ เพิ่มรุ่น</button>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px">
+        <div>
+          <label style="font-size:11px;font-weight:600;color:#64748b">Step 1 – ส่วนลด (%)</label>
+          <input type="number" id="skuDisc1" placeholder="e.g. 20" min="0" max="100" style="width:100%;margin-top:3px" oninput="calcSkuDisc()">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:#64748b">Step 2</label>
+          <div style="display:flex;gap:6px;margin-top:4px;align-items:center;font-size:11px">
+            <label style="display:flex;align-items:center;gap:3px;cursor:pointer"><input type="radio" name="skuDiscMode" value="pct" checked onchange="calcSkuDisc()"> %</label>
+            <label style="display:flex;align-items:center;gap:3px;cursor:pointer"><input type="radio" name="skuDiscMode" value="thb" onchange="calcSkuDisc()"> ฿</label>
+          </div>
+          <input type="number" id="skuDisc2Val" placeholder="ใส่ค่า..." min="0" style="width:100%;margin-top:3px" oninput="calcSkuDisc()">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:#64748b">GP%</label>
+          <input type="number" id="skuDiscGP" placeholder="e.g. 40" min="0" max="100" style="width:100%;margin-top:3px" oninput="calcSkuDisc()">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:#64748b">Voucher Platform (฿)</label>
+          <input type="number" id="skuDiscVoucher" placeholder="e.g. 100" min="0" style="width:100%;margin-top:3px" oninput="calcSkuDisc()">
+        </div>
+      </div>
+      <div id="skuDiscResult" style="margin-top:10px;font-size:12px"></div>
+    </div>
+  </div>
+
+  <!-- ── Bundle + Cross-sell ── -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+    <div class="calc-box">
+      <div style="font-size:15px;font-weight:700;margin-bottom:14px">📦 Bundle Deal</div>
+      <div style="margin-bottom:10px">
+        <label style="font-size:12px;font-weight:600">Price Mode:</label>
+        <select id="bundleMode" onchange="calcBundle()" style="margin-left:6px;font-size:12px">
+          <option value="per_item">Price per item</option>
+          <option value="one_price">One Price for bundle</option>
+        </select>
+        <input type="number" id="bundleOnePrice" placeholder="Bundle Price ฿" style="margin-left:8px;width:130px;display:none" oninput="calcBundle()">
+      </div>
+      <div id="bundleRows"></div>
+      <button onclick="addBundleRow()" style="margin-top:8px;padding:5px 14px;background:#f97316;color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:13px">+ Add Product</button>
+      <div style="margin-top:10px;display:flex;align-items:center;gap:8px">
+        <label style="font-size:12px;font-weight:600">GP%:</label>
+        <input type="number" id="bundleGP" placeholder="e.g. 40" style="width:80px" oninput="calcBundle()" min="0" max="100">
+      </div>
+      <div id="bundleResult" style="margin-top:14px;background:#f8fafc;border-radius:8px;padding:12px;font-size:13px;border:1px solid #e2e8f0"></div>
+    </div>
+
+    <div class="calc-box">
+      <div style="font-size:15px;font-weight:700;margin-bottom:14px">🔄 Cross-sell / แลกซื้อ</div>
+      <div style="font-size:12px;font-weight:600;color:#475569;margin-bottom:6px">Main Products</div>
+      <div id="crossMainRows"></div>
+      <button onclick="addCrossMain()" style="padding:5px 14px;background:#3b82f6;color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:13px">+ Add Main Product</button>
+      <div style="font-size:12px;font-weight:600;color:#475569;margin-top:14px;margin-bottom:6px">Redemption Products (แลกซื้อ)</div>
+      <div id="crossRedeemRows"></div>
+      <button onclick="addCrossRedeem()" style="padding:5px 14px;background:#8b5cf6;color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:13px">+ Add Redemption</button>
+      <div style="margin-top:10px;display:flex;align-items:center;gap:8px">
+        <label style="font-size:12px;font-weight:600">GP%:</label>
+        <input type="number" id="crossGP" placeholder="e.g. 40" style="width:80px" oninput="calcCross()" min="0" max="100">
+      </div>
+      <div id="crossResult" style="margin-top:14px;background:#f8fafc;border-radius:8px;padding:12px;font-size:13px;border:1px solid #e2e8f0"></div>
+    </div>
+  </div>
+
+  <!-- วิธีการคำนวณ -->
+  <div style="margin-top:28px;border-top:2px solid #e2e8f0;padding-top:20px">
+    <div style="font-size:16px;font-weight:800;margin-bottom:16px;color:#0f172a">📐 วิธีการคำนวณแต่ละประเภท</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div style="background:#f8fafc;border-radius:10px;padding:16px;border:1px solid #e2e8f0">
+        <div style="font-size:13px;font-weight:700;color:#f97316;margin-bottom:10px">🔀 Mix Promotion</div>
+        <div style="font-size:12px;color:#475569;line-height:2">
+          <div><strong>ส่วนลดปกติ:</strong> Net = ราคาตั้งต้น × (1 − %)</div>
+          <div><strong>ส่วนลด On Top:</strong> Net = ราคาปัจจุบัน × (1 − %)</div>
+          <div><strong>เพิ่ม % ส่วนลด:</strong> สะสม % รวมกัน แล้วลดจากราคาตั้งต้น</div>
+          <div><strong>Cash Voucher:</strong> หัก ฿ จากราคาปัจจุบัน</div>
+          <div><strong>GWP-Clarks:</strong> ต้นทุน = ราคาป้าย ÷ 3.7</div>
+          <div><strong>Bundle:</strong> ใช้ราคา Bundle รวมสินค้าหลายชิ้น</div>
+          <div><strong>แลกซื้อ:</strong> ลูกค้าจ่าย + ต้นทุนสินค้าแลก</div>
+        </div>
+      </div>
+      <div style="background:#f8fafc;border-radius:10px;padding:16px;border:1px solid #e2e8f0">
+        <div style="font-size:13px;font-weight:700;color:#10b981;margin-bottom:10px">🎁 ของแถม (Free Gift)</div>
+        <div style="font-size:12px;color:#475569;line-height:2">
+          <div><strong>2.</strong> ต้นทุนของแถม = ราคาของแถม ÷ 3.7</div>
+          <div><strong>3.</strong> GP Amount = ราคาหลักหลังส่วนลด × GP%</div>
+          <div><strong>4.</strong> ค่าใช้จ่ายรวม = ต้นทุนของแถม + Voucher + GP</div>
+          <div><strong>Effective Disc% = ค่าใช้จ่ายรวม ÷ ราคาหลัก × 100</strong></div>
+        </div>
+      </div>
+      <div style="background:#f8fafc;border-radius:10px;padding:16px;border:1px solid #e2e8f0">
+        <div style="font-size:13px;font-weight:700;color:#0ea5e9;margin-bottom:10px">🏷️ ลดเพิ่ม (Step Discount)</div>
+        <div style="font-size:12px;color:#475569;line-height:2">
+          <div><strong>1.</strong> หลัง Step 1 = ราคาตั้งต้น × (1 − Step1%)</div>
+          <div><strong>2a.</strong> หลัง Step 2 (%) = หลัง Step 1 × (1 − Step2%)</div>
+          <div><strong>2b.</strong> หลัง Step 2 (฿) = หลัง Step 1 − Step2฿</div>
+          <div><strong>3.</strong> Net Revenue = หลัง Step 2 − Voucher</div>
+          <div><strong>Net after GP = Net Revenue − GP Amount</strong></div>
+        </div>
+      </div>
+      <div style="background:#f8fafc;border-radius:10px;padding:16px;border:1px solid #e2e8f0">
+        <div style="font-size:13px;font-weight:700;color:#f97316;margin-bottom:10px">📦 Bundle / 🔄 Cross-sell</div>
+        <div style="font-size:12px;color:#475569;line-height:2">
+          <div><strong>Bundle Mode A:</strong> Net = Σ (ราคา × Qty × (1 − Disc%))</div>
+          <div><strong>Bundle Mode B:</strong> Net = ราคา Bundle รวม</div>
+          <div><strong>Cross-sell:</strong> Total Net = Main Net + Redeem Net</div>
+          <div><strong>Net after GP = Total Net × (1 − GP%)</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ TAB D: KPI TRACKER ════ -->
+<div id="tab-d" class="tab-content" style="padding:22px">
+  <div style="font-size:20px;font-weight:800;margin-bottom:4px">🎯 KPI Tracker</div>
+  <div style="color:#64748b;font-size:12px;margin-bottom:16px">บันทึกและติดตาม Campaign Performance</div>
+
+  <div style="display:grid;grid-template-columns:1fr 2fr;gap:20px">
+    <!-- Form -->
+    <div class="kpi-card" style="height:fit-content">
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px">+ Add Campaign</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div><label style="font-size:11px;font-weight:600;color:#64748b">Campaign Name</label><br><input type="text" id="kpiName" style="width:100%;margin-top:2px"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div><label style="font-size:11px;font-weight:600;color:#64748b">Start Date</label><br><input type="date" id="kpiStart" style="width:100%;margin-top:2px" onchange="calcDuration()"></div>
+          <div><label style="font-size:11px;font-weight:600;color:#64748b">End Date</label><br><input type="date" id="kpiEnd" style="width:100%;margin-top:2px" onchange="calcDuration()"></div>
+        </div>
+        <div style="background:#f1f5f9;border-radius:6px;padding:6px 10px;font-size:12px">Duration: <strong id="kpiDuration">—</strong></div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:#64748b">Channel / Site</label><br>
+          <select id="kpiChannel" style="width:100%;margin-top:2px" onchange="toggleOtherSite()">
+            <option value="">-- Select Site --</option>
+            <optgroup label="Women">
+              <option value="MLSPCZW1">Paragon Women (ชั้น 1)</option>
+              <option value="MLEPCZW1">Emporium Women (ชั้น 1)</option>
+              <option value="MLNWCZW1">Mall Ngamwongwan Women (ชั้น 1)</option>
+              <option value="CTPKCZW1">Central Pinklao Women (ชั้น 1)</option>
+              <option value="CTEVCZW1">Central Eastville Women (ชั้น 1)</option>
+              <option value="CTMGCZW1">Central Mega Bangna Women (ชั้น 1)</option>
+              <option value="CTRNCZW1">Central Rama 9 Women (ชั้น 3)</option>
+              <option value="BPOBBPM1">Bratpack One Bangkok ⚠</option>
+            </optgroup>
+            <optgroup label="Men">
+              <option value="MLSPCZM1">Paragon Men (ชั้น 2)</option>
+              <option value="CTLPCZM1">Ladprao Men (ชั้น 3)</option>
+              <option value="MLEPCZM1">POP-UP Emporium Men ⚠</option>
+            </optgroup>
+            <optgroup label="Online">
+              <option value="SP01OL">Shopee</option>
+              <option value="LZ01OL">Lazada</option>
+              <option value="CT01OL">Central App</option>
+              <option value="SF01OL">SEEK</option>
+            </optgroup>
+            <optgroup label="รวม">
+              <option value="ALL_OFFLINE">All Offline</option>
+              <option value="ALL_ONLINE">All Online</option>
+              <option value="ALL">All Channels</option>
+            </optgroup>
+            <option value="OTHER">อื่นๆ (ระบุเอง)</option>
+          </select>
+          <input type="text" id="kpiOtherSite" placeholder="ระบุ Site..." style="width:100%;margin-top:4px;display:none">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div><label style="font-size:11px;font-weight:600;color:#64748b">Qty Target</label><br><input type="number" id="kpiQtyTgt" style="width:100%;margin-top:2px"></div>
+          <div><label style="font-size:11px;font-weight:600;color:#64748b">Rev Target (฿)</label><br><input type="number" id="kpiRevTgt" style="width:100%;margin-top:2px"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div><label style="font-size:11px;font-weight:600;color:#64748b">Qty Actual</label><br><input type="number" id="kpiQtyAct" style="width:100%;margin-top:2px"></div>
+          <div><label style="font-size:11px;font-weight:600;color:#64748b">Rev Actual (฿)</label><br><input type="number" id="kpiRevAct" style="width:100%;margin-top:2px"></div>
+        </div>
+        <div><label style="font-size:11px;font-weight:600;color:#64748b">Notes</label><br><textarea id="kpiNotes" rows="2" style="width:100%;margin-top:2px;resize:none"></textarea></div>
+        <button onclick="saveKPI()" style="padding:8px;background:#f97316;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px">💾 Save Campaign</button>
+      </div>
+    </div>
+
+    <!-- History -->
+    <div class="kpi-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-size:14px;font-weight:700">Campaign History</div>
+        <button onclick="exportKPIExcel()" style="padding:5px 12px;background:#16a34a;color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:12px;font-weight:600">📥 Export Excel</button>
+      </div>
+      <div style="overflow-x:auto"><table id="kpiTable">
+        <thead><tr>
+          <th>Campaign</th><th>Site</th><th>Period</th><th>Days</th>
+          <th>Qty Tgt</th><th>Qty Act</th><th>Qty%</th>
+          <th>Rev Tgt</th><th>Rev Act</th><th>Rev%</th>
+          <th>Result</th><th>Notes</th><th></th>
+        </tr></thead>
+        <tbody id="kpiBody"></tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end main -->
+</div><!-- end flex -->
+
+<script>
+const D = { products: [{"Name": "CLOUDSTEPPERS M SOLEVANA STYLE", "full_price": 4290, "type_cat": "SNEAKER", "style_code": "CZSADC01T"}, {"Name": "CLOUDSTEPPERS W SOLEVANA STRAP", "full_price": 3290, "type_cat": "MARY JANES", "style_code": "CZJADC01T"}, {"Name": "ESSENTIALS M BERWICK LACE", "full_price": 4990, "type_cat": "LEATHER SHOES", "style_code": "CZLACE05L"}, {"Name": "ESSENTIALS M BERWICK LO", "full_price": 4990, "type_cat": "LEATHER SHOES", "style_code": "CZLACE06L"}, {"Name": "ESSENTIALS M BERWICK SEAM", "full_price": 4990, "type_cat": "LEATHER SHOES", "style_code": "CZLACE07L"}, {"Name": "ESSENTIALS M FLEXWAY STEP", "full_price": 4990, "type_cat": "LEATHER SHOES", "style_code": "CZLACE03L"}, {"Name": "ESSENTIALS M MARKMAN PLAIN", "full_price": 4570, "type_cat": "LEATHER SHOES", "style_code": "CZLACE04L"}, {"Name": "ESSENTIALS M TILDEN CAP", "full_price": 4890, "type_cat": "LEATHER SHOES", "style_code": "CZLADE03L"}, {"Name": "ESSENTIALS M TILDEN FREE", "full_price": 4890, "type_cat": "LEATHER SHOES", "style_code": "CZLACE01L"}, {"Name": "ESSENTIALS M TILDEN WALK", "full_price": 4890, "type_cat": "LEATHER SHOES", "style_code": "CZLABE01L"}, {"Name": "ESSENTIALS W ELLIOTTE SAIL", "full_price": 3290, "type_cat": "LOAFER", "style_code": "CZRADE02L"}, {"Name": "ESSENTIALS W IRIDESSA MAY", "full_price": 4590, "type_cat": "PUMP SHOES", "style_code": "CZPACE02L"}, {"Name": "ESSENTIALS W IRIDESSA RAE", "full_price": 4990, "type_cat": "PUMP SHOES", "style_code": "CZPACE03L"}, {"Name": "ESSENTIALS W IRIDESSA SKY", "full_price": 5190, "type_cat": "LOAFER", "style_code": "CZRACE02L"}, {"Name": "ESSENTIALS W JAYLAN DUSK", "full_price": 4990, "type_cat": "CASUAL", "style_code": "CZEABE01L"}, {"Name": "ESSENTIALS W JAZMYNN BOW", "full_price": 3990, "type_cat": "FLAT SHOES", "style_code": "CZFADE01L"}, {"Name": "ESSENTIALS W JAZMYNN GEM", "full_price": 4290, "type_cat": "FLAT SHOES", "style_code": "CZFACE01L"}, {"Name": "ESSENTIALS W JAZMYNN IRIS", "full_price": 4290, "type_cat": "MARY JANES", "style_code": "CZJACE01L"}, {"Name": "ESSENTIALS W JULIET ECHO", "full_price": 4590, "type_cat": "LOAFER", "style_code": "CZRACE01L"}, {"Name": "ESSENTIALS W KEPLEY CORA", "full_price": 4990, "type_cat": "PUMP SHOES", "style_code": "CZPACE04L"}, {"Name": "ESSENTIALS W KEPLEY LANE", "full_price": 4990, "type_cat": "PUMP SHOES", "style_code": "CZPACE01L"}, {"Name": "ESSENTIALS W KEPLEY SKY", "full_price": 4990, "type_cat": "PUMP SHOES", "style_code": "CZPABE02L"}, {"Name": "ESSENTIALS W KEPLEY VINE", "full_price": 5490, "type_cat": "PUMP SHOES", "style_code": "CZPABE01L"}, {"Name": "ESSENTIALS W LORELEIGH RAE", "full_price": 4290, "type_cat": "FLAT SHOES", "style_code": "CZFACE02L"}, {"Name": "ESSENTIALS W NATALYN LANE", "full_price": 3990, "type_cat": "MARY JANES", "style_code": "CZJABE01L"}, {"Name": "ESSENTIALS W NATALYN SLING", "full_price": 4290, "type_cat": "FLAT SHOES", "style_code": "CZFADE02L"}, {"Name": "ESSENTIALS W NATALYN STEP", "full_price": 3990, "type_cat": "FLAT SHOES", "style_code": "CZFABE01L"}, {"Name": "ESSENTIALS W NATALYN WISH", "full_price": 4290, "type_cat": "FLATS", "style_code": "CZFACE03L"}, {"Name": "ESSENTIALS W SCARLYT PIPER", "full_price": 4290, "type_cat": "PUMP SHOES", "style_code": "CZPACE05P"}, {"Name": "ESSENTIALS W SOLEVANA LACE", "full_price": 3590, "type_cat": "SNEAKER", "style_code": "CZSACE01T"}, {"Name": "ESSENTIALS W SOLEVANA STYLE", "full_price": 3970, "type_cat": "SNEAKER", "style_code": "CZSACE02N"}, {"Name": "ORIGINAL M MEARE WALLA", "full_price": 6990, "type_cat": "SNEAKER", "style_code": "CZSADR06S"}, {"Name": "ORIGINAL M WALLA YUKONER", "full_price": 8990, "type_cat": "LEATHER SHOES", "style_code": "CZLADR02L"}, {"Name": "ORIGINALS M DESERT BOOT", "full_price": 6170, "type_cat": "SNEAKER", "style_code": "CZSABR02L"}, {"Name": "ORIGINALS M DESERT BOOT GORE-TEX", "full_price": 8990, "type_cat": "HI-TOP SNEAKER", "style_code": "CZHACR01L"}, {"Name": "ORIGINALS M DESERT KHAN EG", "full_price": 11990, "type_cat": "SNEAKER", "style_code": "CZSABR21S"}, {"Name": "ORIGINALS M DESERT KHAN EG", "full_price": 9990, "type_cat": "SNEAKER", "style_code": "CZSABR20L"}, {"Name": "ORIGINALS M DESERT NOMAD MULE", "full_price": 6990, "type_cat": "SANDALS", "style_code": "CZDABR01S"}, {"Name": "ORIGINALS M DESERT RAIN", "full_price": 7590, "type_cat": "SNEAKER", "style_code": "CZSABR18C"}, {"Name": "ORIGINALS M DESERT TREK", "full_price": 6170, "type_cat": "SNEAKER", "style_code": "CZSABR03S"}, {"Name": "ORIGINALS M DESERT TREK GORE-TEX", "full_price": 8990, "type_cat": "SNEAKER", "style_code": "CZSACR02L"}, {"Name": "ORIGINALS M DESET TREK GTX", "full_price": 7990, "type_cat": "SNEAKER", "style_code": "CZSABR11S"}, {"Name": "ORIGINALS M GODNEY BOAT", "full_price": 6990, "type_cat": "LEATHER SHOES", "style_code": "CZLADR01L"}, {"Name": "ORIGINALS M MEARE BUCKLE", "full_price": 6990, "type_cat": "CASUAL", "style_code": "CZDABR03L"}, {"Name": "ORIGINALS M MEARE WALLA", "full_price": 5990, "type_cat": "SNEAKER", "style_code": "CZSACR07S"}, {"Name": "ORIGINALS M NOMAD T BAR", "full_price": 6990, "type_cat": "SNEAKER", "style_code": "CZSACR08S"}, {"Name": "ORIGINALS M SANDFORD 2", "full_price": 10990, "type_cat": "SNEAKER", "style_code": "CZSAAR11S"}, {"Name": "ORIGINALS M SUNDERLAND", "full_price": 10990, "type_cat": "SNEAKER", "style_code": "CZSAAR13S"}, {"Name": "ORIGINALS M TOR 80", "full_price": 5490, "type_cat": "SNEAKER", "style_code": "CZSABR04L"}, {"Name": "ORIGINALS M TORHILL DRGNLO", "full_price": 6490, "type_cat": "SNEAKER", "style_code": "CZSAAR01S"}, {"Name": "ORIGINALS M TORHILL WOVEN", "full_price": 7490, "type_cat": "HI-TOP SNEAKER", "style_code": "CZHAAR01S"}, {"Name": "ORIGINALS M TREK KING", "full_price": 8590, "type_cat": "SNEAKER", "style_code": "CZSACR09L"}, {"Name": "ORIGINALS M WALLA SCOUT LO", "full_price": 8990, "type_cat": "SNEAKER", "style_code": "CZSABR14S"}, {"Name": "ORIGINALS M WALLA STRAP BOOT", "full_price": 9990, "type_cat": "HI-TOP SNEAKER", "style_code": "CZHABR02S"}, {"Name": "ORIGINALS M WALLA STRAP LO", "full_price": 9590, "type_cat": "SNEAKER", "style_code": "CZSABR19S"}, {"Name": "ORIGINALS M WALLA YUKONER", "full_price": 8990, "type_cat": "SNEAKER", "style_code": "CZSACR03L"}, {"Name": "ORIGINALS M WALLABEE", "full_price": 7390, "type_cat": "SNEAKER", "style_code": "CZSAAR02L"}, {"Name": "ORIGINALS M WALLABEE", "full_price": 7590, "type_cat": "SNEAKER", "style_code": "CZSABR01L"}, {"Name": "ORIGINALS M WALLABEE", "full_price": 8270, "type_cat": "SNEAKER", "style_code": "CZSABR06L"}, {"Name": "ORIGINALS M WALLABEE 2604", "full_price": 7990, "type_cat": "SNEAKER", "style_code": "CZSABR22S"}, {"Name": "ORIGINALS M WALLABEE BOAT", "full_price": 7590, "type_cat": "SNEAKER", "style_code": "CZSABR15S"}, {"Name": "ORIGINALS M WALLABEE BOOT", "full_price": 8270, "type_cat": "HI-TOP SNEAKER", "style_code": "CZHACR02S"}, {"Name": "ORIGINALS M WALLABEE BOOT", "full_price": 7990, "type_cat": "HI-TOP SNEAKER", "style_code": "CZHAAR02L"}, {"Name": "ORIGINALS M WALLABEE BOOT", "full_price": 9990, "type_cat": "HI-TOP SNEAKER", "style_code": "CZHACR04C"}, {"Name": "ORIGINALS M WALLABEE BOOT GTX", "full_price": 9590, "type_cat": "HI-TOP SNEAKER", "style_code": "CZHABR01S"}, {"Name": "ORIGINALS M WALLABEE BOOT PAF", "full_price": 8990, "type_cat": "HI-TOP SNEAKER", "style_code": "CZHACR03S"}, {"Name": "ORIGINALS M WALLABEE GORE-TEX", "full_price": 8990, "type_cat": "SNEAKER", "style_code": "CZSACR05L"}, {"Name": "ORIGINALS M WALLABEE GORE-TEX", "full_price": 9590, "type_cat": "SNEAKER", "style_code": "CZSAAR08S"}, {"Name": "ORIGINALS M WALLABEE SLIP", "full_price": 7590, "type_cat": "SNEAKER", "style_code": "CZSABR23S"}, {"Name": "ORIGINALS M WALLABEEGTX", "full_price": 9570, "type_cat": "SNEAKER", "style_code": "CZSABR08N"}, {"Name": "ORIGINALS M WALLABEELOAFER", "full_price": 7590, "type_cat": "SNEAKER", "style_code": "CZSABR09S"}, {"Name": "ORIGINALS M WALLALOAFERGTX", "full_price": 9590, "type_cat": "SNEAKER", "style_code": "CZSABR10S"}, {"Name": "ORIGINALS M WB PENNY WEAVE", "full_price": 7990, "type_cat": "SNEAKER", "style_code": "CZSABR24L"}, {"Name": "ORIGINALS MEN WALLABEE 2604", "full_price": 7590, "type_cat": "SNEAKER", "style_code": "CZSADR11L"}, {"Name": "ORIGINALS W DESERT JANE", "full_price": 4990, "type_cat": "MARY JANES", "style_code": "CZJABR01L"}, {"Name": "ORIGINALS W DESERT NOMAD MULE", "full_price": 6990, "type_cat": "SANDALS", "style_code": "CZDABR02S"}, {"Name": "ORIGINALS W TREKWEDGE TBAR", "full_price": 5990, "type_cat": "SNEAKER", "style_code": "CZSABR13S"}, {"Name": "ORIGINALS W WALLABEE", "full_price": 7590, "type_cat": "SNEAKER", "style_code": "CZSABR05L"}, {"Name": "ORIGINALS W WALLABEE", "full_price": 7390, "type_cat": "SNEAKER", "style_code": "CZSAAR04L"}, {"Name": "ORIGINALS W WALLABEE BOOT", "full_price": 7990, "type_cat": "HI-TOP SNEAKER", "style_code": "CZHAAR05L"}, {"Name": "ORIGINALS W WALLABEE GORE-TEX", "full_price": 9590, "type_cat": "SNEAKER", "style_code": "CZSAAR06S"}, {"Name": "ORIGINALS W WALLABEE SLING", "full_price": 6990, "type_cat": "SNEAKER", "style_code": "CZSABR16L"}, {"Name": "ORIGINALS W WALLABEE WEAVE", "full_price": 7990, "type_cat": "SNEAKER", "style_code": "CZSABR25S"}, {"Name": "ORIGINALS W WALLACRAFT BEE", "full_price": 7390, "type_cat": "SNEAKER", "style_code": "CZSAAR10S"}, {"Name": "ORIGINALS WOMEN WALLABEE 2604", "full_price": 7590, "type_cat": "SNEAKER", "style_code": "CZSADR12P"}, {"Name": "PREMIUM M ALDWIN LACE", "full_price": 7290, "type_cat": "FORMAL", "style_code": "CZLACP01L"}, {"Name": "PREMIUM M CLARKS PACE", "full_price": 7290, "type_cat": "SNEAKER", "style_code": "CZSACP01T"}, {"Name": "PREMIUM M CLEYHILL BOAT", "full_price": 5990, "type_cat": "LEATHER SHOES", "style_code": "CZLADP02L"}, {"Name": "PREMIUM M CRAFT SWIFT", "full_price": 6570, "type_cat": "SNEAKER", "style_code": "CZSABP02L"}, {"Name": "PREMIUM M CRAFTARLO LO", "full_price": 8590, "type_cat": "FORMAL", "style_code": "CZRABP04L"}, {"Name": "PREMIUM M CRAFTJAMES CAP", "full_price": 9970, "type_cat": "FORMAL", "style_code": "CZLABP01L"}, {"Name": "PREMIUM M CRAFTJAMES LO", "full_price": 8970, "type_cat": "LEATHER SHOES", "style_code": "CZLACP02L"}, {"Name": "PREMIUM M CUR DERBY", "full_price": 10990, "type_cat": "FORMAL", "style_code": "CZLABP02L"}, {"Name": "PREMIUM M CUR TORVIEW", "full_price": 7590, "type_cat": "SNEAKER", "style_code": "CZSABP07L"}, {"Name": "PREMIUM M MARTOCK LO", "full_price": 7990, "type_cat": "FORMAL", "style_code": "CZRABP01S"}, {"Name": "PREMIUM M PAULTON LACE", "full_price": 4990, "type_cat": "LEATHER SHOES", "style_code": "CZLACP03L"}, {"Name": "PREMIUM M POLDEN MOC", "full_price": 6590, "type_cat": "SNEAKER", "style_code": "CZSABP09S"}, {"Name": "PREMIUM M SOLSBURY MULE", "full_price": 6590, "type_cat": "SANDALS", "style_code": "CZDABP03S"}, {"Name": "PREMIUM M SOLSBURY STRAP", "full_price": 6590, "type_cat": "SANDALS", "style_code": "CZDABP04L"}, {"Name": "PREMIUM M TORHILL BEE", "full_price": 6590, "type_cat": "SNEAKER", "style_code": "CZSACP05L"}, {"Name": "PREMIUM M TORHILL HI", "full_price": 7570, "type_cat": "SNEAKER", "style_code": "CZSABP05S"}, {"Name": "PREMIUM M TORHILL LO", "full_price": 6570, "type_cat": "SNEAKER", "style_code": "CZSABP06S"}, {"Name": "PREMIUM M TORHILL LO", "full_price": 6590, "type_cat": "SNEAKER", "style_code": "CZSACP06L"}, {"Name": "PREMIUM M TORVIEW", "full_price": 6590, "type_cat": "SNEAKER", "style_code": "CZSACP07S"}, {"Name": "PREMIUM W ADELA COURT", "full_price": 6290, "type_cat": "HEELS", "style_code": "CZPABP01L"}, {"Name": "PREMIUM W ADELA SLING", "full_price": 6290, "type_cat": "HEELS", "style_code": "CZPABP02L"}, {"Name": "PREMIUM W ARIANY MULE", "full_price": 5490, "type_cat": "SANDALS", "style_code": "CZDABP01L"}, {"Name": "PREMIUM W CLARKS PACE", "full_price": 7290, "type_cat": "SNEAKER", "style_code": "CZSACP02T"}, {"Name": "PREMIUM W CRAFT SPEED", "full_price": 7570, "type_cat": "SNEAKER", "style_code": "CZSABP01L"}, {"Name": "PREMIUM W DAISS30 DAZZ", "full_price": 6590, "type_cat": "HEELS", "style_code": "CZJABP03P"}, {"Name": "PREMIUM W EVAMAR WISH", "full_price": 7470, "type_cat": "SANDALS", "style_code": "CZDABP02S"}, {"Name": "PREMIUM W FAWNA SOFT", "full_price": 5970, "type_cat": "FLATS", "style_code": "CZFABP01L"}, {"Name": "PREMIUM W HOLLYHOCK WALK", "full_price": 6290, "type_cat": "SNEAKER", "style_code": "CZSACP03L"}, {"Name": "PREMIUM W LIVIA LILY", "full_price": 5490, "type_cat": "FLATS", "style_code": "CZFACP01L"}, {"Name": "PREMIUM W LIVIA SKY", "full_price": 5690, "type_cat": "FLATS", "style_code": "CZJACP01L"}, {"Name": "PREMIUM W LYNELL STRAP", "full_price": 4290, "type_cat": "MARY JANES", "style_code": "CZJADP02N"}, {"Name": "PREMIUM W MAYHILL WALK", "full_price": 6170, "type_cat": "SNEAKER", "style_code": "CZSABP03L"}, {"Name": "PREMIUM W NARINI EDGE", "full_price": 5490, "type_cat": "LOAFER", "style_code": "CZRABP02S"}, {"Name": "PREMIUM W NYTA45 SLING", "full_price": 6890, "type_cat": "PUMP SHOES", "style_code": "CZPABP03L"}, {"Name": "PREMIUM W ORINOCO3 EDGE", "full_price": 5990, "type_cat": "SNEAKER", "style_code": "CZRACP01L"}, {"Name": "PREMIUM W PAGE LOAFER", "full_price": 6590, "type_cat": "LOAFER", "style_code": "CZRABP05P"}, {"Name": "PREMIUM W SENSA 15 SHINE", "full_price": 6290, "type_cat": "FLATS", "style_code": "CZJABP01L"}, {"Name": "PREMIUM W SENSA15 BOW", "full_price": 4290, "type_cat": "FLAT SHOES", "style_code": "CZFADP01L"}, {"Name": "PREMIUM W SENSA15 TRIM", "full_price": 5990, "type_cat": "FLAT SHOES", "style_code": "CZFACP03L"}, {"Name": "PREMIUM W STRAVEN EDGE", "full_price": 6990, "type_cat": "LOAFER", "style_code": "CZRABP03L"}, {"Name": "PREMIUM W STRAVEN SLING", "full_price": 6290, "type_cat": "FLATS", "style_code": "CZFACP02L"}, {"Name": "PREMIUM W TORHILL BEE", "full_price": 6590, "type_cat": "SNEAKER", "style_code": "CZSABP04N"}, {"Name": "PREMIUM W TORHILL BOAT", "full_price": 5990, "type_cat": "SNEAKERS", "style_code": "CZSADP04N"}, {"Name": "PREMIUM W TORHILL JANE", "full_price": 5590, "type_cat": "MARY JANES", "style_code": "CZJADP03S"}, {"Name": "PREMIUM W UBREE15 POPPY", "full_price": 6290, "type_cat": "FLATS", "style_code": "CZFABP02L"}, {"Name": "PREMIUM W ZAREY BOW", "full_price": 5690, "type_cat": "PUMP SHOES", "style_code": "CZPADP01L"}, {"Name": "PREMIUMCUR W TORVIEW", "full_price": 7590, "type_cat": "SNEAKER", "style_code": "CZSABP08L"}] };
+
+
+// ── Utility ───────────────────────────────────────────────────────────────────
+function fmt(n) { return n == null ? '—' : Math.round(n).toLocaleString(); }
+function fmtN(n) { return n == null ? '—' : n.toLocaleString(); }
+
+// ── Tab navigation ─────────────────────────────────────────────────────────────
+function showTab(id) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  const idx = ['c','d'].indexOf(id);
+  if (idx >= 0) document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+}
+
+// ── Product select helper ──────────────────────────────────────────────────────
+function makeProductSelect(onchangeFn) {
+  const sel = document.createElement('select');
+  sel.style = 'width:100%;font-size:12px;max-width:260px';
+  sel.innerHTML = '<option value="">-- Select product --</option>';
+  D.products.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.style_code;
+    opt.textContent = p.Name + ' (' + fmt(p.full_price) + ')';
+    opt.dataset.price = p.full_price;
+    sel.appendChild(opt);
+  });
+  sel.onchange = onchangeFn;
+  return sel;
+}
+
+// ════════════════════════════════════════════════════════
+// 🔀 MIX PROMOTION
+// ════════════════════════════════════════════════════════
+let mixStepCount = 0;
+let mixStepIds = [];
+
+const MIX_TYPE_OPTS = [
+  {val:'normal',   label:'ส่วนลดปกติ (% จากราคาตั้งต้น)'},
+  {val:'ontop',    label:'ส่วนลด On Top (% จากราคาปัจจุบัน)'},
+  {val:'addpct',   label:'เพิ่ม % ส่วนลด (สะสมจากตั้งต้น)'},
+  {val:'cash',     label:'Cash Voucher (หัก ฿)'},
+  {val:'gwp_clarks',label:'GWP-Clarks (ต้นทุน ÷ 3.7)'},
+  {val:'gwp_other',label:'GWP (Other) — กรอกต้นทุนเอง'},
+  {val:'bundle',   label:'Bundle Deal (หลายสินค้า)'},
+  {val:'redeem',   label:'แลกซื้อ (ลูกค้าจ่าย + ต้นทุน)'},
+];
+
+function addMixStep() {
+  if (mixStepIds.length >= 5) { alert('สูงสุด 5 Step'); return; }
+  mixStepCount++;
+  const sid = mixStepCount;
+  mixStepIds.push(sid);
+
+  const container = document.getElementById('mixStepsContainer');
+  const div = document.createElement('div');
+  div.className = 'mix-step';
+  div.id = 'mixStep_' + sid;
+
+  const typeOpts = MIX_TYPE_OPTS.map(t => '<option value="' + t.val + '">' + t.label + '</option>').join('');
+
+  div.innerHTML =
+    '<div class="mix-step-header">' +
+      '<div class="mix-step-num" id="mixStepNum_' + sid + '">' + mixStepIds.length + '</div>' +
+      '<select id="mixType_' + sid + '" style="flex:1;font-size:13px" onchange="renderMixInputs(' + sid + ');calcMix()">' + typeOpts + '</select>' +
+      '<button onclick="removeMixStep(' + sid + ')" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:18px;line-height:1;padding:0 4px">✕</button>' +
+    '</div>' +
+    '<div id="mixInputs_' + sid + '"></div>';
+
+  container.appendChild(div);
+  renderMixInputs(sid);
+  updateMixStepNums();
+  calcMix();
+}
+
+function removeMixStep(sid) {
+  const idx = mixStepIds.indexOf(sid);
+  if (idx > -1) mixStepIds.splice(idx, 1);
+  const el = document.getElementById('mixStep_' + sid);
+  if (el) el.remove();
+  updateMixStepNums();
+  calcMix();
+}
+
+function clearMixSteps() {
+  mixStepIds = [];
+  document.getElementById('mixStepsContainer').innerHTML = '';
+  document.getElementById('mixStepCount').textContent = '';
+  calcMix();
+}
+
+function updateMixStepNums() {
+  mixStepIds.forEach(function(sid, i) {
+    const el = document.getElementById('mixStepNum_' + sid);
+    if (el) el.textContent = (i + 1);
+  });
+  const addBtn = document.getElementById('mixAddBtn');
+  if (addBtn) addBtn.disabled = mixStepIds.length >= 5;
+  document.getElementById('mixStepCount').textContent = mixStepIds.length > 0 ? mixStepIds.length + '/5 Steps' : '';
+}
+
+// Bundle sub-rows inside Mix step
+let mixBundleRowCounts = {};
+
+function addMixBundleRow(sid) {
+  if (!mixBundleRowCounts[sid]) mixBundleRowCounts[sid] = 0;
+  mixBundleRowCounts[sid]++;
+  const rid = mixBundleRowCounts[sid];
+  const cont = document.getElementById('mixBundleRows_' + sid);
+  if (!cont) return;
+  const rowId = 'mbrRow_' + sid + '_' + rid;
+  const row = document.createElement('div');
+  row.id = rowId;
+  row.className = 'sub-row';
+  row.style.gridTemplateColumns = '1fr 90px 60px 80px 24px';
+  const sel = makeProductSelect(function() {
+    const opt = sel.options[sel.selectedIndex];
+    row.querySelector('.mbp').value = opt.dataset.price || '';
+    calcMix();
+  });
+  const pIn = document.createElement('input'); pIn.type='number'; pIn.placeholder='฿'; pIn.style='width:100%;background:#f8fafc;font-size:12px'; pIn.className='mbp'; pIn.readOnly=true;
+  const qIn = document.createElement('input'); qIn.type='number'; qIn.value='1'; qIn.min='1'; qIn.style='width:100%;font-size:12px'; qIn.className='mbqty'; qIn.oninput=calcMix;
+  const dIn = document.createElement('input'); dIn.type='number'; dIn.placeholder='Disc%'; dIn.style='width:100%;font-size:12px'; dIn.className='mbdisc'; dIn.oninput=calcMix;
+  const del = document.createElement('button'); del.textContent='✕'; del.style='background:none;border:none;color:#ef4444;cursor:pointer;font-size:13px'; del.onclick=function(){row.remove();calcMix();};
+  row.appendChild(sel); row.appendChild(pIn); row.appendChild(qIn); row.appendChild(dIn); row.appendChild(del);
+  cont.appendChild(row);
+}
+
+// Redeem sub-product inside Mix step
+function renderMixRedeemProduct(sid) {
+  const typeEl = document.getElementById('mixRedeemType_' + sid);
+  if (!typeEl) return;
+  const rtype = typeEl.value;
+  const area = document.getElementById('mixRedeemProdArea_' + sid);
+  if (!area) return;
+  if (rtype === 'clarks') {
+    const sel = makeProductSelect(function() { calcMix(); });
+    sel.id = 'mixRedeemProd_' + sid;
+    sel.style.width = '100%';
+    area.innerHTML = '';
+    const label = document.createElement('label'); label.style='font-size:11px;color:#64748b'; label.textContent='สินค้า Clarks ที่แลกซื้อ';
+    area.appendChild(label); area.appendChild(sel);
+    const costLine = document.createElement('div');
+    costLine.style='font-size:11px;color:#94a3b8;margin-top:3px';
+    costLine.id = 'mixRedeemCostLine_' + sid;
+    costLine.textContent = 'ต้นทุน: —';
+    area.appendChild(costLine);
+  } else {
+    area.innerHTML = '<label style="font-size:11px;color:#64748b">ต้นทุนสินค้าแลกซื้อ (฿)</label>' +
+      '<input type="number" id="mixRedeemCostOther_' + sid + '" value="0" min="0" style="width:160px;margin-top:3px;display:block;font-size:12px" oninput="calcMix()">';
+  }
+}
+
+function renderMixInputs(sid) {
+  const typeEl = document.getElementById('mixType_' + sid);
+  if (!typeEl) return;
+  const type = typeEl.value;
+  const cont = document.getElementById('mixInputs_' + sid);
+  if (!cont) return;
+  cont.innerHTML = '';
+
+  if (type === 'normal' || type === 'ontop' || type === 'addpct') {
+    cont.innerHTML =
+      '<div style="display:flex;align-items:center;gap:10px">' +
+        '<label style="font-size:12px;color:#64748b;min-width:90px">ส่วนลด (%):</label>' +
+        '<input type="number" id="mixVal_' + sid + '" value="10" min="0" max="100" style="width:100px" oninput="calcMix()">' +
+      '</div>';
+
+  } else if (type === 'cash') {
+    cont.innerHTML =
+      '<div style="display:flex;align-items:center;gap:10px">' +
+        '<label style="font-size:12px;color:#64748b;min-width:90px">จำนวนเงิน (฿):</label>' +
+        '<input type="number" id="mixVal_' + sid + '" value="200" min="0" style="width:120px" oninput="calcMix()">' +
+      '</div>';
+
+  } else if (type === 'gwp_clarks') {
+    const wrapper = document.createElement('div');
+    wrapper.style = 'display:flex;flex-direction:column;gap:6px';
+    const row = document.createElement('div');
+    row.style = 'display:flex;align-items:center;gap:10px';
+    const label = document.createElement('label'); label.style='font-size:12px;color:#64748b;min-width:90px'; label.textContent='สินค้าของแถม:';
+    const sel = makeProductSelect(function() {
+      const opt = sel.options[sel.selectedIndex];
+      const price = parseFloat(opt.dataset.price) || 0;
+      const cost = price / 3.7;
+      const costEl = document.getElementById('mixGWPCost_' + sid);
+      if (costEl) costEl.textContent = 'ต้นทุน ÷3.7 = ' + fmt(cost) + ' ฿';
+      calcMix();
+    });
+    sel.id = 'mixGWPSel_' + sid;
+    sel.style.flex = '1';
+    const costDiv = document.createElement('div');
+    costDiv.id = 'mixGWPCost_' + sid;
+    costDiv.style = 'font-size:11px;color:#ef4444;margin-top:2px';
+    row.appendChild(label); row.appendChild(sel);
+    wrapper.appendChild(row); wrapper.appendChild(costDiv);
+    cont.appendChild(wrapper);
+
+  } else if (type === 'gwp_other') {
+    cont.innerHTML =
+      '<div style="display:flex;align-items:center;gap:10px">' +
+        '<label style="font-size:12px;color:#64748b;min-width:90px">ต้นทุน GWP (฿):</label>' +
+        '<input type="number" id="mixVal_' + sid + '" value="0" min="0" style="width:120px" oninput="calcMix()">' +
+      '</div>';
+
+  } else if (type === 'bundle') {
+    const wrapper = document.createElement('div');
+    wrapper.style = 'display:flex;flex-direction:column;gap:6px';
+    // header labels
+    const hdr = document.createElement('div');
+    hdr.style = 'display:grid;grid-template-columns:1fr 90px 60px 80px 24px;gap:5px;font-size:10px;color:#94a3b8;padding:0 0 4px 0';
+    hdr.innerHTML = '<span>สินค้า</span><span>ราคา ฿</span><span>Qty</span><span>Disc%</span><span></span>';
+    const rowsCont = document.createElement('div');
+    rowsCont.id = 'mixBundleRows_' + sid;
+    const addBtn = document.createElement('button');
+    addBtn.textContent = '+ เพิ่มสินค้า';
+    addBtn.style = 'padding:4px 10px;background:#f97316;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:11px;width:fit-content';
+    addBtn.onclick = function() { addMixBundleRow(sid); };
+    const modeRow = document.createElement('div');
+    modeRow.style = 'display:flex;align-items:center;gap:8px;margin-top:4px';
+    modeRow.innerHTML = '<label style="font-size:11px;color:#64748b">Price Mode:</label>' +
+      '<select id="mixBundleMode_' + sid + '" style="font-size:11px" onchange="calcMix()">' +
+        '<option value="per_item">Per Item</option>' +
+        '<option value="one_price">One Price</option>' +
+      '</select>' +
+      '<input type="number" id="mixBundleOnePrice_' + sid + '" placeholder="Bundle ฿" style="width:110px;font-size:11px;display:none" oninput="calcMix()">';
+    wrapper.appendChild(hdr); wrapper.appendChild(rowsCont); wrapper.appendChild(addBtn); wrapper.appendChild(modeRow);
+    cont.appendChild(wrapper);
+
+  } else if (type === 'redeem') {
+    const wrapper = document.createElement('div');
+    wrapper.style = 'display:flex;flex-direction:column;gap:8px';
+    wrapper.innerHTML =
+      '<div style="display:flex;align-items:center;gap:10px">' +
+        '<label style="font-size:12px;color:#64748b;min-width:130px">ลูกค้าจ่ายแลก (฿):</label>' +
+        '<input type="number" id="mixRedeemPay_' + sid + '" value="0" min="0" style="width:120px" oninput="calcMix()">' +
+      '</div>' +
+      '<div style="display:flex;align-items:center;gap:10px">' +
+        '<label style="font-size:12px;color:#64748b;min-width:130px">ประเภทสินค้าแลก:</label>' +
+        '<select id="mixRedeemType_' + sid + '" style="font-size:12px" onchange="renderMixRedeemProduct(' + sid + ');calcMix()">' +
+          '<option value="clarks">Clarks (ต้นทุน = ราคาป้าย ÷ 3.7)</option>' +
+          '<option value="other">สินค้าอื่น (กรอกต้นทุนเอง)</option>' +
+        '</select>' +
+      '</div>' +
+      '<div id="mixRedeemProdArea_' + sid + '" style="padding-left:140px"></div>';
+    cont.appendChild(wrapper);
+    // init default (clarks)
+    setTimeout(function() { renderMixRedeemProduct(sid); }, 0);
+  }
+}
+
+function calcMix() {
+  const base = parseFloat(document.getElementById('mixBasePrice').value) || 0;
+  const gp = parseFloat(document.getElementById('mixGP').value) || 0;
+  const voucherAmt = parseFloat(document.getElementById('mixVoucherAmt').value) || 0;
+  const voucherPct = parseFloat(document.getElementById('mixVoucherPct').value) || 0;
+
+  if (base === 0 && mixStepIds.length === 0) {
+    document.getElementById('mixResult').innerHTML = '<span style="color:#94a3b8;font-size:12px">เพิ่ม Step และกรอกข้อมูลเพื่อคำนวน</span>';
+    return;
+  }
+
+  let currentNet = base;
+  let accDiscPct = 0; // for addpct accumulation
+  let totalExtraCost = 0; // GWP cost, redeem cost
+  const stepLines = [];
+
+  mixStepIds.forEach(function(sid) {
+    const typeEl = document.getElementById('mixType_' + sid);
+    if (!typeEl) return;
+    const type = typeEl.value;
+
+    if (type === 'normal') {
+      const pct = parseFloat((document.getElementById('mixVal_' + sid) || {}).value) || 0;
+      accDiscPct = pct;
+      currentNet = base * (1 - pct / 100);
+      stepLines.push('Step ' + (mixStepIds.indexOf(sid)+1) + ': ส่วนลดปกติ ' + pct + '% → <strong style="color:#16a34a">' + fmt(currentNet) + ' ฿</strong>');
+
+    } else if (type === 'ontop') {
+      const pct = parseFloat((document.getElementById('mixVal_' + sid) || {}).value) || 0;
+      const before = currentNet;
+      currentNet = currentNet * (1 - pct / 100);
+      stepLines.push('Step ' + (mixStepIds.indexOf(sid)+1) + ': On Top ' + pct + '% (จาก ' + fmt(before) + ') → <strong style="color:#16a34a">' + fmt(currentNet) + ' ฿</strong>');
+
+    } else if (type === 'addpct') {
+      const pct = parseFloat((document.getElementById('mixVal_' + sid) || {}).value) || 0;
+      accDiscPct += pct;
+      currentNet = base * (1 - accDiscPct / 100);
+      stepLines.push('Step ' + (mixStepIds.indexOf(sid)+1) + ': เพิ่ม ' + pct + '% (รวมสะสม ' + accDiscPct + '%) → <strong style="color:#16a34a">' + fmt(currentNet) + ' ฿</strong>');
+
+    } else if (type === 'cash') {
+      const amt = parseFloat((document.getElementById('mixVal_' + sid) || {}).value) || 0;
+      currentNet = Math.max(0, currentNet - amt);
+      stepLines.push('Step ' + (mixStepIds.indexOf(sid)+1) + ': Cash Voucher -' + fmt(amt) + ' ฿ → <strong style="color:#16a34a">' + fmt(currentNet) + ' ฿</strong>');
+
+    } else if (type === 'gwp_clarks') {
+      const selEl = document.getElementById('mixGWPSel_' + sid);
+      if (selEl && selEl.value) {
+        const price = parseFloat(selEl.options[selEl.selectedIndex].dataset.price) || 0;
+        const cost = price / 3.7;
+        totalExtraCost += cost;
+        const costEl = document.getElementById('mixGWPCost_' + sid);
+        if (costEl) costEl.textContent = 'ต้นทุน ÷3.7 = ' + fmt(cost) + ' ฿';
+        stepLines.push('Step ' + (mixStepIds.indexOf(sid)+1) + ': GWP-Clarks ต้นทุน <strong style="color:#ef4444">' + fmt(cost) + ' ฿</strong> (ราคาป้าย ' + fmt(price) + ')');
+      } else {
+        stepLines.push('Step ' + (mixStepIds.indexOf(sid)+1) + ': GWP-Clarks (ยังไม่เลือกสินค้า)');
+      }
+
+    } else if (type === 'gwp_other') {
+      const cost = parseFloat((document.getElementById('mixVal_' + sid) || {}).value) || 0;
+      totalExtraCost += cost;
+      stepLines.push('Step ' + (mixStepIds.indexOf(sid)+1) + ': GWP Other ต้นทุน <strong style="color:#ef4444">' + fmt(cost) + ' ฿</strong>');
+
+    } else if (type === 'bundle') {
+      const modeEl = document.getElementById('mixBundleMode_' + sid);
+      const mode = modeEl ? modeEl.value : 'per_item';
+      const onePriceEl = document.getElementById('mixBundleOnePrice_' + sid);
+      if (onePriceEl) onePriceEl.style.display = mode === 'one_price' ? 'inline-block' : 'none';
+      const rowsCont = document.getElementById('mixBundleRows_' + sid);
+      let bFull = 0, bNet = 0;
+      if (rowsCont) {
+        rowsCont.querySelectorAll('[id^="mbrRow_' + sid + '_"]').forEach(function(row) {
+          const price = parseFloat(row.querySelector('.mbp') ? row.querySelector('.mbp').value : '0') || 0;
+          const qty = parseFloat(row.querySelector('.mbqty') ? row.querySelector('.mbqty').value : '1') || 1;
+          const disc = parseFloat(row.querySelector('.mbdisc') ? row.querySelector('.mbdisc').value : '0') || 0;
+          bFull += price * qty;
+          if (mode === 'per_item') bNet += price * qty * (1 - disc / 100);
+        });
+      }
+      if (mode === 'one_price') {
+        bNet = parseFloat((onePriceEl || {}).value) || 0;
+      }
+      currentNet = bNet;
+      const bDiscPct = bFull > 0 ? (1 - bNet/bFull)*100 : 0;
+      stepLines.push('Step ' + (mixStepIds.indexOf(sid)+1) + ': Bundle Deal (' + fmt(bNet) + ' ฿ จาก ' + fmt(bFull) + ' ฿, Disc ' + bDiscPct.toFixed(1) + '%)');
+
+    } else if (type === 'redeem') {
+      const pay = parseFloat((document.getElementById('mixRedeemPay_' + sid) || {}).value) || 0;
+      const rtypeEl = document.getElementById('mixRedeemType_' + sid);
+      const rtype = rtypeEl ? rtypeEl.value : 'clarks';
+      currentNet = currentNet + pay; // ลูกค้าจ่ายเพิ่ม
+      let cost = 0;
+      if (rtype === 'clarks') {
+        const selEl = document.getElementById('mixRedeemProd_' + sid);
+        if (selEl && selEl.value) {
+          const price = parseFloat(selEl.options[selEl.selectedIndex].dataset.price) || 0;
+          cost = price / 3.7;
+          const costLine = document.getElementById('mixRedeemCostLine_' + sid);
+          if (costLine) costLine.textContent = 'ต้นทุน ÷3.7 = ' + fmt(cost) + ' ฿';
+        }
+      } else {
+        cost = parseFloat((document.getElementById('mixRedeemCostOther_' + sid) || {}).value) || 0;
+      }
+      totalExtraCost += cost;
+      stepLines.push('Step ' + (mixStepIds.indexOf(sid)+1) + ': แลกซื้อ ลูกค้าจ่าย +' + fmt(pay) + ' ฿ / ต้นทุนสินค้า <strong style="color:#ef4444">' + fmt(cost) + ' ฿</strong> → รายรับ ' + fmt(currentNet) + ' ฿');
+    }
+  });
+
+  // Final calculation
+  const totalVoucher = voucherAmt + (currentNet * voucherPct / 100);
+  const netAfterVoucher = Math.max(0, currentNet - totalVoucher);
+  const gpAmt = netAfterVoucher * gp / 100;
+  const netBrand = netAfterVoucher - gpAmt - totalExtraCost;
+  const discPct = base > 0 ? (1 - currentNet/base)*100 : 0;
+  const totalCost = totalVoucher + gpAmt + totalExtraCost;
+  const effDisc = base > 0 ? totalCost / base * 100 : 0;
+
+  let stepsHtml = '';
+  if (stepLines.length > 0) {
+    stepsHtml = '<div style="margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #e2e8f0">' +
+      '<div style="font-size:11px;font-weight:700;color:#64748b;margin-bottom:4px">ลำดับขั้นตอน:</div>' +
+      stepLines.map(function(l) { return '<div style="font-size:12px;padding:2px 0">' + l + '</div>'; }).join('') +
+      '</div>';
+  }
+
+  document.getElementById('mixResult').innerHTML = stepsHtml +
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px">' +
+      '<div style="background:#f0fdf4;border-radius:8px;padding:10px;border:1px solid #bbf7d0">' +
+        '<div style="font-size:11px;color:#64748b">ราคาสุทธิหลัง Promo</div>' +
+        '<div style="font-size:18px;font-weight:800;color:#16a34a">' + fmt(currentNet) + ' ฿</div>' +
+        '<div style="font-size:10px;color:#64748b">ลด ' + discPct.toFixed(1) + '% จากตั้งต้น</div>' +
+      '</div>' +
+      '<div style="background:#fff7ed;border-radius:8px;padding:10px;border:1px solid #fed7aa">' +
+        '<div style="font-size:11px;color:#64748b">Voucher Deduct (฿)</div>' +
+        '<div style="font-size:18px;font-weight:800;color:#f97316">-' + fmt(totalVoucher) + ' ฿</div>' +
+        '<div style="font-size:10px;color:#64748b">GP ' + fmt(gpAmt) + ' ฿</div>' +
+      '</div>' +
+      '<div style="background:#fef2f2;border-radius:8px;padding:10px;border:1px solid #fecaca">' +
+        '<div style="font-size:11px;color:#64748b">ค่าใช้จ่าย GWP/แลกซื้อ</div>' +
+        '<div style="font-size:18px;font-weight:800;color:#ef4444">-' + fmt(totalExtraCost) + ' ฿</div>' +
+        '<div style="font-size:10px;color:#64748b">Effective Disc ' + effDisc.toFixed(1) + '%</div>' +
+      '</div>' +
+      '<div style="background:' + (netBrand < 0 ? '#fef2f2' : '#eff6ff') + ';border-radius:8px;padding:10px;border:1px solid ' + (netBrand < 0 ? '#fecaca' : '#bfdbfe') + '">' +
+        '<div style="font-size:11px;color:#64748b">Net ที่แบรนด์ได้จริง</div>' +
+        '<div style="font-size:18px;font-weight:800;color:' + (netBrand < 0 ? '#ef4444' : '#1d4ed8') + '">' + fmt(netBrand) + ' ฿</div>' +
+        '<div style="font-size:10px;color:#64748b">' + (netBrand < 0 ? '⚠ ขาดทุน' : 'หลังหักทุกค่าใช้จ่าย') + '</div>' +
+      '</div>' +
+    '</div>';
+}
+
+// ════════════════════════════════════════════════════════
+// 📦 BUNDLE DEAL
+// ════════════════════════════════════════════════════════
+let bundleRowCount = 0;
+function addBundleRow() {
+  bundleRowCount++;
+  const id = 'br' + bundleRowCount;
+  const div = document.createElement('div');
+  div.id = id;
+  div.style = 'display:grid;grid-template-columns:2fr 80px 60px 80px 24px;gap:5px;align-items:center;margin-bottom:6px;border-bottom:1px solid #f1f5f9;padding-bottom:6px';
+  const sel = makeProductSelect(function() {
+    const opt = sel.options[sel.selectedIndex];
+    div.querySelector('.bp').value = opt.dataset.price || '';
+    calcBundle();
+  });
+  const qtyIn = document.createElement('input'); qtyIn.type='number'; qtyIn.value='1'; qtyIn.min='1'; qtyIn.style='width:100%'; qtyIn.className='bqty'; qtyIn.oninput=calcBundle;
+  const discIn = document.createElement('input'); discIn.type='number'; discIn.placeholder='Disc%'; discIn.style='width:100%'; discIn.className='bdisc'; discIn.oninput=calcBundle;
+  const priceIn = document.createElement('input'); priceIn.type='number'; priceIn.placeholder='฿'; priceIn.style='width:100%;background:#f8fafc'; priceIn.className='bp'; priceIn.readOnly=true;
+  const del = document.createElement('button'); del.textContent='✕'; del.style='background:none;border:none;color:#ef4444;cursor:pointer;font-size:14px'; del.onclick=function(){div.remove();calcBundle();};
+  div.appendChild(sel); div.appendChild(priceIn); div.appendChild(qtyIn); div.appendChild(discIn); div.appendChild(del);
+  document.getElementById('bundleRows').appendChild(div);
+}
+
+function calcBundle() {
+  const rows = document.getElementById('bundleRows').querySelectorAll('[id^="br"]');
+  const mode = document.getElementById('bundleMode').value;
+  const gpEl = document.getElementById('bundleGP');
+  const gp = gpEl && gpEl.value !== '' ? parseFloat(gpEl.value) : 0;
+  const onePriceEl = document.getElementById('bundleOnePrice');
+  if (onePriceEl) onePriceEl.style.display = mode === 'one_price' ? 'inline-block' : 'none';
+  let totalFull = 0, totalNet = 0;
+  rows.forEach(function(row) {
+    const price = parseFloat(row.querySelector('.bp') ? row.querySelector('.bp').value : '0') || 0;
+    const qty = parseFloat(row.querySelector('.bqty') ? row.querySelector('.bqty').value : '1') || 1;
+    const disc = parseFloat(row.querySelector('.bdisc') ? row.querySelector('.bdisc').value : '0') || 0;
+    totalFull += price * qty;
+    if (mode === 'per_item') totalNet += price * qty * (1 - disc / 100);
+  });
+  if (mode === 'one_price') totalNet = parseFloat(onePriceEl ? onePriceEl.value : '0') || 0;
+  const totalDisc = totalFull - totalNet;
+  const discPct = totalFull > 0 ? totalDisc / totalFull * 100 : 0;
+  const gpAmt = gp > 0 ? totalNet * gp / 100 : 0;
+  const netAfterGP = totalNet - gpAmt;
+  document.getElementById('bundleResult').innerHTML = '<div style="display:grid;grid-template-columns:1fr auto;gap:4px;font-size:13px">' +
+    '<span style="color:#64748b">Full Price Total:</span><strong>' + fmt(totalFull) + '</strong>' +
+    '<span style="color:#64748b">Discount Total:</span><strong style="color:#ef4444">-' + fmt(totalDisc) + ' (' + discPct.toFixed(1) + '%)</strong>' +
+    '<hr style="grid-column:1/-1;border:none;border-top:1px solid #e2e8f0;margin:3px 0">' +
+    '<span style="font-weight:700">Net Revenue:</span><strong style="color:#16a34a;font-size:15px">' + fmt(totalNet) + '</strong>' +
+    '<span style="color:#64748b">GP deducted (' + gp + '%):</span><strong style="color:#ef4444">-' + fmt(gpAmt) + '</strong>' +
+    '<hr style="grid-column:1/-1;border:none;border-top:1px solid #e2e8f0;margin:3px 0">' +
+    '<span style="font-weight:700">Net after GP:</span><strong style="' + (netAfterGP<0?'color:#ef4444':'color:#0f172a') + ';font-size:15px">' + fmt(netAfterGP) + (netAfterGP<0?' ⚠ ขาดทุน':'') + '</strong>' +
+    '</div>';
+}
+
+// ════════════════════════════════════════════════════════
+// 🔄 CROSS-SELL / แลกซื้อ
+// ════════════════════════════════════════════════════════
+let crossMainCount = 0, crossRedeemCount = 0;
+function addCrossMain() {
+  crossMainCount++;
+  const id = 'cm' + crossMainCount;
+  const div = document.createElement('div');
+  div.id = id;
+  div.style = 'display:grid;grid-template-columns:2fr 80px 60px 80px 24px;gap:5px;align-items:center;margin-bottom:6px';
+  const sel = makeProductSelect(function() { const opt=sel.options[sel.selectedIndex]; div.querySelector('.cmp').value=opt.dataset.price||''; calcCross(); });
+  const qIn = document.createElement('input'); qIn.type='number'; qIn.value='1'; qIn.style='width:100%'; qIn.className='cmqty'; qIn.oninput=calcCross;
+  const dIn = document.createElement('input'); dIn.type='number'; dIn.placeholder='Disc%'; dIn.style='width:100%'; dIn.className='cmdisc'; dIn.oninput=calcCross;
+  const pIn = document.createElement('input'); pIn.type='number'; pIn.placeholder='฿'; pIn.style='width:100%;background:#f8fafc'; pIn.className='cmp'; pIn.readOnly=true;
+  const del = document.createElement('button'); del.textContent='✕'; del.style='background:none;border:none;color:#ef4444;cursor:pointer'; del.onclick=function(){div.remove();calcCross();};
+  div.appendChild(sel); div.appendChild(pIn); div.appendChild(qIn); div.appendChild(dIn); div.appendChild(del);
+  document.getElementById('crossMainRows').appendChild(div);
+}
+
+function addCrossRedeem() {
+  crossRedeemCount++;
+  const id = 'cr' + crossRedeemCount;
+  const wrap = document.createElement('div');
+  wrap.id = id;
+  wrap.style = 'border:1px solid #e2e8f0;border-radius:8px;padding:8px;margin-bottom:8px';
+  const row1 = document.createElement('div');
+  row1.style = 'display:grid;grid-template-columns:2fr 90px 28px;gap:5px;align-items:center;margin-bottom:5px';
+  const sel = makeProductSelect(function() { const opt=sel.options[sel.selectedIndex]; fpIn.value=opt.dataset.price||''; updateRC(); });
+  const fpIn = document.createElement('input'); fpIn.type='number'; fpIn.placeholder='Full ฿'; fpIn.style='width:100%;background:#f8fafc;font-size:12px'; fpIn.className='crfp'; fpIn.readOnly=true;
+  const del = document.createElement('button'); del.textContent='✕'; del.style='background:none;border:none;color:#ef4444;cursor:pointer;font-size:14px'; del.onclick=function(){wrap.remove();calcCross();};
+  row1.appendChild(sel); row1.appendChild(fpIn); row1.appendChild(del);
+  const row2 = document.createElement('div');
+  row2.style = 'display:grid;grid-template-columns:120px 60px 100px;gap:5px;align-items:center';
+  const modeToggle = document.createElement('select'); modeToggle.style='font-size:12px;width:100%'; modeToggle.className='crmode';
+  modeToggle.innerHTML = '<option value="price">One Price (฿)</option><option value="disc">% Discount</option>';
+  const qIn = document.createElement('input'); qIn.type='number'; qIn.value='1'; qIn.min='1'; qIn.style='width:100%;font-size:12px'; qIn.className='crqty'; qIn.placeholder='Qty';
+  const valIn = document.createElement('input'); valIn.type='number'; valIn.style='width:100%;font-size:12px'; valIn.className='crval'; valIn.placeholder='฿ or %';
+  function updateRC() { valIn.placeholder = modeToggle.value==='disc' ? 'Disc %' : 'Special ฿'; calcCross(); }
+  modeToggle.onchange = updateRC; qIn.oninput = calcCross; valIn.oninput = calcCross;
+  row2.appendChild(modeToggle); row2.appendChild(qIn); row2.appendChild(valIn);
+  wrap.appendChild(row1); wrap.appendChild(row2);
+  document.getElementById('crossRedeemRows').appendChild(wrap);
+}
+
+function calcCross() {
+  const gp = parseFloat((document.getElementById('crossGP') || {}).value) || 0;
+  let mainFull=0, mainNet=0;
+  document.getElementById('crossMainRows').querySelectorAll('[id^="cm"]').forEach(function(row) {
+    const price = parseFloat(row.querySelector('.cmp').value) || 0;
+    const qty = parseFloat(row.querySelector('.cmqty').value) || 1;
+    const disc = parseFloat(row.querySelector('.cmdisc').value) || 0;
+    mainFull += price * qty; mainNet += price * qty * (1 - disc/100);
+  });
+  let redeemFull=0, redeemNet=0;
+  document.getElementById('crossRedeemRows').querySelectorAll('[id^="cr"]').forEach(function(row) {
+    const fp = parseFloat(row.querySelector('.crfp') ? row.querySelector('.crfp').value : '0') || 0;
+    const qty = parseFloat(row.querySelector('.crqty') ? row.querySelector('.crqty').value : '1') || 1;
+    const mode = row.querySelector('.crmode') ? row.querySelector('.crmode').value : 'price';
+    const val = parseFloat(row.querySelector('.crval') ? row.querySelector('.crval').value : '0') || 0;
+    const sp = mode === 'disc' ? fp*(1-val/100) : (val>0?val:fp);
+    redeemFull += fp*qty; redeemNet += sp*qty;
+  });
+  const totalFull = mainFull+redeemFull, totalNet = mainNet+redeemNet;
+  const discAmt = totalFull-totalNet, discPct = totalFull>0?discAmt/totalFull*100:0;
+  const gpAmt = totalNet*gp/100, netAfterGP = totalNet-gpAmt;
+  document.getElementById('crossResult').innerHTML = '<div style="display:grid;grid-template-columns:1fr auto;gap:3px">' +
+    '<span>Full Price Total:</span><strong>' + fmt(totalFull) + '</strong>' +
+    '<span>Discount Total:</span><strong style="color:#ef4444">-' + fmt(discAmt) + ' (' + discPct.toFixed(1) + '%)</strong>' +
+    '<span>Net Revenue:</span><strong>' + fmt(totalNet) + '</strong>' +
+    '<span>GP deducted (' + gp + '%):</span><strong style="color:#ef4444">-' + fmt(gpAmt) + '</strong>' +
+    '<span>Net after GP:</span><strong style="' + (netAfterGP<0?'color:#ef4444':'') + '">' + fmt(netAfterGP) + (netAfterGP<0?' ⚠ ขาดทุน':'') + '</strong>' +
+    '<span>Effective Disc%:</span><strong>' + discPct.toFixed(1) + '%</strong>' +
+    '</div>';
+}
+
+// ════════════════════════════════════════════════════════
+// 🏷️ STEP DISCOUNT
+// ════════════════════════════════════════════════════════
+let stepDiscRowCount = 0;
+function addStepDiscRow() {
+  stepDiscRowCount++;
+  const id = 'sd' + stepDiscRowCount;
+  const wrap = document.createElement('div');
+  wrap.id = id;
+  wrap.style = 'margin-bottom:8px;border-bottom:1px solid #f1f5f9;padding-bottom:8px';
+  const row1 = document.createElement('div');
+  row1.style = 'display:grid;grid-template-columns:1fr 90px 28px;gap:5px;align-items:center;margin-bottom:4px';
+  const sel = makeProductSelect(function() { const opt=sel.options[sel.selectedIndex]; priceIn.value=opt.dataset.price||''; calcStepDisc(); });
+  const priceIn = document.createElement('input'); priceIn.type='number'; priceIn.placeholder='ราคา ฿'; priceIn.style='width:100%;background:#f8fafc;font-size:12px'; priceIn.className='sdprice'; priceIn.readOnly=true;
+  const del = document.createElement('button'); del.textContent='✕'; del.style='background:none;border:none;color:#ef4444;cursor:pointer;font-size:14px'; del.onclick=function(){wrap.remove();calcStepDisc();};
+  row1.appendChild(sel); row1.appendChild(priceIn); row1.appendChild(del);
+  const row2 = document.createElement('div'); row2.style='display:flex;align-items:center;gap:6px';
+  const discLabel = document.createElement('label'); discLabel.textContent='ส่วนลดรายรุ่น %:'; discLabel.style='font-size:11px;color:#64748b;white-space:nowrap';
+  const discIn = document.createElement('input'); discIn.type='number'; discIn.placeholder='0'; discIn.min='0'; discIn.max='100'; discIn.style='width:70px;font-size:12px'; discIn.className='sditemdisc'; discIn.value='0'; discIn.oninput=calcStepDisc;
+  const netLabel = document.createElement('span'); netLabel.style='font-size:11px;color:#94a3b8;margin-left:6px'; netLabel.className='sdnetlabel';
+  row2.appendChild(discLabel); row2.appendChild(discIn); row2.appendChild(netLabel);
+  wrap.appendChild(row1); wrap.appendChild(row2);
+  document.getElementById('stepDiscRows').appendChild(wrap);
+}
+
+function calcStepDisc() {
+  const disc1 = parseFloat(document.getElementById('stepDisc1').value) || 0;
+  const disc2Val = parseFloat(document.getElementById('stepDisc2Val').value) || 0;
+  const modeEl = document.querySelector('input[name="stepDiscMode"]:checked');
+  const mode = modeEl ? modeEl.value : 'pct';
+  const gp = parseFloat(document.getElementById('stepDiscGP').value) || 0;
+  const voucher = parseFloat(document.getElementById('stepDiscVoucher').value) || 0;
+  let totalFull=0, totalAfterItemDisc=0;
+  document.getElementById('stepDiscRows').querySelectorAll('[id^="sd"]').forEach(function(row) {
+    const p = parseFloat(row.querySelector('.sdprice') ? row.querySelector('.sdprice').value : '0') || 0;
+    const d = parseFloat(row.querySelector('.sditemdisc') ? row.querySelector('.sditemdisc').value : '0') || 0;
+    const net = p*(1-d/100); totalFull+=p; totalAfterItemDisc+=net;
+    const lbl = row.querySelector('.sdnetlabel'); if(lbl&&p>0) lbl.textContent=d>0?'→ '+fmt(net):'';
+  });
+  const afterStep1 = totalAfterItemDisc*(1-disc1/100);
+  let afterStep2 = mode==='pct' ? afterStep1*(1-disc2Val/100) : Math.max(0,afterStep1-disc2Val);
+  const netAfterVoucher = Math.max(0,afterStep2-voucher);
+  const totalDiscAmt = totalFull-netAfterVoucher, totalDiscPct = totalFull>0?totalDiscAmt/totalFull*100:0;
+  const gpAmt = netAfterVoucher*gp/100, netAfterGP = netAfterVoucher-gpAmt;
+  document.getElementById('stepDiscResult').innerHTML = totalFull===0 ? '<span style="color:#94a3b8;font-size:12px">เลือกสินค้าและกรอกส่วนลดเพื่อคำนวน</span>' :
+    '<div style="display:grid;grid-template-columns:1fr auto;gap:4px;font-size:13px">' +
+    '<span style="color:#64748b">ราคาตั้งต้นรวม:</span><strong>' + fmt(totalFull) + '</strong>' +
+    (totalAfterItemDisc<totalFull?'<span style="color:#64748b">หลังส่วนลดรายรุ่น:</span><strong style="color:#60a5fa">'+fmt(totalAfterItemDisc)+'</strong>':'') +
+    '<span style="color:#64748b">หลัง Step 1 ('+disc1+'%):</span><strong>'+fmt(afterStep1)+'</strong>' +
+    '<span style="color:#64748b">หลัง Step 2'+(mode==='pct'?' ('+disc2Val+'%)':', -฿'+fmt(disc2Val))+':</span><strong>'+fmt(afterStep2)+'</strong>' +
+    '<span style="color:#64748b">หัก Voucher (฿'+fmt(voucher)+'):</span><strong>'+fmt(netAfterVoucher)+'</strong>' +
+    '<span style="color:#64748b">ส่วนลดรวม:</span><strong style="color:#ef4444">-'+fmt(totalDiscAmt)+' ('+totalDiscPct.toFixed(1)+'%)</strong>' +
+    '<hr style="grid-column:1/-1;border:none;border-top:1px solid #e2e8f0;margin:3px 0">' +
+    '<span style="font-weight:700">Net Revenue:</span><strong style="color:#16a34a;font-size:15px">'+fmt(netAfterVoucher)+'</strong>' +
+    '<span style="color:#64748b">GP deducted ('+gp+'%):</span><strong style="color:#ef4444">-'+fmt(gpAmt)+'</strong>' +
+    '<hr style="grid-column:1/-1;border:none;border-top:1px solid #e2e8f0;margin:3px 0">' +
+    '<span style="font-weight:700">Net after GP:</span><strong style="'+(netAfterGP<0?'color:#ef4444':'color:#0f172a')+';font-size:15px">'+fmt(netAfterGP)+(netAfterGP<0?' ⚠ ขาดทุน':'')+'</strong>' +
+    '</div>';
+}
+
+// ════════════════════════════════════════════════════════
+// 📋 ลดเพิ่ม SKU
+// ════════════════════════════════════════════════════════
+let skuDiscRowCount = 0;
+function addSkuDiscRow() {
+  skuDiscRowCount++;
+  const id = 'skd' + skuDiscRowCount;
+  const wrap = document.createElement('div'); wrap.id=id; wrap.style='margin-bottom:8px;border-bottom:1px solid #f1f5f9;padding-bottom:8px';
+  const row1 = document.createElement('div'); row1.style='display:grid;grid-template-columns:1fr 90px 28px;gap:5px;align-items:center;margin-bottom:4px';
+  const sel = makeProductSelect(function() { const opt=sel.options[sel.selectedIndex]; pIn.value=opt.dataset.price||''; calcSkuDisc(); });
+  const pIn = document.createElement('input'); pIn.type='number'; pIn.placeholder='ราคา ฿'; pIn.style='width:100%;background:#f8fafc;font-size:12px'; pIn.className='skdprice'; pIn.readOnly=true;
+  const del = document.createElement('button'); del.textContent='✕'; del.style='background:none;border:none;color:#ef4444;cursor:pointer;font-size:14px'; del.onclick=function(){wrap.remove();calcSkuDisc();};
+  row1.appendChild(sel); row1.appendChild(pIn); row1.appendChild(del);
+  const row2 = document.createElement('div'); row2.style='display:flex;align-items:center;gap:6px';
+  const discLabel = document.createElement('label'); discLabel.textContent='ส่วนลดรายรุ่น %:'; discLabel.style='font-size:11px;color:#64748b;white-space:nowrap';
+  const discIn = document.createElement('input'); discIn.type='number'; discIn.placeholder='0'; discIn.min='0'; discIn.max='100'; discIn.style='width:70px;font-size:12px'; discIn.className='skditemdisc'; discIn.value='0'; discIn.oninput=calcSkuDisc;
+  row2.appendChild(discLabel); row2.appendChild(discIn);
+  wrap.appendChild(row1); wrap.appendChild(row2);
+  document.getElementById('skuDiscRows').appendChild(wrap);
+}
+
+function calcSkuDisc() {
+  const disc1=parseFloat(document.getElementById('skuDisc1').value)||0;
+  const disc2Val=parseFloat(document.getElementById('skuDisc2Val').value)||0;
+  const modeEl=document.querySelector('input[name="skuDiscMode"]:checked');
+  const mode=modeEl?modeEl.value:'pct';
+  const gp=parseFloat(document.getElementById('skuDiscGP').value)||0;
+  const voucher=parseFloat(document.getElementById('skuDiscVoucher').value)||0;
+  const rows=document.getElementById('skuDiscRows').querySelectorAll('[id^="skd"]');
+  if(rows.length===0){document.getElementById('skuDiscResult').innerHTML='<span style="color:#94a3b8;font-size:12px">เพิ่มรุ่นสินค้าเพื่อคำนวน</span>';return;}
+  const items=[];
+  rows.forEach(function(row){
+    const selEl=row.querySelector('select');
+    const name=selEl&&selEl.selectedIndex>0?selEl.options[selEl.selectedIndex].textContent.split('(')[0].trim():'—';
+    const price=parseFloat(row.querySelector('.skdprice')?row.querySelector('.skdprice').value:'0')||0;
+    const iDisc=parseFloat(row.querySelector('.skditemdisc')?row.querySelector('.skditemdisc').value:'0')||0;
+    if(price>0)items.push({name,price,iDisc});
+  });
+  if(items.length===0){document.getElementById('skuDiscResult').innerHTML='<span style="color:#94a3b8;font-size:12px">เลือกสินค้าเพื่อคำนวน</span>';return;}
+  const totalAfterItem=items.reduce(function(a,i){return a+i.price*(1-i.iDisc/100);},0);
+  let tableHtml='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr style="background:#f1f5f9;font-weight:700">' +
+    '<th style="padding:5px 8px;text-align:left;border:1px solid #e2e8f0">รุ่นสินค้า</th>' +
+    '<th style="padding:5px 6px;text-align:right;border:1px solid #e2e8f0">ราคาเต็ม</th>' +
+    '<th style="padding:5px 6px;text-align:right;border:1px solid #e2e8f0">ส่วนลดรุ่น</th>' +
+    '<th style="padding:5px 6px;text-align:right;border:1px solid #e2e8f0">หลัง Step1 ('+disc1+'%)</th>' +
+    '<th style="padding:5px 6px;text-align:right;border:1px solid #e2e8f0">หลัง Step2</th>' +
+    '<th style="padding:5px 6px;text-align:right;border:1px solid #e2e8f0">หัก GP ('+gp+'%)</th>' +
+    '<th style="padding:5px 6px;text-align:right;border:1px solid #e2e8f0;color:#16a34a">Net/รุ่น</th>' +
+    '</tr></thead><tbody>';
+  let sumFull=0,sumNet=0,sumGP=0;
+  items.forEach(function(item){
+    const afterItem=item.price*(1-item.iDisc/100);
+    const afterS1=afterItem*(1-disc1/100);
+    let afterS2;
+    if(mode==='pct'){afterS2=afterS1*(1-disc2Val/100);}
+    else{const share=totalAfterItem>0?afterItem/totalAfterItem:0;afterS2=Math.max(0,afterS1*(totalAfterItem>0?(totalAfterItem-disc2Val)/totalAfterItem:1));}
+    const vShare=totalAfterItem>0?afterItem/totalAfterItem:0;
+    const afterV=Math.max(0,afterS2-voucher*vShare);
+    const gpAmt=afterV*gp/100;const net=afterV-gpAmt;
+    const discPct=item.price>0?(item.price-net)/item.price*100:0;
+    sumFull+=item.price;sumNet+=net;sumGP+=gpAmt;
+    const clr=discPct>=50?'#ef4444':discPct>=30?'#f97316':'#16a34a';
+    tableHtml+='<tr style="border-bottom:1px solid #f1f5f9">' +
+      '<td style="padding:5px 8px;border:1px solid #e2e8f0;font-weight:600">'+item.name+'<br><span style="font-size:10px;color:'+clr+'">Disc '+discPct.toFixed(1)+'%</span></td>' +
+      '<td style="padding:5px 6px;text-align:right;border:1px solid #e2e8f0">'+fmt(item.price)+'</td>' +
+      '<td style="padding:5px 6px;text-align:right;border:1px solid #e2e8f0;color:#ef4444">'+(item.iDisc>0?'-'+item.iDisc+'%':'—')+'</td>' +
+      '<td style="padding:5px 6px;text-align:right;border:1px solid #e2e8f0">'+fmt(afterS1)+'</td>' +
+      '<td style="padding:5px 6px;text-align:right;border:1px solid #e2e8f0">'+fmt(afterS2)+'</td>' +
+      '<td style="padding:5px 6px;text-align:right;border:1px solid #e2e8f0;color:#ef4444">-'+fmt(gpAmt)+'</td>' +
+      '<td style="padding:5px 6px;text-align:right;border:1px solid #e2e8f0;font-weight:700;color:'+(net<0?'#ef4444':'#16a34a')+'">'+fmt(net)+'</td>' +
+      '</tr>';
+  });
+  const totDiscPct=sumFull>0?(sumFull-sumNet)/sumFull*100:0;
+  tableHtml+='<tr style="background:#f0f9ff;font-weight:700;border-top:2px solid #bae6fd">' +
+    '<td style="padding:6px 8px;border:1px solid #e2e8f0">📊 รวม ('+items.length+' รุ่น)</td>' +
+    '<td style="padding:6px;text-align:right;border:1px solid #e2e8f0">'+fmt(sumFull)+'</td>' +
+    '<td style="padding:6px;text-align:right;border:1px solid #e2e8f0">—</td>' +
+    '<td style="padding:6px;text-align:right;border:1px solid #e2e8f0">—</td>' +
+    '<td style="padding:6px;text-align:right;border:1px solid #e2e8f0">—</td>' +
+    '<td style="padding:6px;text-align:right;border:1px solid #e2e8f0;color:#ef4444">-'+fmt(sumGP)+'</td>' +
+    '<td style="padding:6px;text-align:right;border:1px solid #e2e8f0;font-size:14px;color:'+(sumNet<0?'#ef4444':'#16a34a')+'">'+fmt(sumNet)+' <span style="font-size:10px;font-weight:400">(Disc '+totDiscPct.toFixed(1)+'%)</span></td>' +
+    '</tr></tbody></table></div>';
+  document.getElementById('skuDiscResult').innerHTML=tableHtml;
+}
+
+// ════════════════════════════════════════════════════════
+// 🎁 ของแถม
+// ════════════════════════════════════════════════════════
+let giftMainCount=0, giftItemCount=0;
+function addGiftMain() {
+  giftMainCount++;
+  const id='gm'+giftMainCount;
+  const div=document.createElement('div'); div.id=id; div.style='margin-bottom:8px;border-bottom:1px solid #f1f5f9;padding-bottom:8px';
+  const row1=document.createElement('div'); row1.style='display:grid;grid-template-columns:1fr 90px 28px;gap:5px;align-items:center;margin-bottom:4px';
+  const sel=makeProductSelect(function(){const opt=sel.options[sel.selectedIndex];pIn.value=opt.dataset.price||'';calcGift();});
+  const pIn=document.createElement('input'); pIn.type='number'; pIn.placeholder='ราคา ฿'; pIn.style='width:100%;background:#f8fafc;font-size:12px'; pIn.className='gmprice'; pIn.readOnly=true;
+  const del=document.createElement('button'); del.textContent='✕'; del.style='background:none;border:none;color:#ef4444;cursor:pointer;font-size:14px'; del.onclick=function(){div.remove();calcGift();};
+  row1.appendChild(sel); row1.appendChild(pIn); row1.appendChild(del);
+  const row2=document.createElement('div'); row2.style='display:flex;align-items:center;gap:6px';
+  const lbl=document.createElement('label'); lbl.textContent='ส่วนลด %:'; lbl.style='font-size:11px;color:#64748b;white-space:nowrap';
+  const dIn=document.createElement('input'); dIn.type='number'; dIn.placeholder='0'; dIn.min='0'; dIn.max='100'; dIn.style='width:70px;font-size:12px'; dIn.className='gmdisc'; dIn.value='0'; dIn.oninput=calcGift;
+  row2.appendChild(lbl); row2.appendChild(dIn);
+  div.appendChild(row1); div.appendChild(row2);
+  document.getElementById('giftMainRows').appendChild(div);
+}
+
+function addGiftItem() {
+  giftItemCount++;
+  const id='gi'+giftItemCount;
+  const div=document.createElement('div'); div.id=id; div.style='display:grid;grid-template-columns:1fr 90px 28px;gap:5px;align-items:center;margin-bottom:6px;border-bottom:1px dashed #d1fae5;padding-bottom:6px';
+  const sel=makeProductSelect(function(){const opt=sel.options[sel.selectedIndex];pIn.value=opt.dataset.price||'';calcGift();});
+  const pIn=document.createElement('input'); pIn.type='number'; pIn.placeholder='ราคา ฿'; pIn.style='width:100%;background:#f0fdf4;font-size:12px'; pIn.className='giprice'; pIn.readOnly=true;
+  const del=document.createElement('button'); del.textContent='✕'; del.style='background:none;border:none;color:#ef4444;cursor:pointer;font-size:14px'; del.onclick=function(){div.remove();calcGift();};
+  div.appendChild(sel); div.appendChild(pIn); div.appendChild(del);
+  document.getElementById('giftItemRows').appendChild(div);
+}
+
+function calcGift() {
+  const gp=parseFloat(document.getElementById('giftGP').value)||0;
+  const voucher=parseFloat(document.getElementById('giftVoucher').value)||0;
+  let mainFull=0,mainNet=0;
+  document.getElementById('giftMainRows').querySelectorAll('[id^="gm"]').forEach(function(row){
+    const price=parseFloat(row.querySelector('.gmprice')?row.querySelector('.gmprice').value:'0')||0;
+    const disc=parseFloat(row.querySelector('.gmdisc')?row.querySelector('.gmdisc').value:'0')||0;
+    mainFull+=price; mainNet+=price*(1-disc/100);
+  });
+  let giftCost=0,giftFull=0;
+  document.getElementById('giftItemRows').querySelectorAll('[id^="gi"]').forEach(function(row){
+    const price=parseFloat(row.querySelector('.giprice').value)||0;
+    giftFull+=price; giftCost+=price/3.7;
+  });
+  const gpAmt=mainNet*gp/100, totalCost=giftCost+voucher+gpAmt;
+  const effectiveDisc=mainNet>0?totalCost/mainNet*100:0, netBrand=mainNet-totalCost;
+  document.getElementById('giftResult').innerHTML=(mainFull===0&&giftCost===0)?'<span style="color:#94a3b8;font-size:12px">เลือกสินค้าหลักและของแถมเพื่อคำนวน</span>':
+    '<div style="display:grid;grid-template-columns:1fr auto;gap:4px;font-size:13px">' +
+    '<span style="color:#64748b">ราคาหลักรวม (full):</span><strong>'+fmt(mainFull)+'</strong>' +
+    '<span style="color:#64748b">ราคาหลังส่วนลด:</span><strong>'+fmt(mainNet)+'</strong>' +
+    '<hr style="grid-column:1/-1;border:none;border-top:1px solid #e2e8f0;margin:3px 0">' +
+    '<span style="color:#64748b">ต้นทุนของแถม (÷3.7):</span><strong style="color:#ef4444">-'+fmt(giftCost)+'</strong>' +
+    '<span style="color:#64748b">Voucher Platform:</span><strong style="color:#ef4444">-'+fmt(voucher)+'</strong>' +
+    '<span style="color:#64748b">GP ('+gp+'%):</span><strong style="color:#ef4444">-'+fmt(gpAmt)+'</strong>' +
+    '<hr style="grid-column:1/-1;border:none;border-top:1px solid #e2e8f0;margin:3px 0">' +
+    '<span style="font-weight:700;color:#f97316">Effective Disc%:</span><strong style="color:#f97316;font-size:15px">'+effectiveDisc.toFixed(1)+'%</strong>' +
+    '<span style="font-weight:700">Net ที่แบรนด์ได้จริง:</span><strong style="'+(netBrand<0?'color:#ef4444':'color:#16a34a')+';font-size:15px">'+fmt(netBrand)+(netBrand<0?' ⚠ ขาดทุน':'')+'</strong>' +
+    '</div>';
+}
+
+// ════════════════════════════════════════════════════════
+// 🎯 KPI TRACKER
+// ════════════════════════════════════════════════════════
+function calcDuration() {
+  const s=document.getElementById('kpiStart').value, e=document.getElementById('kpiEnd').value;
+  if(s&&e){const days=Math.max(0,Math.round((new Date(e)-new Date(s))/86400000)+1);document.getElementById('kpiDuration').textContent=days+' days';}
+}
+function toggleOtherSite() {
+  const val=document.getElementById('kpiChannel').value;
+  document.getElementById('kpiOtherSite').style.display=val==='OTHER'?'block':'none';
+}
+function getKPIs() { return JSON.parse(localStorage.getItem('clarks_kpis')||'[]'); }
+function saveKPI() {
+  const name=document.getElementById('kpiName').value.trim();
+  if(!name)return alert('กรุณากรอก Campaign Name');
+  const chVal=document.getElementById('kpiChannel').value;
+  const chText=chVal==='OTHER'?(document.getElementById('kpiOtherSite').value.trim()||'Other'):document.getElementById('kpiChannel').options[document.getElementById('kpiChannel').selectedIndex]?.text||chVal;
+  const start=document.getElementById('kpiStart').value, end=document.getElementById('kpiEnd').value;
+  const days=(start&&end)?Math.max(0,Math.round((new Date(end)-new Date(start))/86400000)+1):null;
+  const kpis=getKPIs();
+  kpis.push({id:Date.now(),name,channel:chText,siteCode:chVal,start,end,days,
+    qty_tgt:parseFloat(document.getElementById('kpiQtyTgt').value)||null,
+    rev_tgt:parseFloat(document.getElementById('kpiRevTgt').value)||null,
+    qty_act:parseFloat(document.getElementById('kpiQtyAct').value)||null,
+    rev_act:parseFloat(document.getElementById('kpiRevAct').value)||null,
+    notes:document.getElementById('kpiNotes').value.trim()
+  });
+  localStorage.setItem('clarks_kpis',JSON.stringify(kpis));
+  renderKPI();
+  ['kpiName','kpiStart','kpiEnd','kpiQtyTgt','kpiRevTgt','kpiQtyAct','kpiRevAct','kpiNotes'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('kpiDuration').textContent='—';
+  document.getElementById('kpiChannel').value='';
+  document.getElementById('kpiOtherSite').style.display='none';
+}
+function deleteKPI(id){let kpis=getKPIs().filter(function(k){return k.id!==id;});localStorage.setItem('clarks_kpis',JSON.stringify(kpis));renderKPI();}
+function resultBadge(qPct,rPct){
+  if(qPct>=100&&rPct>=100)return '<span class="badge badge-green">✅ ACHIEVED</span>';
+  if(qPct<80||rPct<80)return '<span class="badge badge-red">❌ MISSED</span>';
+  return '<span class="badge badge-amber">⚠ PARTIAL</span>';
+}
+function renderKPI(){
+  const kpis=getKPIs(), tbody=document.getElementById('kpiBody');
+  tbody.innerHTML='';
+  if(!kpis.length){tbody.innerHTML='<tr><td colspan="13" style="color:#94a3b8;text-align:center;padding:20px">ยังไม่มี Campaign</td></tr>';return;}
+  kpis.forEach(function(k){
+    const qPct=k.qty_tgt>0?k.qty_act/k.qty_tgt*100:100, rPct=k.rev_tgt>0?k.rev_act/k.rev_tgt*100:100;
+    const tr=document.createElement('tr');
+    tr.innerHTML='<td style="font-weight:600">'+k.name+'</td>' +
+      '<td style="font-size:11px">'+(k.channel||'—')+'</td>' +
+      '<td style="font-size:11px;white-space:nowrap">'+(k.start||'—')+' → '+(k.end||'—')+'</td>' +
+      '<td>'+(k.days!=null?k.days+'d':'—')+'</td>' +
+      '<td>'+fmtN(k.qty_tgt)+'</td><td>'+fmtN(k.qty_act)+'</td>' +
+      '<td><span class="badge '+(qPct>=100?'badge-green':qPct<80?'badge-red':'badge-amber')+'">'+(k.qty_tgt>0?qPct.toFixed(0)+'%':'—')+'</span></td>' +
+      '<td>'+fmt(k.rev_tgt)+'</td><td>'+fmt(k.rev_act)+'</td>' +
+      '<td><span class="badge '+(rPct>=100?'badge-green':rPct<80?'badge-red':'badge-amber')+'">'+(k.rev_tgt>0?rPct.toFixed(0)+'%':'—')+'</span></td>' +
+      '<td>'+resultBadge(qPct,rPct)+'</td>' +
+      '<td style="font-size:11px;color:#64748b;max-width:120px">'+(k.notes||'')+'</td>' +
+      '<td><button onclick="deleteKPI('+k.id+')" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:13px">🗑</button></td>';
+    tbody.appendChild(tr);
+  });
+}
+function exportKPIExcel(){
+  const kpis=getKPIs(); if(!kpis.length)return alert('No campaigns to export');
+  const headers=['Campaign','Channel','Start','End','Days','Qty Target','Qty Actual','Qty%','Rev Target','Rev Actual','Rev%','Result','Notes'];
+  const rows=kpis.map(function(k){
+    const qPct=k.qty_tgt>0?(k.qty_act/k.qty_tgt*100).toFixed(1)+'%':'—';
+    const rPct=k.rev_tgt>0?(k.rev_act/k.rev_tgt*100).toFixed(1)+'%':'—';
+    const qN=k.qty_tgt>0?k.qty_act/k.qty_tgt*100:100, rN=k.rev_tgt>0?k.rev_act/k.rev_tgt*100:100;
+    const res=qN>=100&&rN>=100?'ACHIEVED':qN<80||rN<80?'MISSED':'PARTIAL';
+    return [k.name,k.channel||'',k.start||'',k.end||'',k.days||'',k.qty_tgt||'',k.qty_act||'',qPct,k.rev_tgt||'',k.rev_act||'',rPct,res,k.notes||''];
+  });
+  const ws=XLSX.utils.aoa_to_sheet([headers,...rows]);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'KPI Campaigns');
+  XLSX.writeFile(wb,'Clarks_KPI_Campaigns.xlsx');
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+renderKPI();
+</script>
+</body>
+</html>
