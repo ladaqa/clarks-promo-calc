@@ -4,668 +4,618 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>🏷️ Promo Planner — Clarks</title>
-<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
 <style>
+*{box-sizing:border-box;margin:0;padding:0}
 :root{--navy:#0f172a;--accent:#f97316}
-body{font-family:'Segoe UI',sans-serif;background:#f1f5f9;color:#1e293b;margin:0;font-size:13px}
-.sidebar{background:var(--navy);width:210px;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
+body{font-family:'Segoe UI',Tahoma,sans-serif;background:#f1f5f9;color:#1e293b;font-size:13px;display:flex;min-height:100vh}
+/* Sidebar */
+.sidebar{background:var(--navy);width:220px;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column}
 .logo-text{font-size:19px;font-weight:800;color:#fff;letter-spacing:1px;padding:18px 18px 4px}
-.logo-sub{font-size:11px;color:#64748b;padding:0 18px 14px}
+.logo-sub{font-size:11px;color:#64748b;padding:0 18px 14px;border-bottom:1px solid #1e293b}
+.nav-link{display:block;padding:10px 18px;color:#94a3b8;border-left:3px solid transparent;text-decoration:none;font-size:13px;cursor:pointer;background:none;border-top:none;border-right:none;border-bottom:none;width:100%;text-align:left;transition:all .15s}
+.nav-link:hover{color:#fff;background:rgba(249,115,22,.15);border-left-color:var(--accent)}
+.nav-link.active{color:#fff;background:rgba(249,115,22,.15);border-left-color:var(--accent)}
+/* Layout */
+.main{flex:1;padding:20px;overflow-x:hidden;max-width:calc(100vw - 220px)}
+/* Cards */
+.card{background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:16px}
 .step-badge{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-weight:800;font-size:13px;flex-shrink:0}
 .step-title{font-size:15px;font-weight:700}
-.card{background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:16px}
-.filter-chip{display:inline-flex;align-items:center;padding:3px 10px;border-radius:9999px;font-size:11px;cursor:pointer;border:1.5px solid #cbd5e1;background:#fff;color:#475569;margin:2px;transition:all .15s;white-space:nowrap}
-.filter-chip.active{background:var(--accent);border-color:var(--accent);color:#fff}
-.tier-btn{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #cbd5e1;background:#fff;color:#475569;transition:all .15s;white-space:nowrap}
+/* Filter chips */
+.chip{display:inline-flex;align-items:center;padding:3px 10px;border-radius:9999px;font-size:11px;cursor:pointer;border:1.5px solid #cbd5e1;background:#fff;color:#475569;margin:2px;transition:all .15s;white-space:nowrap}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+/* Tier buttons */
+.tier-btn{padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #cbd5e1;background:#fff;color:#475569;transition:all .15s;white-space:nowrap}
 .tier-btn:hover{border-color:#94a3b8}
-.tier-btn.offline-active{background:#1d4ed8;border-color:#1d4ed8;color:#fff}
-.tier-btn.online-active{background:#16a34a;border-color:#16a34a;color:#fff}
-.tier-btn.disabled{opacity:.35;cursor:not-allowed}
-input,select{border:1.5px solid #cbd5e1;border-radius:7px;padding:4px 8px;font-size:12px;outline:none;background:#fff}
+.t-offline{background:#1d4ed8;border-color:#1d4ed8;color:#fff}
+.t-online{background:#16a34a;border-color:#16a34a;color:#fff}
+.t-none{background:#475569;border-color:#475569;color:#fff}
+/* Form */
+input,select{border:1.5px solid #cbd5e1;border-radius:7px;padding:4px 8px;font-size:12px;outline:none;background:#fff;font-family:inherit}
 input:focus,select:focus{border-color:var(--accent)}
+button{font-family:inherit;cursor:pointer}
+/* Table */
 table{width:100%;border-collapse:collapse;font-size:12px}
-th{background:#f8fafc;padding:6px 8px;text-align:left;border-bottom:2px solid #e2e8f0;white-space:nowrap;font-weight:600;color:#475569;position:sticky;top:0;z-index:2;cursor:pointer}
+th{background:#f8fafc;padding:6px 8px;text-align:left;border-bottom:2px solid #e2e8f0;white-space:nowrap;font-weight:600;color:#475569;position:sticky;top:0;z-index:2;cursor:pointer;user-select:none}
 th:hover{background:#f1f5f9}
 td{padding:5px 8px;border-bottom:1px solid #f1f5f9;vertical-align:middle}
-tr:hover td{background:#fff7ed}
-tr.selected td{background:#fff7ed}
-.st-high td{background:#dcfce7}
-.st-mid td{background:#fef9c3}
-.st-low td{background:#fee2e2}
-tr.selected.st-high td,tr.selected.st-mid td,tr.selected.st-low td{background:#fff7ed}
-.badge{display:inline-block;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:700}
-.bg-green{background:#dcfce7;color:#16a34a}
-.bg-amber{background:#fef3c7;color:#d97706}
-.bg-red{background:#fee2e2;color:#dc2626}
-.bg-blue{background:#dbeafe;color:#1d4ed8}
-.bg-purple{background:#f3e8ff;color:#7c3aed}
-.mix-step-card{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:12px;margin-bottom:8px}
-.result-table th{background:#1e293b;color:#94a3b8;border-bottom-color:#334155}
-.result-table td{border-bottom-color:#1e293b;color:#1e293b}
-.result-table{background:#fff}
-#productTableWrap{max-height:400px;overflow-y:auto;border:1px solid #e2e8f0;border-radius:8px}
+tbody tr:hover td{background:#fff7ed !important}
+tr.sel td{background:#fff7ed !important}
+tr.st-hi td{background:#dcfce7}
+tr.st-mi td{background:#fef9c3}
+tr.st-lo td{background:#fee2e2}
+/* Badges */
+.b{display:inline-block;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:700}
+.b-g{background:#dcfce7;color:#16a34a}
+.b-y{background:#fef3c7;color:#d97706}
+.b-r{background:#fee2e2;color:#dc2626}
+.b-b{background:#dbeafe;color:#1d4ed8}
+.b-p{background:#f3e8ff;color:#7c3aed}
+/* Product table wrapper */
+#tblWrap{max-height:380px;overflow-y:auto;border:1px solid #e2e8f0;border-radius:8px}
+/* Locked steps */
+.locked{opacity:.45;pointer-events:none}
+/* Mix step cards */
+.mcard{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:12px;margin-bottom:8px;position:relative}
+/* Result table */
+.rtbl th{background:#1e293b;color:#94a3b8;font-size:11px}
+.rtbl td{font-size:12px}
+/* Summary cards */
+.sum-card{background:#fff;border-radius:10px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.08);text-align:center;flex:1;min-width:120px}
 </style>
 </head>
 <body>
-<div style="display:flex;min-height:100vh">
-
 <!-- Sidebar -->
 <div class="sidebar">
   <div class="logo-text">CLARKS</div>
   <div class="logo-sub">Promo Planner</div>
   <nav style="padding:8px 0">
-    <a href="index.html" style="display:block;width:100%;text-align:left;padding:10px 20px;color:#94a3b8;border-left:3px solid transparent;cursor:pointer;font-size:13px;text-decoration:none;transition:all .2s" onmouseover="this.style.color='#fff';this.style.background='rgba(249,115,22,.15)';this.style.borderLeftColor='#f97316'" onmouseout="this.style.color='#94a3b8';this.style.background='none';this.style.borderLeftColor='transparent'">🧮 Promo Calculator</a>
-    <span style="display:block;width:100%;text-align:left;padding:10px 20px;color:#fff;border-left:3px solid #f97316;background:rgba(249,115,22,.15);font-size:13px">🏷️ Promo Planner</span>
+    <a href="index.html" class="nav-link">🧮 Promo Calculator</a>
+    <span class="nav-link active">🏷️ Promo Planner</span>
   </nav>
-  <div style="padding:14px 18px;border-top:1px solid #1e293b;margin-top:8px">
-    <div style="color:#64748b;font-size:10px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Workflow</div>
-    <div style="display:flex;flex-direction:column;gap:8px">
-      <div style="display:flex;align-items:center;gap:8px;color:#94a3b8;font-size:12px">
-        <span style="width:20px;height:20px;border-radius:50%;background:#f97316;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">1</span>
-        <span>เลือกสินค้า</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;color:#94a3b8;font-size:12px">
-        <span style="width:20px;height:20px;border-radius:50%;background:#3b82f6;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">2</span>
-        <span>เลือก Tier ส่วนลด</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;color:#94a3b8;font-size:12px">
-        <span style="width:20px;height:20px;border-radius:50%;background:#8b5cf6;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">3</span>
-        <span>เพิ่มโปรโมชั่น</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;color:#94a3b8;font-size:12px">
-        <span style="width:20px;height:20px;border-radius:50%;background:#10b981;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">4</span>
-        <span>ดูผลลัพธ์</span>
-      </div>
-    </div>
-  </div>
-  <div style="padding:14px 18px;margin-top:8px;border-top:1px solid #1e293b">
-    <div style="color:#64748b;font-size:10px;margin-bottom:6px">สรุป</div>
-    <div style="color:#f97316;font-size:18px;font-weight:800" id="sideSelCount">0</div>
-    <div style="color:#94a3b8;font-size:11px">รายการที่เลือก</div>
+  <div style="padding:14px 18px;margin-top:auto;border-top:1px solid #1e293b">
+    <div style="color:#64748b;font-size:10px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">สินค้าที่เลือก</div>
+    <div id="sideCount" style="color:var(--accent);font-size:22px;font-weight:800">0</div>
+    <div style="color:#94a3b8;font-size:11px">รายการ</div>
+    <div style="margin-top:12px;color:#64748b;font-size:10px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Tier ที่เลือก</div>
+    <div id="sideTier" style="color:#94a3b8;font-size:11px">DC NOW เดิม</div>
   </div>
 </div>
 
-<!-- Main content -->
-<div style="flex:1;padding:20px;overflow-x:hidden">
+<!-- Main Content -->
+<div class="main">
   <div style="font-size:20px;font-weight:800;margin-bottom:2px">🏷️ Promo Planner</div>
-  <div style="color:#64748b;font-size:12px;margin-bottom:18px">วางแผนโปรโมชั่นจากข้อมูล Slow Move · 247 SKUs</div>
+  <div style="color:#64748b;font-size:12px;margin-bottom:18px">วางแผนโปรโมชั่นจากข้อมูล Slow Move &middot; 247 SKUs</div>
 
-  <!-- ════ STEP 1: Product Selection ════ -->
-  <div class="card">
+  <!-- STEP 1: เลือกสินค้า -->
+  <div class="card" id="card1">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
       <span class="step-badge">1</span>
       <span class="step-title">เลือกสินค้า</span>
-      <span id="selCount" style="font-size:12px;color:#64748b;margin-left:4px">ยังไม่ได้เลือก</span>
-      <button onclick="clearSelection()" style="margin-left:auto;padding:4px 10px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;cursor:pointer;font-size:11px;color:#64748b">ล้างการเลือก</button>
+      <span id="selCount" style="font-size:12px;color:#64748b;margin-left:4px"></span>
+      <button id="btnClear" onclick="clearSel()" style="margin-left:auto;padding:4px 10px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;font-size:11px;color:#64748b">ล้างการเลือก</button>
     </div>
-
     <!-- Filters -->
-    <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px;padding:10px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0">
-      <input type="text" id="searchInput" placeholder="🔍 ค้นหาชื่อรุ่น..." style="width:180px" oninput="renderTable()">
-      <div style="display:flex;flex-wrap:wrap;gap:3px;align-items:center">
-        <span style="font-size:10px;color:#64748b;font-weight:600">BU:</span>
-        <button class="filter-chip active" onclick="toggleFilter(this,'bu','ALL')" id="bu-ALL">ALL</button>
-        <button class="filter-chip" onclick="toggleFilter(this,'bu','Originals')" id="bu-Originals">Originals</button>
-        <button class="filter-chip" onclick="toggleFilter(this,'bu','Premium')" id="bu-Premium">Premium</button>
-        <button class="filter-chip" onclick="toggleFilter(this,'bu','Essentials')" id="bu-Essentials">Essentials</button>
-        <button class="filter-chip" onclick="toggleFilter(this,'bu','Cloudsteppers')" id="bu-Cloudsteppers">Cloudsteppers</button>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:10px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;margin-bottom:8px">
+      <input id="search" type="text" placeholder="🔍 ค้นหาชื่อรุ่น/สี..." style="width:170px" oninput="render()">
+      <div style="display:flex;flex-wrap:wrap;gap:2px;align-items:center">
+        <span style="font-size:10px;color:#64748b;font-weight:600;margin-right:2px">BU:</span>
+        <button class="chip on" id="f-bu-ALL" onclick="setFilter('bu','ALL',this)">ALL</button>
+        <button class="chip" id="f-bu-Originals" onclick="setFilter('bu','Originals',this)">Originals</button>
+        <button class="chip" id="f-bu-Premium" onclick="setFilter('bu','Premium',this)">Premium</button>
+        <button class="chip" id="f-bu-Essentials" onclick="setFilter('bu','Essentials',this)">Essentials</button>
+        <button class="chip" id="f-bu-Cloudsteppers" onclick="setFilter('bu','Cloudsteppers',this)">Cloudsteppers</button>
       </div>
-      <div style="display:flex;flex-wrap:wrap;gap:3px;align-items:center">
-        <span style="font-size:10px;color:#64748b;font-weight:600">Gender:</span>
-        <button class="filter-chip active" onclick="toggleFilter(this,'gender','ALL')" id="gender-ALL">ALL</button>
-        <button class="filter-chip" onclick="toggleFilter(this,'gender','WOMEN')" id="gender-WOMEN">👩 Women</button>
-        <button class="filter-chip" onclick="toggleFilter(this,'gender','MEN')" id="gender-MEN">👨 Men</button>
+      <div style="display:flex;flex-wrap:wrap;gap:2px;align-items:center">
+        <span style="font-size:10px;color:#64748b;font-weight:600;margin-right:2px">Gender:</span>
+        <button class="chip on" id="f-g-ALL" onclick="setFilter('gender','ALL',this)">ALL</button>
+        <button class="chip" id="f-g-WOMEN" onclick="setFilter('gender','WOMEN',this)">👩 Women</button>
+        <button class="chip" id="f-g-MEN" onclick="setFilter('gender','MEN',this)">👨 Men</button>
       </div>
-      <div style="display:flex;flex-wrap:wrap;gap:3px;align-items:center">
-        <span style="font-size:10px;color:#64748b;font-weight:600">DC NOW:</span>
-        <button class="filter-chip active" onclick="toggleFilter(this,'dc','ALL')" id="dc-ALL">ALL</button>
-        <button class="filter-chip" onclick="toggleFilter(this,'dc','low')" id="dc-low">0–15%</button>
-        <button class="filter-chip" onclick="toggleFilter(this,'dc','mid')" id="dc-mid">15–30%</button>
-        <button class="filter-chip" onclick="toggleFilter(this,'dc','high')" id="dc-high">&gt;30%</button>
+      <div style="display:flex;flex-wrap:wrap;gap:2px;align-items:center">
+        <span style="font-size:10px;color:#64748b;font-weight:600;margin-right:2px">DC NOW:</span>
+        <button class="chip on" id="f-dc-ALL" onclick="setFilter('dc','ALL',this)">ALL</button>
+        <button class="chip" id="f-dc-low" onclick="setFilter('dc','low',this)">0-15%</button>
+        <button class="chip" id="f-dc-mid" onclick="setFilter('dc','mid',this)">15-30%</button>
+        <button class="chip" id="f-dc-hi" onclick="setFilter('dc','hi',this)">&gt;30%</button>
       </div>
     </div>
-
-    <!-- Color legend -->
+    <!-- Legend -->
     <div style="display:flex;gap:12px;font-size:10px;color:#64748b;margin-bottom:6px">
-      <span><span style="display:inline-block;width:10px;height:10px;background:#dcfce7;border-radius:2px;margin-right:3px"></span>ST% ≥ 50%</span>
-      <span><span style="display:inline-block;width:10px;height:10px;background:#fef9c3;border-radius:2px;margin-right:3px"></span>ST% 20–50%</span>
-      <span><span style="display:inline-block;width:10px;height:10px;background:#fee2e2;border-radius:2px;margin-right:3px"></span>ST% &lt; 20%</span>
+      <span><span style="display:inline-block;width:10px;height:10px;background:#dcfce7;border-radius:2px;margin-right:3px;vertical-align:middle"></span>ST% &ge; 50</span>
+      <span><span style="display:inline-block;width:10px;height:10px;background:#fef9c3;border-radius:2px;margin-right:3px;vertical-align:middle"></span>ST% 20-50</span>
+      <span><span style="display:inline-block;width:10px;height:10px;background:#fee2e2;border-radius:2px;margin-right:3px;vertical-align:middle"></span>ST% &lt; 20</span>
     </div>
-
-    <div id="productTableWrap">
-      <table id="productTable">
+    <div id="tblWrap">
+      <table>
         <thead>
           <tr>
-            <th style="width:32px"><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>
-            <th onclick="sortTable('name')">รุ่น ↕</th>
-            <th onclick="sortTable('color')">สี ↕</th>
-            <th onclick="sortTable('price')" style="text-align:right">ราคาป้าย ↕</th>
-            <th onclick="sortTable('bu')">BU ↕</th>
-            <th onclick="sortTable('gender')">Gender ↕</th>
-            <th onclick="sortTable('stock')" style="text-align:right">Stock ↕</th>
-            <th onclick="sortTable('st_pct')" style="text-align:right">%ST ↕</th>
-            <th onclick="sortTable('dc_now')" style="text-align:right">DC NOW ↕</th>
-            <th onclick="sortTable('avg_dc')" style="text-align:right">Avg DC ↕</th>
-            <th onclick="sortTable('total')" style="text-align:right">ขายแล้ว ↕</th>
-            <th style="text-align:center">Tier ที่มี</th>
+            <th style="width:30px"><input type="checkbox" id="chkAll" onchange="toggleAll(this)"></th>
+            <th onclick="sortBy('name')">รุ่น &#8597;</th>
+            <th onclick="sortBy('color')">สี &#8597;</th>
+            <th onclick="sortBy('price')" style="text-align:right">ราคาป้าย &#8597;</th>
+            <th onclick="sortBy('bu')">BU &#8597;</th>
+            <th onclick="sortBy('gender')">Gender &#8597;</th>
+            <th onclick="sortBy('stock')" style="text-align:right">Stock &#8597;</th>
+            <th onclick="sortBy('st_pct')" style="text-align:right">%ST &#8597;</th>
+            <th onclick="sortBy('dc_now')" style="text-align:right">DC NOW &#8597;</th>
+            <th onclick="sortBy('avg_dc')" style="text-align:right">Avg DC &#8597;</th>
+            <th onclick="sortBy('total')" style="text-align:right">ขายแล้ว &#8597;</th>
+            <th style="font-size:10px">Tier ที่มี</th>
           </tr>
         </thead>
-        <tbody id="productTbody"></tbody>
+        <tbody id="tbody"></tbody>
       </table>
     </div>
-    <div id="tableFooter" style="font-size:11px;color:#64748b;margin-top:6px;text-align:right"></div>
+    <div id="tblFoot" style="font-size:11px;color:#64748b;margin-top:5px;text-align:right"></div>
   </div>
 
-  <!-- ════ STEP 2: Tier Selection ════ -->
-  <div class="card" id="step2card" style="opacity:.5;pointer-events:none">
+  <!-- STEP 2: เลือก Tier -->
+  <div class="card locked" id="card2">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
       <span class="step-badge" style="background:#3b82f6">2</span>
       <span class="step-title">เลือก Discount Tier</span>
-      <span style="font-size:11px;color:#64748b">(จะแทนที่ DC NOW)</span>
+      <span style="font-size:11px;color:#64748b">(แทนที่ DC NOW)</span>
     </div>
-    <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start">
-      <!-- Offline -->
-      <div>
-        <div style="font-size:11px;font-weight:700;color:#1d4ed8;margin-bottom:6px">🏪 Offline</div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap" id="offlineTierBtns">
-          <button class="tier-btn" onclick="selectTier(this,'offline','counter','Counter')" id="tier-counter">Counter</button>
-          <button class="tier-btn" onclick="selectTier(this,'offline','xclusive','X Clusive')" id="tier-xclusive">X Clusive</button>
-        </div>
-      </div>
-      <!-- Online -->
-      <div>
-        <div style="font-size:11px;font-weight:700;color:#16a34a;margin-bottom:6px">🌐 Online</div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap" id="onlineTierBtns">
-          <button class="tier-btn" onclick="selectTier(this,'online','bau','BAU')" id="tier-bau">BAU</button>
-          <button class="tier-btn" onclick="selectTier(this,'online','a','A')" id="tier-a">A</button>
-          <button class="tier-btn" onclick="selectTier(this,'online','a_plus','A+')" id="tier-aplus">A+</button>
-          <button class="tier-btn" onclick="selectTier(this,'online','mega','Mega')" id="tier-mega">Mega</button>
-          <button class="tier-btn" onclick="selectTier(this,'online','fs','FS')" id="tier-fs">FS</button>
-          <button class="tier-btn" onclick="selectTier(this,'online','seek','SEEK')" id="tier-seek">SEEK</button>
-        </div>
-      </div>
-      <!-- No tier -->
-      <div>
-        <div style="font-size:11px;font-weight:700;color:#64748b;margin-bottom:6px">📌 ไม่เลือก Tier</div>
-        <button class="tier-btn offline-active" onclick="selectTier(this,'none','none','DC NOW เดิม')" id="tier-none" style="background:#64748b;border-color:#64748b;color:#fff">ใช้ DC NOW เดิม</button>
+    <div style="margin-bottom:10px">
+      <div style="font-size:11px;font-weight:600;color:#1d4ed8;margin-bottom:6px">&#127970; Offline</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        <button class="tier-btn t-none" id="tbtn-none" onclick="pickTier(this,'none','none','DC NOW เดิม')">DC NOW เดิม</button>
+        <button class="tier-btn" id="tbtn-counter" onclick="pickTier(this,'offline','counter','Counter')">Counter</button>
+        <button class="tier-btn" id="tbtn-xclusive" onclick="pickTier(this,'offline','xclusive','X Clusive')">X Clusive</button>
       </div>
     </div>
-    <div id="tierPreview" style="margin-top:12px;font-size:12px;color:#64748b"></div>
+    <div>
+      <div style="font-size:11px;font-weight:600;color:#16a34a;margin-bottom:6px">&#127760; Online</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        <button class="tier-btn" id="tbtn-bau" onclick="pickTier(this,'online','bau','BAU')">BAU</button>
+        <button class="tier-btn" id="tbtn-a" onclick="pickTier(this,'online','a','Tier A')">Tier A</button>
+        <button class="tier-btn" id="tbtn-a_plus" onclick="pickTier(this,'online','a_plus','Tier A+')">Tier A+</button>
+        <button class="tier-btn" id="tbtn-mega" onclick="pickTier(this,'online','mega','Mega')">Mega</button>
+        <button class="tier-btn" id="tbtn-fs" onclick="pickTier(this,'online','fs','Flash Sale')">Flash Sale</button>
+        <button class="tier-btn" id="tbtn-seek" onclick="pickTier(this,'online','seek','SEEK')">SEEK</button>
+      </div>
+    </div>
+    <div id="tierMsg" style="margin-top:10px;font-size:12px;color:#64748b;padding:8px;background:#f8fafc;border-radius:6px;min-height:28px"></div>
   </div>
 
-  <!-- ════ STEP 3: Mix Promotion ════ -->
-  <div class="card" id="step3card" style="opacity:.5;pointer-events:none">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+  <!-- STEP 3: Mix Promo -->
+  <div class="card locked" id="card3">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
       <span class="step-badge" style="background:#8b5cf6">3</span>
-      <span class="step-title">เพิ่มโปรโมชั่น (Mix Promotion)</span>
-      <span style="font-size:11px;color:#64748b">เพิ่มเติมจาก Tier Discount (ไม่บังคับ)</span>
-    </div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;background:#f8fafc;padding:10px;border-radius:8px;border:1px solid #e2e8f0">
-      <div>
-        <label style="font-size:11px;font-weight:600;color:#64748b">GP%</label>
-        <input type="number" id="plannerGP" value="" placeholder="e.g. 40" min="0" max="100" style="width:100%;margin-top:3px" oninput="calcResults()">
-      </div>
-      <div>
-        <label style="font-size:11px;font-weight:600;color:#64748b">Voucher Platform (฿)</label>
-        <input type="number" id="plannerVoucherAmt" value="" placeholder="e.g. 200" min="0" style="width:100%;margin-top:3px" oninput="calcResults()">
-      </div>
-      <div>
-        <label style="font-size:11px;font-weight:600;color:#64748b">Voucher Platform (%)</label>
-        <input type="number" id="plannerVoucherPct" value="" placeholder="e.g. 5" min="0" style="width:100%;margin-top:3px" oninput="calcResults()">
+      <span class="step-title">เพิ่มโปรโมชั่น</span>
+      <span style="font-size:11px;color:#64748b">(ซ้อนทับได้ สูงสุด 5 ขั้น)</span>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
+        <span style="font-size:11px;color:#64748b">GP%</span>
+        <input id="gpPct" type="number" min="0" max="100" value="0" style="width:60px" oninput="calcResults()">
+        <span style="font-size:11px;color:#64748b">Voucher ฿</span>
+        <input id="vAmt" type="number" min="0" value="0" style="width:70px" oninput="calcResults()">
+        <span style="font-size:11px;color:#64748b">+%</span>
+        <input id="vPct" type="number" min="0" max="100" value="0" style="width:50px" oninput="calcResults()">
       </div>
     </div>
-
-    <div id="plannerSteps"></div>
-    <div style="display:flex;gap:8px;align-items:center;margin-top:4px">
-      <button onclick="addPlannerStep()" id="plannerAddBtn" style="padding:6px 16px;background:#8b5cf6;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600">+ เพิ่ม Step โปรโมชั่น</button>
-      <button onclick="clearPlannerSteps()" style="padding:6px 12px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:8px;cursor:pointer;font-size:11px;color:#64748b">ล้าง</button>
-      <span id="plannerStepCount" style="font-size:11px;color:#94a3b8"></span>
-    </div>
+    <div id="stepArea"></div>
+    <button onclick="addStep()" style="padding:6px 14px;background:#8b5cf6;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600">+ เพิ่มขั้นโปรโมชั่น</button>
+    <span id="stepCount" style="font-size:11px;color:#94a3b8;margin-left:8px">0/5</span>
   </div>
 
-  <!-- ════ STEP 4: Results ════ -->
-  <div class="card" id="step4card" style="opacity:.5;pointer-events:none">
+  <!-- STEP 4: ผลลัพธ์ -->
+  <div class="card locked" id="card4">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
       <span class="step-badge" style="background:#10b981">4</span>
-      <span class="step-title">ผลลัพธ์ตามโปรโมชั่น</span>
-      <button onclick="calcResults()" style="margin-left:auto;padding:6px 16px;background:#10b981;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600">🔄 คำนวณ</button>
+      <span class="step-title">ผลลัพธ์</span>
     </div>
-    <div id="resultsArea"><span style="color:#94a3b8;font-size:12px">เลือกสินค้าและกำหนดโปรโมชั่นเพื่อดูผลลัพธ์</span></div>
+    <!-- Summary cards -->
+    <div id="sumArea" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px"></div>
+    <!-- Result table -->
+    <div style="overflow-x:auto">
+      <table class="rtbl" id="resTable">
+        <thead>
+          <tr>
+            <th>รุ่น / สี</th>
+            <th style="text-align:right">ราคาป้าย</th>
+            <th style="text-align:right">Tier ที่ใช้</th>
+            <th style="text-align:right">Net after Tier</th>
+            <th style="text-align:right">Net after Promo</th>
+            <th style="text-align:right">Net Brand</th>
+            <th style="text-align:right">Eff. Disc%</th>
+          </tr>
+        </thead>
+        <tbody id="resTbody"></tbody>
+      </table>
+    </div>
+    <div id="resEmpty" style="text-align:center;color:#94a3b8;padding:30px;display:none">เลือกสินค้าก่อน</div>
   </div>
-
-</div><!-- end main -->
-</div><!-- end flex -->
+</div>
 
 <script>
 const PRODUCTS = [{"name": "ORIGINALS M WALLABEE", "color": "MAPLE SUEDE", "qty": 251, "price": 7590, "bu": "Originals", "gender": "MEN", "season": "SS 2026", "sale_type": "WHOLE SALE/SFG", "seeding": null, "sale_total": 146, "total": 146, "stock": 105, "st_pct": 58.2, "dc_now": 5.0, "avg_dc": 24.0, "art_color": "CZSADR03SMAP", "tiers": {"counter": 5.0, "xclusive": null, "bau": 0, "a": 0, "a_plus": 0, "mega": 0, "fs": null, "seek": null}}, {"name": "PREMIUM W TORHILL BOAT", "color": "BEIGE SUEDE", "qty": 60, "price": 5990, "bu": "Premium", "gender": "WOMEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 1, "total": 1, "stock": 59, "st_pct": 1.7, "dc_now": 10.0, "avg_dc": 0, "art_color": "CZSADP04SBEG", "tiers": {"counter": 10.0, "xclusive": 20.0, "bau": 2.0, "a": 3.0, "a_plus": 5.0, "mega": 10.0, "fs": 12.0, "seek": null}}, {"name": "PREMIUM W TORHILL BOAT", "color": "DARK BROWN SUEDE", "qty": 36, "price": 5990, "bu": "Premium", "gender": "WOMEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 1, "total": 1, "stock": 35, "st_pct": 2.8, "dc_now": 10.0, "avg_dc": 10.0, "art_color": "CZSADP04SDBR", "tiers": {"counter": 10.0, "xclusive": 20.0, "bau": 2.0, "a": 3.0, "a_plus": 5.0, "mega": 10.0, "fs": 12.0, "seek": null}}, {"name": "PREMIUM M TORHILL HI", "color": "DARK SAND SUEDE", "qty": 60, "price": 7570, "bu": "Premium", "gender": "MEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 13, "total": 13, "stock": 47, "st_pct": 21.7, "dc_now": 5.0, "avg_dc": 8.0, "art_color": "CZSADP02SDAS", "tiers": {"counter": 5.0, "xclusive": null, "bau": 2.0, "a": 3.0, "a_plus": 5.0, "mega": 10.0, "fs": 12.0, "seek": null}}, {"name": "PREMIUM W TORHILL BOAT", "color": "CREAM NUBUCK", "qty": 36, "price": 5990, "bu": "Premium", "gender": "WOMEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 2, "total": 2, "stock": 34, "st_pct": 5.6, "dc_now": 10.0, "avg_dc": 0, "art_color": "CZSADP04NCRE", "tiers": {"counter": 10.0, "xclusive": 20.0, "bau": 2.0, "a": 3.0, "a_plus": 5.0, "mega": 10.0, "fs": 12.0, "seek": null}}, {"name": "PREMIUM W SENSA15 BOW", "color": "LIME LEATHER", "qty": 36, "price": 4290, "bu": "Premium", "gender": "WOMEN", "season": "SS 2026", "sale_type": "SFG", "seeding": 2, "sale_total": 0, "total": 2, "stock": 34, "st_pct": 5.6, "dc_now": 5.0, "avg_dc": 0, "art_color": "CZFADP01LLIM", "tiers": {"counter": 5.0, "xclusive": null, "bau": 2.0, "a": 4.0, "a_plus": 5.0, "mega": 10.0, "fs": null, "seek": null}}, {"name": "ESSENTIALS M BERWICK LACE", "color": "BROWN LEATHER", "qty": 48, "price": 4990, "bu": "Essentials", "gender": "MEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 2, "total": 2, "stock": 46, "st_pct": 4.2, "dc_now": 30.0, "avg_dc": 15.0, "art_color": "CZLADE01LBRW", "tiers": {"counter": 30.0, "xclusive": 30.0, "bau": 15.0, "a": 20.0, "a_plus": 25.0, "mega": 30.0, "fs": 35.0, "seek": null}}, {"name": "PREMIUM CUR W TORVIEW", "color": "BURGUNDY LEATHER", "qty": 12, "price": 7590, "bu": "Premium", "gender": "WOMEN", "season": "SS 2025", "sale_type": "WHOLESALE", "seeding": null, "sale_total": 1, "total": 1, "stock": 11, "st_pct": 8.3, "dc_now": 40.0, "avg_dc": 20.0, "art_color": "CZSABP08LBGD", "tiers": {"counter": 40.0, "xclusive": 40.0, "bau": 20.0, "a": 25.0, "a_plus": 30.0, "mega": 35.0, "fs": 40.0, "seek": 40.0}}, {"name": "ORIGINALS W WALLABEE BOOT", "color": "BLACK CROCODILE DISTRESS", "qty": 12, "price": 7990, "bu": "Originals", "gender": "WOMEN", "season": "SS 2025", "sale_type": "WHOLESALE", "seeding": null, "sale_total": 1, "total": 1, "stock": 11, "st_pct": 8.3, "dc_now": 50.0, "avg_dc": 50.0, "art_color": "CZHAAR05LBCD", "tiers": {"counter": 50.0, "xclusive": 50.0, "bau": 30.0, "a": 35.0, "a_plus": 38.0, "mega": 40.0, "fs": 50.0, "seek": null}}, {"name": "ORIGINALS M WALLABEE GORE-TEX", "color": "MAPLE SUEDE", "qty": 84, "price": 9590, "bu": "Originals", "gender": "MEN", "season": "SS 2026", "sale_type": "WHOLE SALE/SFG", "seeding": null, "sale_total": 38, "total": 38, "stock": 46, "st_pct": 45.2, "dc_now": 5.0, "avg_dc": 2.0, "art_color": "CZSADR05SMAP", "tiers": {"counter": 5.0, "xclusive": null, "bau": null, "a": null, "a_plus": null, "mega": null, "fs": null, "seek": null}}, {"name": "ORIGINALS M WALLABEE", "color": "BLACK SUEDE", "qty": 94, "price": 7590, "bu": "Originals", "gender": "MEN", "season": "SS 2026", "sale_type": "WHOLE SALE/SFG", "seeding": null, "sale_total": 48, "total": 48, "stock": 46, "st_pct": 51.1, "dc_now": 5.0, "avg_dc": 21.0, "art_color": "CZSADR03SBLK", "tiers": {"counter": 5.0, "xclusive": null, "bau": 0, "a": 0, "a_plus": 0, "mega": 0, "fs": null, "seek": null}}, {"name": "PREMIUM W ZAREY BOW", "color": "LIGHT BLUE LEATHER", "qty": 36, "price": 5690, "bu": "Premium", "gender": "WOMEN", "season": "SS 2026", "sale_type": "SFG", "seeding": 1, "sale_total": 3, "total": 4, "stock": 32, "st_pct": 11.1, "dc_now": 5.0, "avg_dc": 0, "art_color": "CZPADP01LLGB", "tiers": {"counter": 5.0, "xclusive": null, "bau": 2.0, "a": 4.0, "a_plus": 5.0, "mega": 10.0, "fs": null, "seek": null}}, {"name": "PREMIUM W SENSA15 BOW", "color": "LIGHT BLUE LEATHER", "qty": 36, "price": 4290, "bu": "Premium", "gender": "WOMEN", "season": "SS 2026", "sale_type": "SFG", "seeding": 1, "sale_total": 3, "total": 4, "stock": 32, "st_pct": 11.1, "dc_now": 5.0, "avg_dc": 5.0, "art_color": "CZFADP01LLGB", "tiers": {"counter": 5.0, "xclusive": null, "bau": 2.0, "a": 4.0, "a_plus": 5.0, "mega": 10.0, "fs": null, "seek": null}}, {"name": "PREMIUM W NARINI EDGE", "color": "STONE SUEDE", "qty": 72, "price": 5490, "bu": "Premium", "gender": "WOMEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 9, "total": 9, "stock": 63, "st_pct": 12.5, "dc_now": 10.0, "avg_dc": 0, "art_color": "CZRADP01SSTN", "tiers": {"counter": 10.0, "xclusive": 20.0, "bau": 2.0, "a": 3.0, "a_plus": 5.0, "mega": 10.0, "fs": 15.0, "seek": null}}, {"name": "PREMIUM W NARINI EDGE", "color": "NAVY SUEDE", "qty": 71, "price": 5490, "bu": "Premium", "gender": "WOMEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 9, "total": 9, "stock": 62, "st_pct": 12.7, "dc_now": 10.0, "avg_dc": 19.0, "art_color": "CZRADP01SNAV", "tiers": {"counter": 10.0, "xclusive": 20.0, "bau": 2.0, "a": 3.0, "a_plus": 5.0, "mega": 10.0, "fs": 15.0, "seek": null}}, {"name": "CLOUDSTEPPERS M SOLEVANA STYLE", "color": "BLACK", "qty": 48, "price": 4290, "bu": "Cloudsteppers", "gender": "MEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 5, "total": 5, "stock": 43, "st_pct": 10.4, "dc_now": 20.0, "avg_dc": 20.0, "art_color": "CZSADC01TBLK", "tiers": {"counter": 15.0, "xclusive": 20.0, "bau": 8.0, "a": 10.0, "a_plus": 15.0, "mega": 20.0, "fs": 22.0, "seek": null}}, {"name": "PREMIUM W CLARKS PACE", "color": "AQUA COMBI", "qty": 36, "price": 7290, "bu": "Premium", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 6, "total": 6, "stock": 30, "st_pct": 16.7, "dc_now": 50.0, "avg_dc": 49.0, "art_color": "CZSACP02TAQU", "tiers": {"counter": 50.0, "xclusive": 60.0, "bau": 33.0, "a": 37.0, "a_plus": 47.0, "mega": 55.0, "fs": 60.0, "seek": null}}, {"name": "CLOUDSTEPPERS M SOLEVANA STYLE", "color": "GREY", "qty": 48, "price": 4290, "bu": "Cloudsteppers", "gender": "MEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 10, "total": 10, "stock": 38, "st_pct": 20.8, "dc_now": 20.0, "avg_dc": 22.0, "art_color": "CZSADC01TGRY", "tiers": {"counter": 15.0, "xclusive": 20.0, "bau": 8.0, "a": 10.0, "a_plus": 15.0, "mega": 20.0, "fs": 22.0, "seek": null}}, {"name": "PREMIUM M TORHILL LO", "color": "DARK SAND SUEDE", "qty": 86, "price": 6590, "bu": "Premium", "gender": "MEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 50, "total": 50, "stock": 36, "st_pct": 58.1, "dc_now": 5.0, "avg_dc": 7.0, "art_color": "CZSADP03SDAS", "tiers": {"counter": 5.0, "xclusive": null, "bau": 2.0, "a": 3.0, "a_plus": 5.0, "mega": 10.0, "fs": 12.0, "seek": null}}, {"name": "ESSENTIALS M BERWICK LACE", "color": "BLACK LEATHER", "qty": 48, "price": 4990, "bu": "Essentials", "gender": "MEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 15, "total": 15, "stock": 33, "st_pct": 31.2, "dc_now": 30.0, "avg_dc": 20.0, "art_color": "CZLADE01LBLK", "tiers": {"counter": 30.0, "xclusive": 30.0, "bau": 15.0, "a": 20.0, "a_plus": 25.0, "mega": 30.0, "fs": 35.0, "seek": null}}, {"name": "PREMIUM CUR W TORVIEW", "color": "BLACK LEATHER", "qty": 12, "price": 7590, "bu": "Premium", "gender": "WOMEN", "season": "SS 2025", "sale_type": "WHOLESALE", "seeding": 1, "sale_total": 1, "total": 2, "stock": 10, "st_pct": 16.7, "dc_now": 40.0, "avg_dc": 0, "art_color": "CZSABP08LBLK", "tiers": {"counter": 40.0, "xclusive": 40.0, "bau": 20.0, "a": 25.0, "a_plus": 30.0, "mega": 35.0, "fs": 40.0, "seek": 40.0}}, {"name": "ESSENTIALS W NATALYN SLING", "color": "BLACK LEATHER", "qty": 60, "price": 4290, "bu": "Essentials", "gender": "WOMEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 11, "total": 11, "stock": 49, "st_pct": 18.3, "dc_now": 10.0, "avg_dc": 20.0, "art_color": "CZFADE02LBLK", "tiers": {"counter": 10.0, "xclusive": 20.0, "bau": 2.0, "a": 4.0, "a_plus": 5.0, "mega": 10.0, "fs": 12.0, "seek": null}}, {"name": "PREMIUM W SENSA15 TRIM", "color": "SAND PATENT", "qty": 36, "price": 5990, "bu": "Premium", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 7, "total": 7, "stock": 29, "st_pct": 19.4, "dc_now": 40.0, "avg_dc": 17.0, "art_color": "CZFACP03PSAN", "tiers": {"counter": 50.0, "xclusive": 50.0, "bau": 35.0, "a": 40.0, "a_plus": 45.0, "mega": 52.0, "fs": 55.0, "seek": null}}, {"name": "PREMIUM W TORHILL BEE", "color": "LIGHT TAN NUBUCK", "qty": 60, "price": 6590, "bu": "Premium", "gender": "WOMEN", "season": "SS 2026", "sale_type": "SFG", "seeding": 3, "sale_total": 9, "total": 12, "stock": 48, "st_pct": 20.0, "dc_now": 5.0, "avg_dc": 12.0, "art_color": "CZSADP01NLTA", "tiers": {"counter": 5.0, "xclusive": null, "bau": 2.0, "a": 3.0, "a_plus": 5.0, "mega": 10.0, "fs": 12.0, "seek": null}}, {"name": "ESSENTIALS M BERWICK SEAM", "color": "BROWN LEATHER", "qty": 48, "price": 4990, "bu": "Essentials", "gender": "MEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 18, "total": 18, "stock": 30, "st_pct": 37.5, "dc_now": 20.0, "avg_dc": 14.0, "art_color": "CZLACE07LBRW", "tiers": {"counter": 20.0, "xclusive": 20.0, "bau": 5.0, "a": 7.0, "a_plus": 10.0, "mega": 15.0, "fs": 25.0, "seek": null}}, {"name": "PREMIUM W ZAREY BOW", "color": "BLACK LEATHER", "qty": 48, "price": 5690, "bu": "Premium", "gender": "WOMEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 10, "total": 10, "stock": 38, "st_pct": 20.8, "dc_now": 5.0, "avg_dc": 15.0, "art_color": "CZPADP01LBLK", "tiers": {"counter": 5.0, "xclusive": null, "bau": 2.0, "a": 4.0, "a_plus": 5.0, "mega": 10.0, "fs": null, "seek": null}}, {"name": "PREMIUM M CLARKS PACE", "color": "OFF WHITE COMBI", "qty": 48, "price": 7290, "bu": "Premium", "gender": "MEN", "season": "AW 2025", "sale_type": "SFG", "seeding": 3, "sale_total": 19, "total": 22, "stock": 26, "st_pct": 45.8, "dc_now": 50.0, "avg_dc": 33.0, "art_color": "CZSACP01TOFW", "tiers": {"counter": 50.0, "xclusive": 60.0, "bau": 30.0, "a": 35.0, "a_plus": 45.0, "mega": 50.0, "fs": 55.0, "seek": null}}, {"name": "ESSENTIALS M TILDEN WALK", "color": "DARK TAN LEATHER", "qty": 36, "price": 4890, "bu": "Essentials", "gender": "MEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 11, "total": 11, "stock": 25, "st_pct": 30.6, "dc_now": 30.0, "avg_dc": 25.0, "art_color": "CZLADE04LDAT", "tiers": {"counter": 30.0, "xclusive": 30.0, "bau": 15.0, "a": 20.0, "a_plus": 25.0, "mega": 30.0, "fs": 35.0, "seek": null}}, {"name": "PREMIUM W SENSA15 TRIM", "color": "BLACK LEATHER", "qty": 36, "price": 5990, "bu": "Premium", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 8, "total": 8, "stock": 28, "st_pct": 22.2, "dc_now": 40.0, "avg_dc": 32.0, "art_color": "CZFACP03LBLK", "tiers": {"counter": 50.0, "xclusive": 50.0, "bau": 35.0, "a": 40.0, "a_plus": 45.0, "mega": 52.0, "fs": 55.0, "seek": null}}, {"name": "PREMIUM W SENSA15 BOW", "color": "BLACK LEATHER", "qty": 48, "price": 4290, "bu": "Premium", "gender": "WOMEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 11, "total": 11, "stock": 37, "st_pct": 22.9, "dc_now": 10.0, "avg_dc": 12.0, "art_color": "CZFADP01LBLK", "tiers": {"counter": 10.0, "xclusive": 20.0, "bau": 2.0, "a": 4.0, "a_plus": 5.0, "mega": 10.0, "fs": 12.0, "seek": null}}, {"name": "PREMIUM W TORHILL JANE", "color": "LIGHT PINK SUEDE", "qty": 60, "price": 5590, "bu": "Premium", "gender": "WOMEN", "season": "SS 2026", "sale_type": "SFG", "seeding": 1, "sale_total": 13, "total": 14, "stock": 46, "st_pct": 23.3, "dc_now": 5.0, "avg_dc": 10.0, "art_color": "CZJADP03SLPK", "tiers": {"counter": 5.0, "xclusive": null, "bau": 2.0, "a": 4.0, "a_plus": 5.0, "mega": 10.0, "fs": null, "seek": null}}, {"name": "PREMIUM W CLARKS PACE", "color": "WHITE", "qty": 36, "price": 7290, "bu": "Premium", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 9, "total": 9, "stock": 27, "st_pct": 25.0, "dc_now": 50.0, "avg_dc": 37.0, "art_color": "CZSACP02TWHT", "tiers": {"counter": 50.0, "xclusive": 60.0, "bau": 30.0, "a": 35.0, "a_plus": 45.0, "mega": 55.0, "fs": 60.0, "seek": null}}, {"name": "ESSENTIALS M FLEXWAY STEP", "color": "NAVY SUEDE", "qty": 36, "price": 4990, "bu": "Essentials", "gender": "MEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 11, "total": 11, "stock": 25, "st_pct": 30.6, "dc_now": 20.0, "avg_dc": 10.0, "art_color": "CZLADE01SNAV", "tiers": {"counter": 20.0, "xclusive": null, "bau": 5.0, "a": 10.0, "a_plus": 15.0, "mega": 20.0, "fs": 22.0, "seek": null}}, {"name": "ORIGINALS W WALLABEE", "color": "BLACK SUEDE", "qty": 24, "price": 7590, "bu": "Originals", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 6, "total": 6, "stock": 18, "st_pct": 25.0, "dc_now": 5.0, "avg_dc": 10.0, "art_color": "CZSABR05SBLK", "tiers": {"counter": 5.0, "xclusive": null, "bau": 0, "a": 0, "a_plus": 0, "mega": 5.0, "fs": 10.0, "seek": null}}, {"name": "PREMIUM W SENSA 15 SHINE", "color": "SAND PATENT", "qty": 100, "price": 6290, "bu": "Premium", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 27, "total": 27, "stock": 73, "st_pct": 27.0, "dc_now": 50.0, "avg_dc": 38.0, "art_color": "CZJABP02PSAN", "tiers": {"counter": 50.0, "xclusive": 60.0, "bau": 40.0, "a": 45.0, "a_plus": 50.0, "mega": 60.0, "fs": 65.0, "seek": null}}, {"name": "PREMIUM W ZAREY BOW", "color": "CREAM LEATHER", "qty": 48, "price": 5690, "bu": "Premium", "gender": "WOMEN", "season": "SS 2026", "sale_type": "SFG", "seeding": 2, "sale_total": 11, "total": 13, "stock": 35, "st_pct": 27.1, "dc_now": 5.0, "avg_dc": 16.0, "art_color": "CZPADP01LCRE", "tiers": {"counter": 5.0, "xclusive": null, "bau": 2.0, "a": 4.0, "a_plus": 5.0, "mega": 10.0, "fs": null, "seek": null}}, {"name": "ESSENTIALS W ELLIOTTE SAIL", "color": "LIGHT PINK", "qty": 60, "price": 3290, "bu": "Essentials", "gender": "WOMEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 17, "total": 17, "stock": 43, "st_pct": 28.3, "dc_now": 5.0, "avg_dc": 8.0, "art_color": "CZRADE02LPIK", "tiers": {"counter": 5.0, "xclusive": null, "bau": 2.0, "a": 4.0, "a_plus": 5.0, "mega": 10.0, "fs": null, "seek": null}}, {"name": "PREMIUM W SENSA 15 SHINE", "color": "CHAMPAGNE LEATHER", "qty": 120, "price": 6290, "bu": "Premium", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": 4, "sale_total": 31, "total": 35, "stock": 85, "st_pct": 29.2, "dc_now": 50.0, "avg_dc": 42.0, "art_color": "CZJABP01LCMP", "tiers": {"counter": 50.0, "xclusive": 60.0, "bau": 40.0, "a": 45.0, "a_plus": 50.0, "mega": 60.0, "fs": 65.0, "seek": null}}, {"name": "PREMIUM W NARINI EDGE", "color": "SAND SUEDE", "qty": 84, "price": 5490, "bu": "Premium", "gender": "WOMEN", "season": "SS 2026", "sale_type": "SFG", "seeding": 4, "sale_total": 21, "total": 25, "stock": 59, "st_pct": 29.8, "dc_now": 10.0, "avg_dc": 11.0, "art_color": "CZRADP01SSND", "tiers": {"counter": 10.0, "xclusive": 20.0, "bau": 2.0, "a": 3.0, "a_plus": 5.0, "mega": 10.0, "fs": 15.0, "seek": null}}, {"name": "PREMIUM W MAYHILL WALK", "color": "LIGHT GREEN LEATHER", "qty": 60, "price": 6170, "bu": "Premium", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 18, "total": 18, "stock": 42, "st_pct": 30.0, "dc_now": 50.0, "avg_dc": 38.0, "art_color": "CZSABP03LLGE", "tiers": {"counter": 50.0, "xclusive": 55.0, "bau": 33.0, "a": 37.0, "a_plus": 45.0, "mega": 52.0, "fs": 55.0, "seek": null}}, {"name": "ESSENTIALS M TILDEN FREE", "color": "DARK TAN LEATHER", "qty": 36, "price": 4890, "bu": "Essentials", "gender": "MEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 11, "total": 11, "stock": 25, "st_pct": 30.6, "dc_now": 30.0, "avg_dc": 19.0, "art_color": "CZLACE01LDAT", "tiers": {"counter": 40.0, "xclusive": 40.0, "bau": 20.0, "a": 25.0, "a_plus": 30.0, "mega": 35.0, "fs": 40.0, "seek": null}}, {"name": "PREMIUM M PAULTON LACE", "color": "BLACK HI SHINE LEATHER", "qty": 48, "price": 4990, "bu": "Premium", "gender": "MEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 24, "total": 24, "stock": 24, "st_pct": 50.0, "dc_now": 10.0, "avg_dc": 18.0, "art_color": "CZLACP03LBHS", "tiers": {"counter": 10.0, "xclusive": 20.0, "bau": 10.0, "a": 12.0, "a_plus": 15.0, "mega": 20.0, "fs": 25.0, "seek": null}}, {"name": "ORIGINALS M GODNEY BOAT", "color": "BROWN LEATHER", "qty": 24, "price": 6990, "bu": "Originals", "gender": "MEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 2, "total": 2, "stock": 22, "st_pct": 8.3, "dc_now": 5.0, "avg_dc": 0, "art_color": "CZLADR01LBRW", "tiers": {"counter": 5.0, "xclusive": null, "bau": null, "a": 2.0, "a_plus": 3.0, "mega": 5.0, "fs": null, "seek": null}}, {"name": "CLOUDSTEPPERS M SOLEVANA STYLE", "color": "NAVY", "qty": 36, "price": 4290, "bu": "Cloudsteppers", "gender": "MEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 14, "total": 14, "stock": 22, "st_pct": 38.9, "dc_now": 20.0, "avg_dc": 20.0, "art_color": "CZSADC01TNAV", "tiers": {"counter": 15.0, "xclusive": 20.0, "bau": 8.0, "a": 10.0, "a_plus": 15.0, "mega": 20.0, "fs": 22.0, "seek": null}}, {"name": "ESSENTIALS W SOLEVANA LACE", "color": "MERLOT COMBI", "qty": 48, "price": 3590, "bu": "Cloudsteppers", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 15, "total": 15, "stock": 33, "st_pct": 31.2, "dc_now": 30.0, "avg_dc": 24.0, "art_color": "CZSACE01TMLC", "tiers": {"counter": 30.0, "xclusive": 40.0, "bau": 17.0, "a": 20.0, "a_plus": 25.0, "mega": 35.0, "fs": 40.0, "seek": null}}, {"name": "PREMIUM W DAISS30 DAZZ", "color": "BEIGE PATENT", "qty": 120, "price": 6590, "bu": "Premium", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": 2, "sale_total": 38, "total": 40, "stock": 80, "st_pct": 33.3, "dc_now": 50.0, "avg_dc": 35.0, "art_color": "CZJABP03PBEG", "tiers": {"counter": 50.0, "xclusive": 60.0, "bau": 40.0, "a": 45.0, "a_plus": 50.0, "mega": 55.0, "fs": 60.0, "seek": null}}, {"name": "PREMIUM W HOLLYHOCK WALK", "color": "SAND LEATHER", "qty": 24, "price": 6290, "bu": "Premium", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 8, "total": 8, "stock": 16, "st_pct": 33.3, "dc_now": 40.0, "avg_dc": 45.0, "art_color": "CZSACP03LSAN", "tiers": {"counter": 50.0, "xclusive": 50.0, "bau": 30.0, "a": 35.0, "a_plus": 40.0, "mega": 45.0, "fs": 55.0, "seek": null}}, {"name": "ESSENTIALS W NATALYN SLING", "color": "NATURAL RAFFIA", "qty": 72, "price": 4290, "bu": "Essentials", "gender": "WOMEN", "season": "SS 2026", "sale_type": "SFG", "seeding": 5, "sale_total": 20, "total": 25, "stock": 47, "st_pct": 34.7, "dc_now": 10.0, "avg_dc": 14.0, "art_color": "CZFADE02TRAF", "tiers": {"counter": 10.0, "xclusive": 20.0, "bau": 2.0, "a": 4.0, "a_plus": 5.0, "mega": 10.0, "fs": 12.0, "seek": null}}, {"name": "ESSENTIALS W ELLIOTTE SAIL", "color": "NAVY NUBUCK", "qty": 60, "price": 3290, "bu": "Essentials", "gender": "WOMEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 21, "total": 21, "stock": 39, "st_pct": 35.0, "dc_now": 5.0, "avg_dc": 12.0, "art_color": "CZRADE02NNAV", "tiers": {"counter": 5.0, "xclusive": null, "bau": 2.0, "a": 4.0, "a_plus": 5.0, "mega": 10.0, "fs": null, "seek": null}}, {"name": "ESSENTIALS W SCARLYT PIPER", "color": "MERLOT", "qty": 72, "price": 4290, "bu": "Essentials", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 26, "total": 26, "stock": 46, "st_pct": 36.1, "dc_now": 40.0, "avg_dc": 30.0, "art_color": "CZPACE05PMER", "tiers": {"counter": 40.0, "xclusive": 50.0, "bau": 30.0, "a": 35.0, "a_plus": 40.0, "mega": 50.0, "fs": 50.0, "seek": null}}, {"name": "PREMIUM W CLARKS PACE", "color": "SAND COMBI", "qty": 36, "price": 7290, "bu": "Premium", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 13, "total": 13, "stock": 23, "st_pct": 36.1, "dc_now": 50.0, "avg_dc": 36.0, "art_color": "CZSACP02TSNC", "tiers": {"counter": 50.0, "xclusive": 60.0, "bau": 30.0, "a": 35.0, "a_plus": 45.0, "mega": 55.0, "fs": 60.0, "seek": null}}, {"name": "PREMIUM W SENSA 15 SHINE", "color": "BLACK LEATHER", "qty": 120, "price": 6290, "bu": "Premium", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": 1, "sale_total": 43, "total": 44, "stock": 76, "st_pct": 36.7, "dc_now": 50.0, "avg_dc": 41.0, "art_color": "CZJABP01LBLK", "tiers": {"counter": 50.0, "xclusive": 60.0, "bau": 40.0, "a": 45.0, "a_plus": 50.0, "mega": 60.0, "fs": 65.0, "seek": null}}, {"name": "PREMIUM W LIVIA SKY", "color": "BLACK WEAVE", "qty": 72, "price": 5690, "bu": "Premium", "gender": "WOMEN", "season": "SS 2026", "sale_type": "SFG", "seeding": 1, "sale_total": 26, "total": 27, "stock": 45, "st_pct": 37.5, "dc_now": 10.0, "avg_dc": 9.0, "art_color": "CZJADP01WBLK", "tiers": {"counter": 10.0, "xclusive": 20.0, "bau": 2.0, "a": 4.0, "a_plus": 5.0, "mega": 10.0, "fs": 12.0, "seek": null}}, {"name": "ORIGINALS M GODNEY BOAT", "color": "BRITISH TAN LEATHER", "qty": 41, "price": 6990, "bu": "Originals", "gender": "MEN", "season": "SS 2026", "sale_type": "WHOLE SALE/SFG", "seeding": null, "sale_total": 19, "total": 19, "stock": 22, "st_pct": 46.3, "dc_now": 5.0, "avg_dc": 38.0, "art_color": "CZLADR01LBTT", "tiers": {"counter": 5.0, "xclusive": null, "bau": null, "a": 2.0, "a_plus": 3.0, "mega": 5.0, "fs": null, "seek": null}}, {"name": "ESSENTIALS W KEPLEY CORA", "color": "WARM BEIGE LEATHER", "qty": 72, "price": 4990, "bu": "Essentials", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 28, "total": 28, "stock": 44, "st_pct": 38.9, "dc_now": 30.0, "avg_dc": 29.0, "art_color": "CZPACE04LWMB", "tiers": {"counter": 30.0, "xclusive": 40.0, "bau": 15.0, "a": 20.0, "a_plus": 25.0, "mega": 30.0, "fs": 40.0, "seek": null}}, {"name": "ESSENTIALS M TILDEN CAP", "color": "BLACK LEATHER", "qty": 36, "price": 4890, "bu": "Essentials", "gender": "MEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 15, "total": 15, "stock": 21, "st_pct": 41.7, "dc_now": 10.0, "avg_dc": 9.0, "art_color": "CZLADE03LBLK", "tiers": {"counter": 10.0, "xclusive": null, "bau": 3.0, "a": 4.0, "a_plus": 5.0, "mega": 10.0, "fs": 12.0, "seek": null}}, {"name": "PREMIUM W ARIANY MULE", "color": "TAN LEATHER", "qty": 120, "price": 5490, "bu": "Premium", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 49, "total": 49, "stock": 71, "st_pct": 40.8, "dc_now": 50.0, "avg_dc": 59.0, "art_color": "CZDABP01LTAN", "tiers": {"counter": 50.0, "xclusive": 65.0, "bau": 50.0, "a": 52.0, "a_plus": 54.0, "mega": 60.0, "fs": 65.0, "seek": null}}, {"name": "ESSENTIALS W ELLIOTTE SAIL", "color": "CREAM LEATHER", "qty": 75, "price": 3290, "bu": "Essentials", "gender": "WOMEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 31, "total": 31, "stock": 44, "st_pct": 41.3, "dc_now": 5.0, "avg_dc": 9.0, "art_color": "CZRADE02LCRE", "tiers": {"counter": 5.0, "xclusive": null, "bau": 2.0, "a": 4.0, "a_plus": 5.0, "mega": 10.0, "fs": null, "seek": null}}, {"name": "PREMIUM W HOLLYHOCK WALK", "color": "WHITE LEATHER", "qty": 24, "price": 6290, "bu": "Premium", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 10, "total": 10, "stock": 14, "st_pct": 41.7, "dc_now": 40.0, "avg_dc": 44.0, "art_color": "CZSACP03LWHI", "tiers": {"counter": 50.0, "xclusive": 50.0, "bau": 30.0, "a": 35.0, "a_plus": 40.0, "mega": 45.0, "fs": 55.0, "seek": null}}, {"name": "PREMIUM W PAGE LOAFER", "color": "BLACK PATENT", "qty": 48, "price": 6590, "bu": "Premium", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 20, "total": 20, "stock": 28, "st_pct": 41.7, "dc_now": 60.0, "avg_dc": 53.0, "art_color": "CZRABP05PBLK", "tiers": {"counter": 60.0, "xclusive": 65.0, "bau": null, "a": null, "a_plus": null, "mega": null, "fs": null, "seek": null}}, {"name": "PREMIUM W STRAVEN SLING", "color": "CREAM LEATHER", "qty": 24, "price": 6290, "bu": "Premium", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": 1, "sale_total": 9, "total": 10, "stock": 14, "st_pct": 41.7, "dc_now": 30.0, "avg_dc": 9.0, "art_color": "CZFACP02LCRE", "tiers": {"counter": 40.0, "xclusive": 40.0, "bau": 20.0, "a": 25.0, "a_plus": 30.0, "mega": 35.0, "fs": 40.0, "seek": null}}, {"name": "CLOUDSTEPPERS W SOLEVANA STRAP", "color": "WHITE", "qty": 60, "price": 3290, "bu": "Cloudsteppers", "gender": "WOMEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 25, "total": 25, "stock": 35, "st_pct": 41.7, "dc_now": 5.0, "avg_dc": 25.0, "art_color": "CZJADC01TWHT", "tiers": {"counter": 5.0, "xclusive": null, "bau": 2.0, "a": 4.0, "a_plus": 5.0, "mega": 10.0, "fs": null, "seek": null}}, {"name": "PREMIUM M CRAFTJAMES LO", "color": "BLACK LEATHER", "qty": 24, "price": 8970, "bu": "Premium", "gender": "MEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 4, "total": 4, "stock": 20, "st_pct": 16.7, "dc_now": 20.0, "avg_dc": 30.0, "art_color": "CZLADP03LBLK", "tiers": {"counter": 20.0, "xclusive": 20.0, "bau": 10.0, "a": 12.0, "a_plus": 15.0, "mega": 20.0, "fs": 25.0, "seek": null}}, {"name": "PREMIUM M CLARKS PACE", "color": "LIME COMBI", "qty": 24, "price": 7290, "bu": "Premium", "gender": "MEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 4, "total": 4, "stock": 20, "st_pct": 16.7, "dc_now": 50.0, "avg_dc": 28.0, "art_color": "CZSACP01TLME", "tiers": {"counter": 50.0, "xclusive": 60.0, "bau": 30.0, "a": 35.0, "a_plus": 45.0, "mega": 50.0, "fs": 55.0, "seek": null}}, {"name": "ORIGINALS W WALLABEE", "color": "GREY SNAKE LEATHER", "qty": 12, "price": 7390, "bu": "Originals", "gender": "WOMEN", "season": "SS 2025", "sale_type": "WHOLESALE", "seeding": null, "sale_total": 5, "total": 5, "stock": 7, "st_pct": 41.7, "dc_now": 50.0, "avg_dc": 30.0, "art_color": "CZSAAR04LGRS", "tiers": {"counter": 50.0, "xclusive": 50.0, "bau": 30.0, "a": 35.0, "a_plus": 38.0, "mega": 40.0, "fs": 50.0, "seek": null}}, {"name": "PREMIUM M CRAFTJAMES LO", "color": "WINE LEATHER", "qty": 24, "price": 8970, "bu": "Premium", "gender": "MEN", "season": "SS 2026", "sale_type": "SFG", "seeding": 1, "sale_total": 3, "total": 4, "stock": 20, "st_pct": 16.7, "dc_now": 20.0, "avg_dc": 22.0, "art_color": "CZLADP03LWNE", "tiers": {"counter": 30.0, "xclusive": 30.0, "bau": 15.0, "a": 20.0, "a_plus": 25.0, "mega": 30.0, "fs": 35.0, "seek": null}}, {"name": "PREMIUM W ADELA COURT", "color": "CHAMPAGNE INTEREST", "qty": 100, "price": 6290, "bu": "Premium", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": 1, "sale_total": 42, "total": 43, "stock": 57, "st_pct": 43.0, "dc_now": 50.0, "avg_dc": 36.0, "art_color": "CZPABP01LCPI", "tiers": {"counter": 50.0, "xclusive": 60.0, "bau": 37.0, "a": 42.0, "a_plus": 47.0, "mega": 52.0, "fs": 60.0, "seek": null}}, {"name": "ESSENTIALS W JAZMYNN BOW", "color": "BLACK INTEREST", "qty": 72, "price": 3990, "bu": "Essentials", "gender": "WOMEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 31, "total": 31, "stock": 41, "st_pct": 43.1, "dc_now": 10.0, "avg_dc": 10.0, "art_color": "CZFADE01LIBK", "tiers": {"counter": 10.0, "xclusive": 20.0, "bau": 2.0, "a": 4.0, "a_plus": 5.0, "mega": 10.0, "fs": 12.0, "seek": null}}, {"name": "ESSENTIALS W ELLIOTTE SAIL", "color": "TAN NUBUCK", "qty": 60, "price": 3290, "bu": "Essentials", "gender": "WOMEN", "season": "SS 2026", "sale_type": "SFG", "seeding": 1, "sale_total": 25, "total": 26, "stock": 34, "st_pct": 43.3, "dc_now": 5.0, "avg_dc": 9.0, "art_color": "CZRADE02NTAN", "tiers": {"counter": 5.0, "xclusive": null, "bau": 2.0, "a": 4.0, "a_plus": 5.0, "mega": 10.0, "fs": null, "seek": null}}, {"name": "ESSENTIALS W JAZMYNN BOW", "color": "TAN INTEREST", "qty": 60, "price": 3990, "bu": "Essentials", "gender": "WOMEN", "season": "SS 2026", "sale_type": "SFG", "seeding": 1, "sale_total": 25, "total": 26, "stock": 34, "st_pct": 43.3, "dc_now": 10.0, "avg_dc": 10.0, "art_color": "CZFADE01LITN", "tiers": {"counter": 10.0, "xclusive": 20.0, "bau": 2.0, "a": 4.0, "a_plus": 5.0, "mega": 10.0, "fs": 12.0, "seek": null}}, {"name": "ESSENTIALS W SOLEVANA LACE", "color": "BLACK COMBI", "qty": 72, "price": 3590, "bu": "Cloudsteppers", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 32, "total": 32, "stock": 40, "st_pct": 44.4, "dc_now": 30.0, "avg_dc": 20.0, "art_color": "CZSACE01TBLC", "tiers": {"counter": 30.0, "xclusive": 40.0, "bau": 17.0, "a": 20.0, "a_plus": 25.0, "mega": 35.0, "fs": 40.0, "seek": null}}, {"name": "ESSENTIALS M BERWICK LACE", "color": "BROWN LEATHER", "qty": 36, "price": 4990, "bu": "Essentials", "gender": "MEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 16, "total": 16, "stock": 20, "st_pct": 44.4, "dc_now": 30.0, "avg_dc": 18.0, "art_color": "CZLACE05LBRW", "tiers": {"counter": 30.0, "xclusive": 30.0, "bau": 15.0, "a": 20.0, "a_plus": 25.0, "mega": 30.0, "fs": 35.0, "seek": null}}, {"name": "PREMIUM W LIVIA LILY", "color": "SILVER", "qty": 36, "price": 5490, "bu": "Premium", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 16, "total": 16, "stock": 20, "st_pct": 44.4, "dc_now": 50.0, "avg_dc": 20.0, "art_color": "CZFACP01LSIL", "tiers": {"counter": 50.0, "xclusive": 50.0, "bau": 30.0, "a": 35.0, "a_plus": 40.0, "mega": 45.0, "fs": 55.0, "seek": null}}, {"name": "ORIGINALS W WALLABEE", "color": "BLACK TUMBLED LEATHER", "qty": 20, "price": 7590, "bu": "Originals", "gender": "WOMEN", "season": "SS 2025", "sale_type": "WHOLESALE", "seeding": null, "sale_total": 9, "total": 9, "stock": 11, "st_pct": 45.0, "dc_now": 40.0, "avg_dc": 18.0, "art_color": "CZSABR05LBLT", "tiers": {"counter": 40.0, "xclusive": 40.0, "bau": 15.0, "a": 20.0, "a_plus": 27.0, "mega": 35.0, "fs": 40.0, "seek": 40.0}}, {"name": "ORIGINALS M DESERT BOOT", "color": "BEESWAX", "qty": 97, "price": 6170, "bu": "Originals", "gender": "MEN", "season": "SS 2026", "sale_type": "WHOLE SALE/SFG", "seeding": 5, "sale_total": 72, "total": 77, "stock": 20, "st_pct": 79.4, "dc_now": 5.0, "avg_dc": 13.0, "art_color": "CZSADR01LBWX", "tiers": {"counter": 5.0, "xclusive": null, "bau": 0, "a": 2.0, "a_plus": 3.0, "mega": 5.0, "fs": 10.0, "seek": null}}, {"name": "ORIGINAL M MEARE WALLA", "color": "MAPLE SUEDE", "qty": 24, "price": 6990, "bu": "Originals", "gender": "MEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 5, "total": 5, "stock": 19, "st_pct": 20.8, "dc_now": 0, "avg_dc": 0, "art_color": "CZSADR06SMAP", "tiers": {"counter": 5.0, "xclusive": null, "bau": null, "a": null, "a_plus": null, "mega": null, "fs": null, "seek": null}}, {"name": "ESSENTIALS M BERWICK LO", "color": "BLACK LEATHER", "qty": 48, "price": 4990, "bu": "Essentials", "gender": "MEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 29, "total": 29, "stock": 19, "st_pct": 60.4, "dc_now": 10.0, "avg_dc": 15.0, "art_color": "CZLACE06LBLK", "tiers": {"counter": 10.0, "xclusive": 20.0, "bau": 2.0, "a": 3.0, "a_plus": 5.0, "mega": 10.0, "fs": 20.0, "seek": null}}, {"name": "ESSENTIALS W NATALYN WISH", "color": "BEIGE LEATHER", "qty": 120, "price": 4290, "bu": "Essentials", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 55, "total": 55, "stock": 65, "st_pct": 45.8, "dc_now": 20.0, "avg_dc": 18.0, "art_color": "CZFACE03LBEG", "tiers": {"counter": 20.0, "xclusive": 30.0, "bau": 5.0, "a": 10.0, "a_plus": 15.0, "mega": 20.0, "fs": 30.0, "seek": null}}, {"name": "ESSENTIALS M FLEXWAY STEP", "color": "MAPLE", "qty": 48, "price": 4990, "bu": "Essentials", "gender": "MEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 29, "total": 29, "stock": 19, "st_pct": 60.4, "dc_now": 10.0, "avg_dc": 10.0, "art_color": "CZLADE01SMAP", "tiers": {"counter": 10.0, "xclusive": null, "bau": 3.0, "a": 4.0, "a_plus": 5.0, "mega": 10.0, "fs": 12.0, "seek": null}}, {"name": "ORIGINALS M WALLABEE", "color": "BLACK SUEDE", "qty": 20, "price": 7590, "bu": "Originals", "gender": "MEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 2, "total": 2, "stock": 18, "st_pct": 10.0, "dc_now": 5.0, "avg_dc": 3.0, "art_color": "CZSADR01SBLK", "tiers": {"counter": 5.0, "xclusive": null, "bau": 0, "a": 0, "a_plus": 0, "mega": 0, "fs": null, "seek": null}}, {"name": "PREMIUM W EVAMAR WISH", "color": "ECRU SUEDE", "qty": 60, "price": 7470, "bu": "Premium", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 28, "total": 28, "stock": 32, "st_pct": 46.7, "dc_now": 50.0, "avg_dc": 33.0, "art_color": "CZDABP02SECR", "tiers": {"counter": 50.0, "xclusive": 60.0, "bau": 30.0, "a": 35.0, "a_plus": 40.0, "mega": 50.0, "fs": 55.0, "seek": null}}, {"name": "PREMIUM W TORHILL BEE", "color": "GOLDEN TAN SUEDE", "qty": 36, "price": 6590, "bu": "Premium", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 17, "total": 17, "stock": 19, "st_pct": 47.2, "dc_now": 50.0, "avg_dc": 36.0, "art_color": "CZSABP04SGDT", "tiers": {"counter": 50.0, "xclusive": 60.0, "bau": 30.0, "a": 40.0, "a_plus": 45.0, "mega": 50.0, "fs": 60.0, "seek": null}}, {"name": "PREMIUM W TORHILL BEE", "color": "DUSTY ROSE SUEDE", "qty": 48, "price": 6590, "bu": "Premium", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": 1, "sale_total": 22, "total": 23, "stock": 25, "st_pct": 47.9, "dc_now": 30.0, "avg_dc": 19.0, "art_color": "CZSACP05SDTR", "tiers": {"counter": 30.0, "xclusive": 40.0, "bau": 15.0, "a": 20.0, "a_plus": 25.0, "mega": 30.0, "fs": 40.0, "seek": null}}, {"name": "ESSENTIALS W IRIDESSA MAY", "color": "BEIGE LEATHER", "qty": 48, "price": 4590, "bu": "Essentials", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 23, "total": 23, "stock": 25, "st_pct": 47.9, "dc_now": 40.0, "avg_dc": 19.0, "art_color": "CZPACE02LBEG", "tiers": {"counter": 40.0, "xclusive": 30.0, "bau": 20.0, "a": 25.0, "a_plus": 30.0, "mega": 40.0, "fs": 50.0, "seek": null}}, {"name": "ESSENTIALS W KEPLEY VINE", "color": "WARM BEIGE LEATHER", "qty": 120, "price": 5490, "bu": "Essentials", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 58, "total": 58, "stock": 62, "st_pct": 48.3, "dc_now": 50.0, "avg_dc": 34.0, "art_color": "CZPABE01LWMB", "tiers": {"counter": 50.0, "xclusive": 55.0, "bau": 33.0, "a": 37.0, "a_plus": 45.0, "mega": 53.0, "fs": 55.0, "seek": null}}, {"name": "ESSENTIALS M TILDEN WALK", "color": "BLACK LEATHER", "qty": 36, "price": 4890, "bu": "Essentials", "gender": "MEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 18, "total": 18, "stock": 18, "st_pct": 50.0, "dc_now": 30.0, "avg_dc": 18.0, "art_color": "CZLADE04LBLK", "tiers": {"counter": 30.0, "xclusive": 30.0, "bau": 15.0, "a": 20.0, "a_plus": 25.0, "mega": 30.0, "fs": 35.0, "seek": null}}, {"name": "PREMIUM W LYNELL STRAP", "color": "BLACK NUBUCK", "qty": 48, "price": 4290, "bu": "Premium", "gender": "WOMEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 24, "total": 24, "stock": 24, "st_pct": 50.0, "dc_now": 10.0, "avg_dc": 12.0, "art_color": "CZJADP02NBLK", "tiers": {"counter": 10.0, "xclusive": 20.0, "bau": 2.0, "a": 4.0, "a_plus": 5.0, "mega": 10.0, "fs": 12.0, "seek": null}}, {"name": "ORIGINALS M WALLABEE GORE-TEX", "color": "BLACK SUEDE", "qty": 36, "price": 9590, "bu": "Originals", "gender": "MEN", "season": "SS 2026", "sale_type": "WHOLE SALE/SFG", "seeding": null, "sale_total": 19, "total": 19, "stock": 17, "st_pct": 52.8, "dc_now": 5.0, "avg_dc": 0, "art_color": "CZSADR05SBLK", "tiers": {"counter": 5.0, "xclusive": null, "bau": null, "a": null, "a_plus": null, "mega": null, "fs": null, "seek": null}}, {"name": "PREMIUM W MAYHILL WALK", "color": "LIGHT PINK LEATHER", "qty": 60, "price": 6170, "bu": "Premium", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 30, "total": 30, "stock": 30, "st_pct": 50.0, "dc_now": 50.0, "avg_dc": 34.0, "art_color": "CZSABP03LPIN", "tiers": {"counter": 50.0, "xclusive": 55.0, "bau": 33.0, "a": 37.0, "a_plus": 45.0, "mega": 52.0, "fs": 55.0, "seek": null}}, {"name": "ORIGINALS M DESERT KHAN EG", "color": "BROWN SUEDE", "qty": 40, "price": 9990, "bu": "Originals", "gender": "MEN", "season": "SS 2025", "sale_type": "WHOLE SALE/SFG", "seeding": 2, "sale_total": 21, "total": 23, "stock": 17, "st_pct": 57.5, "dc_now": 30.0, "avg_dc": 43.0, "art_color": "CZSABR20SBRW", "tiers": {"counter": 30.0, "xclusive": 30.0, "bau": 10.0, "a": 15.0, "a_plus": 25.0, "mega": 30.0, "fs": 35.0, "seek": 30.0}}, {"name": "PREMIUM M SOLSBURY MULE", "color": "DARK SAND SUEDE", "qty": 36, "price": 6590, "bu": "Premium", "gender": "MEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 21, "total": 21, "stock": 15, "st_pct": 58.3, "dc_now": 10.0, "avg_dc": 12.0, "art_color": "CZDADP01SDAS", "tiers": {"counter": 10.0, "xclusive": 20.0, "bau": 2.0, "a": 3.0, "a_plus": 5.0, "mega": 10.0, "fs": 12.0, "seek": null}}, {"name": "PREMIUM M CLARKS PACE", "color": "BLACK", "qty": 48, "price": 7290, "bu": "Premium", "gender": "MEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 33, "total": 33, "stock": 15, "st_pct": 68.8, "dc_now": 50.0, "avg_dc": 39.0, "art_color": "CZSACP01TBLK", "tiers": {"counter": 50.0, "xclusive": 60.0, "bau": 30.0, "a": 35.0, "a_plus": 45.0, "mega": 50.0, "fs": 55.0, "seek": null}}, {"name": "ESSENTIALS M MARKMAN PLAIN", "color": "BLACK LEATHER", "qty": 36, "price": 4570, "bu": "Essentials", "gender": "MEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 22, "total": 22, "stock": 14, "st_pct": 61.1, "dc_now": 15.0, "avg_dc": 15.0, "art_color": "CZLADE02LBLK", "tiers": {"counter": 15.0, "xclusive": 20.0, "bau": 10.0, "a": 15.0, "a_plus": 18.0, "mega": 20.0, "fs": 25.0, "seek": null}}, {"name": "ESSENTIALS W NATALYN LANE", "color": "BEIGE LEATHER", "qty": 120, "price": 3990, "bu": "Essentials", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 61, "total": 61, "stock": 59, "st_pct": 50.8, "dc_now": 50.0, "avg_dc": 31.0, "art_color": "CZJABE01LBEG", "tiers": {"counter": 50.0, "xclusive": 50.0, "bau": 30.0, "a": 35.0, "a_plus": 40.0, "mega": 50.0, "fs": 55.0, "seek": null}}, {"name": "ESSENTIALS W SOLEVANA STYLE", "color": "SAND", "qty": 100, "price": 3970, "bu": "Cloudsteppers", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": 3, "sale_total": 48, "total": 51, "stock": 49, "st_pct": 51.0, "dc_now": 30.0, "avg_dc": 15.0, "art_color": "CZSACE02NSND", "tiers": {"counter": 30.0, "xclusive": 40.0, "bau": 17.0, "a": 20.0, "a_plus": 25.0, "mega": 35.0, "fs": 40.0, "seek": null}}, {"name": "PREMIUM M CRAFTARLO LO", "color": "TAN LEATHER", "qty": 48, "price": 8590, "bu": "Premium", "gender": "MEN", "season": "SS 2025", "sale_type": "SFG", "seeding": 1, "sale_total": 33, "total": 34, "stock": 14, "st_pct": 70.8, "dc_now": 50.0, "avg_dc": 23.0, "art_color": "CZRABP04LTAN", "tiers": {"counter": 50.0, "xclusive": 50.0, "bau": 30.0, "a": 35.0, "a_plus": 40.0, "mega": 45.0, "fs": 55.0, "seek": null}}, {"name": "ESSENTIALS W JAZMYNN GEM", "color": "DARK PEWTER METALLIC", "qty": 72, "price": 4290, "bu": "Essentials", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 37, "total": 37, "stock": 35, "st_pct": 51.4, "dc_now": 30.0, "avg_dc": 15.0, "art_color": "CZFACE01LDPM", "tiers": {"counter": 30.0, "xclusive": 30.0, "bau": 15.0, "a": 20.0, "a_plus": 25.0, "mega": 30.0, "fs": 35.0, "seek": null}}, {"name": "PREMIUM W NYTA45 SLING", "color": "SAND COMBI LEATHER", "qty": 100, "price": 6890, "bu": "Premium", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": 3, "sale_total": 49, "total": 52, "stock": 48, "st_pct": 52.0, "dc_now": 50.0, "avg_dc": 34.0, "art_color": "CZPABP03LSAC", "tiers": {"counter": 50.0, "xclusive": 55.0, "bau": 30.0, "a": 35.0, "a_plus": 40.0, "mega": 50.0, "fs": 55.0, "seek": null}}, {"name": "PREMIUM W LYNELL STRAP", "color": "NAVY NUBUCK", "qty": 48, "price": 4290, "bu": "Premium", "gender": "WOMEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 25, "total": 25, "stock": 23, "st_pct": 52.1, "dc_now": 10.0, "avg_dc": 11.0, "art_color": "CZJADP02NNAV", "tiers": {"counter": 10.0, "xclusive": 20.0, "bau": 2.0, "a": 4.0, "a_plus": 5.0, "mega": 10.0, "fs": 12.0, "seek": null}}, {"name": "ORIGINALS M WALLABEE", "color": "BEESWAX", "qty": 48, "price": 7590, "bu": "Originals", "gender": "MEN", "season": "SS 2026", "sale_type": "WHOLE SALE/SFG", "seeding": null, "sale_total": 34, "total": 34, "stock": 14, "st_pct": 70.8, "dc_now": 5.0, "avg_dc": 24.0, "art_color": "CZSADR03LBWX", "tiers": {"counter": 5.0, "xclusive": null, "bau": 0, "a": 0, "a_plus": 0, "mega": 0, "fs": null, "seek": null}}, {"name": "PREMIUM W FAWNA SOFT", "color": "SILVER METALLIC", "qty": 60, "price": 5970, "bu": "Premium", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 32, "total": 32, "stock": 28, "st_pct": 53.3, "dc_now": 50.0, "avg_dc": 42.0, "art_color": "CZFABP01LSVM", "tiers": {"counter": 50.0, "xclusive": 60.0, "bau": 30.0, "a": 35.0, "a_plus": 40.0, "mega": 50.0, "fs": 60.0, "seek": null}}, {"name": "PREMIUM M CRAFT SWIFT", "color": "BLACK LEATHER", "qty": 48, "price": 6570, "bu": "Premium", "gender": "MEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 34, "total": 34, "stock": 14, "st_pct": 70.8, "dc_now": 30.0, "avg_dc": 29.0, "art_color": "CZSABP02LBLK", "tiers": {"counter": 40.0, "xclusive": 40.0, "bau": 20.0, "a": 25.0, "a_plus": 30.0, "mega": 35.0, "fs": 40.0, "seek": null}}, {"name": "ESSENTIALS W IRIDESSA SKY", "color": "DARK TAN LEATHER", "qty": 24, "price": 5190, "bu": "Essentials", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 13, "total": 13, "stock": 11, "st_pct": 54.2, "dc_now": 20.0, "avg_dc": 20.0, "art_color": "CZRACE02LDAT", "tiers": {"counter": 20.0, "xclusive": 30.0, "bau": 15.0, "a": 20.0, "a_plus": 25.0, "mega": 30.0, "fs": 35.0, "seek": null}}, {"name": "ESSENTIALS W KEPLEY LANE", "color": "BLACK LEATHER", "qty": 120, "price": 4990, "bu": "Essentials", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": 1, "sale_total": 64, "total": 65, "stock": 55, "st_pct": 54.2, "dc_now": 30.0, "avg_dc": 23.0, "art_color": "CZPACE01LBLK", "tiers": {"counter": 30.0, "xclusive": 40.0, "bau": 10.0, "a": 15.0, "a_plus": 20.0, "mega": 30.0, "fs": 40.0, "seek": null}}, {"name": "ORIGINALS M WALLABEE GORE-TEX", "color": "BLACK SUEDE", "qty": 24, "price": 9590, "bu": "Originals", "gender": "MEN", "season": "AW 2025", "sale_type": "WHOLE SALE/SFG", "seeding": 1, "sale_total": 10, "total": 11, "stock": 13, "st_pct": 45.8, "dc_now": 5.0, "avg_dc": 10.0, "art_color": "CZSACR10SBLK", "tiers": {"counter": 5.0, "xclusive": null, "bau": null, "a": null, "a_plus": null, "mega": null, "fs": null, "seek": null}}, {"name": "ORIGINALS W WALLABEE", "color": "BLACK SUEDE", "qty": 35, "price": 7590, "bu": "Originals", "gender": "WOMEN", "season": "SS 2026", "sale_type": "WHOLE SALE/SFG", "seeding": null, "sale_total": 19, "total": 19, "stock": 16, "st_pct": 54.3, "dc_now": 5.0, "avg_dc": 27.0, "art_color": "CZSADR04SBLK", "tiers": {"counter": 5.0, "xclusive": null, "bau": 0, "a": 0, "a_plus": 0, "mega": 5.0, "fs": 10.0, "seek": null}}, {"name": "ESSENTIALS W SOLEVANA STYLE", "color": "BLACK", "qty": 100, "price": 3970, "bu": "Cloudsteppers", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 55, "total": 55, "stock": 45, "st_pct": 55.0, "dc_now": 30.0, "avg_dc": 16.0, "art_color": "CZSACE02NBLK", "tiers": {"counter": 30.0, "xclusive": 40.0, "bau": 17.0, "a": 20.0, "a_plus": 25.0, "mega": 35.0, "fs": 40.0, "seek": null}}, {"name": "PREMIUM W DAISS30 DAZZ", "color": "RED PATENT", "qty": 100, "price": 6590, "bu": "Premium", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": 7, "sale_total": 48, "total": 55, "stock": 45, "st_pct": 55.0, "dc_now": 50.0, "avg_dc": 35.0, "art_color": "CZJABP03PRED", "tiers": {"counter": 50.0, "xclusive": 60.0, "bau": 40.0, "a": 45.0, "a_plus": 50.0, "mega": 55.0, "fs": 60.0, "seek": null}}, {"name": "PREMIUM W TORHILL BEE", "color": "SILVER", "qty": 36, "price": 6590, "bu": "Premium", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 20, "total": 20, "stock": 16, "st_pct": 55.6, "dc_now": 40.0, "avg_dc": 27.0, "art_color": "CZSACP05LSIL", "tiers": {"counter": 40.0, "xclusive": 50.0, "bau": 30.0, "a": 35.0, "a_plus": 40.0, "mega": 50.0, "fs": 50.0, "seek": null}}, {"name": "ORIGINALS W WALLACRAFT BEE", "color": "LEOPARD PRINT COMBINATION", "qty": 16, "price": 7390, "bu": "Originals", "gender": "WOMEN", "season": "SS 2025", "sale_type": "WHOLESALE", "seeding": null, "sale_total": 9, "total": 9, "stock": 7, "st_pct": 56.2, "dc_now": 50.0, "avg_dc": 37.0, "art_color": "CZSAAR10SLPC", "tiers": {"counter": 50.0, "xclusive": 50.0, "bau": 30.0, "a": 35.0, "a_plus": 38.0, "mega": 40.0, "fs": 50.0, "seek": null}}, {"name": "PREMIUM W DAISS30 DAZZ", "color": "BLACK PATENT", "qty": 100, "price": 6590, "bu": "Premium", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": 9, "sale_total": 48, "total": 57, "stock": 43, "st_pct": 57.0, "dc_now": 50.0, "avg_dc": 34.0, "art_color": "CZJABP03PBLK", "tiers": {"counter": 50.0, "xclusive": 60.0, "bau": 40.0, "a": 45.0, "a_plus": 50.0, "mega": 55.0, "fs": 60.0, "seek": null}}, {"name": "ESSENTIALS W LORELEIGH RAE", "color": "BLACK LEATHER", "qty": 120, "price": 4290, "bu": "Essentials", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 69, "total": 69, "stock": 51, "st_pct": 57.5, "dc_now": 30.0, "avg_dc": 22.0, "art_color": "CZFACE02LBLK", "tiers": {"counter": 30.0, "xclusive": 30.0, "bau": 15.0, "a": 20.0, "a_plus": 25.0, "mega": 30.0, "fs": 40.0, "seek": null}}, {"name": "ORIGINALS M DESERT BOOT", "color": "SAND SUEDE", "qty": 37, "price": 6170, "bu": "Originals", "gender": "MEN", "season": "SS 2026", "sale_type": "WHOLE SALE/SFG", "seeding": 1, "sale_total": 23, "total": 24, "stock": 13, "st_pct": 64.9, "dc_now": 5.0, "avg_dc": 26.0, "art_color": "CZSADR01SSND", "tiers": {"counter": 5.0, "xclusive": 20.0, "bau": 2.0, "a": 3.0, "a_plus": 5.0, "mega": 10.0, "fs": 20.0, "seek": null}}, {"name": "PREMIUM M CRAFTJAMES LO", "color": "WINE LEATHER", "qty": 12, "price": 8970, "bu": "Premium", "gender": "MEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 0, "total": 0, "stock": 12, "st_pct": 0, "dc_now": 30.0, "avg_dc": 0, "art_color": "CZLACP02LWNE", "tiers": {"counter": 30.0, "xclusive": 30.0, "bau": 15.0, "a": 20.0, "a_plus": 25.0, "mega": 30.0, "fs": 35.0, "seek": null}}, {"name": "ESSENTIALS M FLEXWAY STEP", "color": "BROWN SMOOTH", "qty": 24, "price": 4990, "bu": "Essentials", "gender": "MEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 12, "total": 12, "stock": 12, "st_pct": 50.0, "dc_now": 40.0, "avg_dc": 28.0, "art_color": "CZLACE03LBRW", "tiers": {"counter": 40.0, "xclusive": 50.0, "bau": 25.0, "a": 30.0, "a_plus": 40.0, "mega": 50.0, "fs": 55.0, "seek": null}}, {"name": "PREMIUM W LYNELL STRAP", "color": "TAUPE NUBUCK", "qty": 48, "price": 4290, "bu": "Premium", "gender": "WOMEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 28, "total": 28, "stock": 20, "st_pct": 58.3, "dc_now": 10.0, "avg_dc": 11.0, "art_color": "CZJADP02NTAU", "tiers": {"counter": 10.0, "xclusive": 20.0, "bau": 2.0, "a": 4.0, "a_plus": 5.0, "mega": 10.0, "fs": 12.0, "seek": null}}, {"name": "ORIGINALS M SUNDERLAND", "color": "KHAKI COMBI", "qty": 24, "price": 10990, "bu": "Originals", "gender": "MEN", "season": "SS 2025", "sale_type": "WHOLESALE", "seeding": null, "sale_total": 12, "total": 12, "stock": 12, "st_pct": 50.0, "dc_now": 50.0, "avg_dc": 45.0, "art_color": "CZSABR12SKHC", "tiers": {"counter": 50.0, "xclusive": 50.0, "bau": 30.0, "a": 35.0, "a_plus": 45.0, "mega": 50.0, "fs": 55.0, "seek": 50.0}}, {"name": "PREMIUM W TORHILL BEE", "color": "CORAL SUEDE", "qty": 24, "price": 6590, "bu": "Premium", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 14, "total": 14, "stock": 10, "st_pct": 58.3, "dc_now": 50.0, "avg_dc": 41.0, "art_color": "CZSABP04SCOR", "tiers": {"counter": 50.0, "xclusive": 60.0, "bau": 30.0, "a": 40.0, "a_plus": 45.0, "mega": 50.0, "fs": 60.0, "seek": null}}, {"name": "ESSENTIALS W KEPLEY CORA", "color": "BLACK LEATHER", "qty": 72, "price": 4990, "bu": "Essentials", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 42, "total": 42, "stock": 30, "st_pct": 58.3, "dc_now": 30.0, "avg_dc": 30.0, "art_color": "CZPACE04LBLK", "tiers": {"counter": 30.0, "xclusive": 40.0, "bau": 15.0, "a": 20.0, "a_plus": 25.0, "mega": 30.0, "fs": 40.0, "seek": null}}, {"name": "PREMIUM W STRAVEN SLING", "color": "BLACK LEATHER", "qty": 24, "price": 6290, "bu": "Premium", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 14, "total": 14, "stock": 10, "st_pct": 58.3, "dc_now": 30.0, "avg_dc": 21.0, "art_color": "CZFACP02LBLK", "tiers": {"counter": 40.0, "xclusive": 40.0, "bau": 20.0, "a": 25.0, "a_plus": 30.0, "mega": 35.0, "fs": 40.0, "seek": null}}, {"name": "PREMIUM M CLEYHILL BOAT", "color": "BROWN LEATHER", "qty": 36, "price": 5990, "bu": "Premium", "gender": "MEN", "season": "SS 2026", "sale_type": "SFG", "seeding": 2, "sale_total": 22, "total": 24, "stock": 12, "st_pct": 66.7, "dc_now": 5.0, "avg_dc": 9.0, "art_color": "CZLADP02LBRW", "tiers": {"counter": 5.0, "xclusive": null, "bau": null, "a": 3.0, "a_plus": 5.0, "mega": 10.0, "fs": null, "seek": null}}, {"name": "ORIGINALS W WALLABEE GORE-TEX", "color": "KHAKI GREEN SUEDE", "qty": 12, "price": 9590, "bu": "Originals", "gender": "WOMEN", "season": "SS 2025", "sale_type": "WHOLESALE", "seeding": null, "sale_total": 7, "total": 7, "stock": 5, "st_pct": 58.3, "dc_now": 10.0, "avg_dc": 7.0, "art_color": "CZSAAR06SKKG", "tiers": {"counter": 10.0, "xclusive": 20.0, "bau": 4.0, "a": 6.0, "a_plus": 8.0, "mega": 10.0, "fs": 20.0, "seek": 20.0}}, {"name": "PREMIUM W CRAFT SPEED", "color": "LIGHT GREEN NUBUCK", "qty": 60, "price": 7570, "bu": "Premium", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 36, "total": 36, "stock": 24, "st_pct": 60.0, "dc_now": 50.0, "avg_dc": 35.0, "art_color": "CZSABP01NLGE", "tiers": {"counter": 50.0, "xclusive": 50.0, "bau": 30.0, "a": 40.0, "a_plus": 45.0, "mega": 50.0, "fs": 52.0, "seek": null}}, {"name": "ESSENTIALS W NATALYN LANE", "color": "BLACK PATENT", "qty": 120, "price": 3990, "bu": "Essentials", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 72, "total": 72, "stock": 48, "st_pct": 60.0, "dc_now": 50.0, "avg_dc": 28.0, "art_color": "CZJABE01PBLK", "tiers": {"counter": 50.0, "xclusive": 50.0, "bau": 30.0, "a": 35.0, "a_plus": 40.0, "mega": 50.0, "fs": 55.0, "seek": null}}, {"name": "PREMIUM W FAWNA SOFT", "color": "BLACK LEATHER", "qty": 60, "price": 5970, "bu": "Premium", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 36, "total": 36, "stock": 24, "st_pct": 60.0, "dc_now": 50.0, "avg_dc": 26.0, "art_color": "CZFABP01LBLK", "tiers": {"counter": 50.0, "xclusive": 50.0, "bau": 30.0, "a": 35.0, "a_plus": 40.0, "mega": 50.0, "fs": 55.0, "seek": null}}, {"name": "ORIGINALS W WALLABEE", "color": "MAPLE SUEDE", "qty": 73, "price": 7590, "bu": "Originals", "gender": "WOMEN", "season": "SS 2026", "sale_type": "WHOLE SALE/SFG", "seeding": null, "sale_total": 44, "total": 44, "stock": 29, "st_pct": 60.3, "dc_now": 0, "avg_dc": 29.0, "art_color": "CZSADR04SMAP", "tiers": {"counter": 0, "xclusive": null, "bau": 0, "a": 0, "a_plus": 0, "mega": 0, "fs": 5.0, "seek": null}}, {"name": "ESSENTIALS M BERWICK LACE", "color": "BLACK LEATHER", "qty": 36, "price": 4990, "bu": "Essentials", "gender": "MEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 24, "total": 24, "stock": 12, "st_pct": 66.7, "dc_now": 30.0, "avg_dc": 16.0, "art_color": "CZLACE05LBLK", "tiers": {"counter": 30.0, "xclusive": 30.0, "bau": 15.0, "a": 20.0, "a_plus": 25.0, "mega": 30.0, "fs": 35.0, "seek": null}}, {"name": "PREMIUM M CUR TORVIEW", "color": "BURGUNDY LEATHER", "qty": 20, "price": 7590, "bu": "Premium", "gender": "MEN", "season": "SS 2025", "sale_type": "WHOLESALE", "seeding": null, "sale_total": 9, "total": 9, "stock": 11, "st_pct": 45.0, "dc_now": 40.0, "avg_dc": 45.0, "art_color": "CZSABP07LBGD", "tiers": {"counter": 40.0, "xclusive": 40.0, "bau": 20.0, "a": 25.0, "a_plus": 30.0, "mega": 35.0, "fs": 40.0, "seek": 40.0}}, {"name": "PREMIUM M CLARKS PACE", "color": "GREY", "qty": 24, "price": 7290, "bu": "Premium", "gender": "MEN", "season": "AW 2025", "sale_type": "SFG", "seeding": 1, "sale_total": 12, "total": 13, "stock": 11, "st_pct": 54.2, "dc_now": 50.0, "avg_dc": 39.0, "art_color": "CZSACP01TGRY", "tiers": {"counter": 50.0, "xclusive": 60.0, "bau": 30.0, "a": 35.0, "a_plus": 45.0, "mega": 50.0, "fs": 55.0, "seek": null}}, {"name": "PREMIUM W LIVIA LILY", "color": "BLACK LEATHER", "qty": 36, "price": 5490, "bu": "Premium", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 22, "total": 22, "stock": 14, "st_pct": 61.1, "dc_now": 40.0, "avg_dc": 11.0, "art_color": "CZFACP01LBLK", "tiers": {"counter": 40.0, "xclusive": 40.0, "bau": 20.0, "a": 25.0, "a_plus": 35.0, "mega": 45.0, "fs": 50.0, "seek": null}}, {"name": "ORIGINALS M SUNDERLAND", "color": "CHALK", "qty": 28, "price": 10990, "bu": "Originals", "gender": "MEN", "season": "SS 2025", "sale_type": "WHOLESALE", "seeding": null, "sale_total": 17, "total": 17, "stock": 11, "st_pct": 60.7, "dc_now": 50.0, "avg_dc": 46.0, "art_color": "CZSAAR14SCHK", "tiers": {"counter": 50.0, "xclusive": 50.0, "bau": 30.0, "a": 35.0, "a_plus": 45.0, "mega": 50.0, "fs": 55.0, "seek": 50.0}}, {"name": "PREMIUM W TORHILL BEE", "color": "ECRU SUEDE", "qty": 60, "price": 6590, "bu": "Premium", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 37, "total": 37, "stock": 23, "st_pct": 61.7, "dc_now": 50.0, "avg_dc": 22.0, "art_color": "CZSABP04SECR", "tiers": {"counter": 50.0, "xclusive": 50.0, "bau": 25.0, "a": 30.0, "a_plus": 35.0, "mega": 40.0, "fs": 50.0, "seek": null}}, {"name": "ESSENTIALS W SOLEVANA LACE", "color": "LIGHT BLUE COMBI", "qty": 48, "price": 3590, "bu": "Cloudsteppers", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 30, "total": 30, "stock": 18, "st_pct": 62.5, "dc_now": 30.0, "avg_dc": 23.0, "art_color": "CZSACE01TLBC", "tiers": {"counter": 30.0, "xclusive": 40.0, "bau": 17.0, "a": 20.0, "a_plus": 25.0, "mega": 35.0, "fs": 40.0, "seek": null}}, {"name": "ESSENTIALS W SCARLYT PIPER", "color": "BLACK PATENT", "qty": 48, "price": 4290, "bu": "Essentials", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 30, "total": 30, "stock": 18, "st_pct": 62.5, "dc_now": 40.0, "avg_dc": 28.0, "art_color": "CZPACE05PBLK", "tiers": {"counter": 40.0, "xclusive": 50.0, "bau": 30.0, "a": 35.0, "a_plus": 40.0, "mega": 50.0, "fs": 50.0, "seek": null}}, {"name": "PREMIUM W LIVIA SKY", "color": "BURGUNDY PATENT", "qty": 24, "price": 5690, "bu": "Premium", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": 1, "sale_total": 14, "total": 15, "stock": 9, "st_pct": 62.5, "dc_now": 40.0, "avg_dc": 19.0, "art_color": "CZJACP01PBGD", "tiers": {"counter": 40.0, "xclusive": 50.0, "bau": 30.0, "a": 35.0, "a_plus": 40.0, "mega": 50.0, "fs": 50.0, "seek": null}}, {"name": "PREMIUM W UBREE15 POPPY", "color": "CREAM MULTI", "qty": 100, "price": 6290, "bu": "Premium", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 63, "total": 63, "stock": 37, "st_pct": 63.0, "dc_now": 50.0, "avg_dc": 35.0, "art_color": "CZFABP02LCRM", "tiers": {"counter": 50.0, "xclusive": 50.0, "bau": 30.0, "a": 35.0, "a_plus": 40.0, "mega": 50.0, "fs": 55.0, "seek": null}}, {"name": "ESSENTIALS W SOLEVANA STYLE", "color": "PALE GREEN", "qty": 120, "price": 3970, "bu": "Cloudsteppers", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": 6, "sale_total": 71, "total": 77, "stock": 43, "st_pct": 64.2, "dc_now": 30.0, "avg_dc": 16.0, "art_color": "CZSACE02NPLG", "tiers": {"counter": 30.0, "xclusive": 40.0, "bau": 17.0, "a": 20.0, "a_plus": 25.0, "mega": 35.0, "fs": 40.0, "seek": null}}, {"name": "ESSENTIALS M TILDEN FREE", "color": "DARK TAN LEATHER", "qty": 36, "price": 4890, "bu": "Essentials", "gender": "MEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 25, "total": 25, "stock": 11, "st_pct": 69.4, "dc_now": 30.0, "avg_dc": 21.0, "art_color": "CZRABE02LDAT", "tiers": {"counter": 40.0, "xclusive": 40.0, "bau": 20.0, "a": 25.0, "a_plus": 30.0, "mega": 35.0, "fs": 40.0, "seek": null}}, {"name": "ORIGINALS MEN WALLABEE 2604", "color": "GREY SUEDE", "qty": 12, "price": 7590, "bu": "Originals", "gender": "MEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 2, "total": 2, "stock": 10, "st_pct": 16.7, "dc_now": 0, "avg_dc": 0, "art_color": "CZSADR11SGRY", "tiers": {"counter": 5.0, "xclusive": null, "bau": null, "a": null, "a_plus": null, "mega": null, "fs": null, "seek": null}}, {"name": "ESSENTIALS W KEPLEY LANE", "color": "WARM BEIGE LEATHER", "qty": 120, "price": 4990, "bu": "Essentials", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 79, "total": 79, "stock": 41, "st_pct": 65.8, "dc_now": 30.0, "avg_dc": 26.0, "art_color": "CZPACE01LWMB", "tiers": {"counter": 30.0, "xclusive": 40.0, "bau": 10.0, "a": 15.0, "a_plus": 20.0, "mega": 30.0, "fs": 40.0, "seek": null}}, {"name": "PREMIUM W LIVIA SKY", "color": "TAN WEAVE", "qty": 72, "price": 5690, "bu": "Premium", "gender": "WOMEN", "season": "SS 2026", "sale_type": "SFG", "seeding": 2, "sale_total": 46, "total": 48, "stock": 24, "st_pct": 66.7, "dc_now": 10.0, "avg_dc": 14.0, "art_color": "CZJADP01WTAN", "tiers": {"counter": 10.0, "xclusive": 20.0, "bau": 2.0, "a": 4.0, "a_plus": 5.0, "mega": 10.0, "fs": 12.0, "seek": null}}, {"name": "ORIGINALS M SUNDERLAND", "color": "DARK TEAL COMBI", "qty": 24, "price": 10990, "bu": "Originals", "gender": "MEN", "season": "SS 2025", "sale_type": "WHOLESALE", "seeding": null, "sale_total": 14, "total": 14, "stock": 10, "st_pct": 58.3, "dc_now": 50.0, "avg_dc": 45.0, "art_color": "CZSABR12SDTC", "tiers": {"counter": 50.0, "xclusive": 50.0, "bau": 30.0, "a": 35.0, "a_plus": 45.0, "mega": 50.0, "fs": 55.0, "seek": 50.0}}, {"name": "ORIGINALS M SANDFORD 2", "color": "DARK OLIVE COMBI", "qty": 28, "price": 10990, "bu": "Originals", "gender": "MEN", "season": "SS 2025", "sale_type": "WHOLESALE", "seeding": null, "sale_total": 18, "total": 18, "stock": 10, "st_pct": 64.3, "dc_now": 50.0, "avg_dc": 44.0, "art_color": "CZSAAR12SDOC", "tiers": {"counter": 50.0, "xclusive": 50.0, "bau": 30.0, "a": 35.0, "a_plus": 45.0, "mega": 50.0, "fs": 55.0, "seek": 50.0}}, {"name": "PREMIUM W MAYHILL WALK", "color": "OFF WHITE LEATHER", "qty": 60, "price": 6170, "bu": "Premium", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": 1, "sale_total": 39, "total": 40, "stock": 20, "st_pct": 66.7, "dc_now": 50.0, "avg_dc": 39.0, "art_color": "CZSABP03LOFW", "tiers": {"counter": 50.0, "xclusive": 55.0, "bau": 33.0, "a": 37.0, "a_plus": 45.0, "mega": 52.0, "fs": 55.0, "seek": null}}, {"name": "PREMIUM W TORHILL BEE", "color": "LIGHT GREEN NUBUCK", "qty": 60, "price": 6590, "bu": "Premium", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": 6, "sale_total": 34, "total": 40, "stock": 20, "st_pct": 66.7, "dc_now": 50.0, "avg_dc": 29.0, "art_color": "CZSABP04NLGE", "tiers": {"counter": 50.0, "xclusive": 50.0, "bau": 25.0, "a": 30.0, "a_plus": 35.0, "mega": 40.0, "fs": 50.0, "seek": null}}, {"name": "ESSENTIALS M MARKMAN PLAIN", "color": "DARK TAN LEATHER", "qty": 36, "price": 4570, "bu": "Essentials", "gender": "MEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 26, "total": 26, "stock": 10, "st_pct": 72.2, "dc_now": 15.0, "avg_dc": 21.0, "art_color": "CZLADE02LDAT", "tiers": {"counter": 15.0, "xclusive": 20.0, "bau": 10.0, "a": 15.0, "a_plus": 18.0, "mega": 20.0, "fs": 25.0, "seek": null}}, {"name": "ORIGINALS MEN WALLABEE 2604", "color": "BROWN LEATHER", "qty": 12, "price": 7590, "bu": "Originals", "gender": "MEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 3, "total": 3, "stock": 9, "st_pct": 25.0, "dc_now": 0, "avg_dc": 0, "art_color": "CZSADR11LBRW", "tiers": {"counter": 5.0, "xclusive": null, "bau": null, "a": null, "a_plus": null, "mega": null, "fs": null, "seek": null}}, {"name": "PREMIUM W LIVIA SKY", "color": "BLACK LEATHER", "qty": 24, "price": 5690, "bu": "Premium", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 16, "total": 16, "stock": 8, "st_pct": 66.7, "dc_now": 30.0, "avg_dc": 20.0, "art_color": "CZJACP01LBLK", "tiers": {"counter": 30.0, "xclusive": 30.0, "bau": 15.0, "a": 20.0, "a_plus": 25.0, "mega": 30.0, "fs": 35.0, "seek": null}}, {"name": "ESSENTIALS M TILDEN WALK", "color": "DARK TAN LEATHER", "qty": 35, "price": 4890, "bu": "Essentials", "gender": "MEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 26, "total": 26, "stock": 9, "st_pct": 74.3, "dc_now": 30.0, "avg_dc": 21.0, "art_color": "CZLACE02LDAT", "tiers": {"counter": 30.0, "xclusive": 30.0, "bau": 15.0, "a": 20.0, "a_plus": 25.0, "mega": 30.0, "fs": 35.0, "seek": null}}, {"name": "PREMIUM W NARINI EDGE", "color": "NAVY SUEDE", "qty": 100, "price": 5490, "bu": "Premium", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 67, "total": 67, "stock": 33, "st_pct": 67.0, "dc_now": 10.0, "avg_dc": 21.0, "art_color": "CZRABP02SNAV", "tiers": {"counter": 10.0, "xclusive": 20.0, "bau": 2.0, "a": 3.0, "a_plus": 5.0, "mega": 10.0, "fs": 15.0, "seek": null}}, {"name": "ESSENTIALS W NATALYN WISH", "color": "BLACK LEATHER", "qty": 120, "price": 4290, "bu": "Essentials", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 82, "total": 82, "stock": 38, "st_pct": 68.3, "dc_now": 20.0, "avg_dc": 21.0, "art_color": "CZFACE03LBLK", "tiers": {"counter": 20.0, "xclusive": 30.0, "bau": 5.0, "a": 10.0, "a_plus": 15.0, "mega": 20.0, "fs": 30.0, "seek": null}}, {"name": "ESSENTIALS W SOLEVANA STYLE", "color": "OFF WHITE", "qty": 73, "price": 3970, "bu": "Cloudsteppers", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": 1, "sale_total": 49, "total": 50, "stock": 23, "st_pct": 68.5, "dc_now": 30.0, "avg_dc": 19.0, "art_color": "CZSACE02NOFW", "tiers": {"counter": 30.0, "xclusive": 30.0, "bau": 15.0, "a": 18.0, "a_plus": 22.0, "mega": 30.0, "fs": 35.0, "seek": null}}, {"name": "ESSENTIALS M TILDEN FREE", "color": "BLACK LEATHER", "qty": 36, "price": 4890, "bu": "Essentials", "gender": "MEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 27, "total": 27, "stock": 9, "st_pct": 75.0, "dc_now": 30.0, "avg_dc": 14.0, "art_color": "CZLACE01LBLK", "tiers": {"counter": 30.0, "xclusive": 30.0, "bau": 15.0, "a": 20.0, "a_plus": 25.0, "mega": 30.0, "fs": 35.0, "seek": null}}, {"name": "ESSENTIALS M TILDEN WALK", "color": "BLACK LEATHER", "qty": 36, "price": 4890, "bu": "Essentials", "gender": "MEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 27, "total": 27, "stock": 9, "st_pct": 75.0, "dc_now": 30.0, "avg_dc": 19.0, "art_color": "CZLACE02LBLK", "tiers": {"counter": 30.0, "xclusive": 30.0, "bau": 15.0, "a": 20.0, "a_plus": 25.0, "mega": 30.0, "fs": 35.0, "seek": null}}, {"name": "PREMIUM M CRAFTARLO LO", "color": "BLACK LEATHER", "qty": 48, "price": 8590, "bu": "Premium", "gender": "MEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 39, "total": 39, "stock": 9, "st_pct": 81.2, "dc_now": 50.0, "avg_dc": 21.0, "art_color": "CZRABP04LBLK", "tiers": {"counter": 50.0, "xclusive": 50.0, "bau": 30.0, "a": 35.0, "a_plus": 40.0, "mega": 45.0, "fs": 55.0, "seek": null}}, {"name": "PREMIUM M POLDEN MOC", "color": "SAGE SUEDE", "qty": 24, "price": 6590, "bu": "Premium", "gender": "MEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 16, "total": 16, "stock": 8, "st_pct": 66.7, "dc_now": 10.0, "avg_dc": 16.0, "art_color": "CZSACP04SSAG", "tiers": {"counter": 10.0, "xclusive": 20.0, "bau": 10.0, "a": 12.0, "a_plus": 15.0, "mega": 20.0, "fs": 25.0, "seek": null}}, {"name": "PREMIUM M ALDWIN LACE", "color": "TAN LEATHER", "qty": 24, "price": 7290, "bu": "Premium", "gender": "MEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 16, "total": 16, "stock": 8, "st_pct": 66.7, "dc_now": 20.0, "avg_dc": 20.0, "art_color": "CZLACP01LTAN", "tiers": {"counter": 20.0, "xclusive": 30.0, "bau": 5.0, "a": 10.0, "a_plus": 15.0, "mega": 20.0, "fs": 30.0, "seek": null}}, {"name": "ORIGINALS M DESERT KHAN EG", "color": "BLACK SMOOTH", "qty": 36, "price": 9990, "bu": "Originals", "gender": "MEN", "season": "SS 2025", "sale_type": "WHOLE SALE/SFG", "seeding": null, "sale_total": 28, "total": 28, "stock": 8, "st_pct": 77.8, "dc_now": 30.0, "avg_dc": 36.0, "art_color": "CZSABR20LBLS", "tiers": {"counter": 30.0, "xclusive": 30.0, "bau": 10.0, "a": 15.0, "a_plus": 25.0, "mega": 30.0, "fs": 35.0, "seek": 30.0}}, {"name": "PREMIUM M CRAFT SWIFT", "color": "WHITE LEATHER", "qty": 48, "price": 6570, "bu": "Premium", "gender": "MEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 40, "total": 40, "stock": 8, "st_pct": 83.3, "dc_now": 30.0, "avg_dc": 20.0, "art_color": "CZSABP02LWHT", "tiers": {"counter": 40.0, "xclusive": 40.0, "bau": 20.0, "a": 25.0, "a_plus": 30.0, "mega": 35.0, "fs": 40.0, "seek": null}}, {"name": "PREMIUM M CRAFTJAMES LO", "color": "BLACK LEATHER", "qty": 12, "price": 8970, "bu": "Premium", "gender": "MEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 5, "total": 5, "stock": 7, "st_pct": 41.7, "dc_now": 20.0, "avg_dc": 17.0, "art_color": "CZLACP02LBLK", "tiers": {"counter": 20.0, "xclusive": 20.0, "bau": 10.0, "a": 12.0, "a_plus": 15.0, "mega": 20.0, "fs": 25.0, "seek": null}}, {"name": "ESSENTIALS W IRIDESSA MAY", "color": "BLACK LEATHER", "qty": 120, "price": 4590, "bu": "Essentials", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 87, "total": 87, "stock": 33, "st_pct": 72.5, "dc_now": 30.0, "avg_dc": 19.0, "art_color": "CZPACE02LBLK", "tiers": {"counter": 30.0, "xclusive": 30.0, "bau": 15.0, "a": 20.0, "a_plus": 25.0, "mega": 30.0, "fs": 40.0, "seek": null}}, {"name": "ESSENTIALS W JAYLAN DUSK", "color": "BLACK LEATHER", "qty": 108, "price": 4990, "bu": "Essentials", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 79, "total": 79, "stock": 29, "st_pct": 73.1, "dc_now": 50.0, "avg_dc": 33.0, "art_color": "CZEABE01LBLK", "tiers": {"counter": 50.0, "xclusive": 55.0, "bau": 30.0, "a": 35.0, "a_plus": 40.0, "mega": 50.0, "fs": 53.0, "seek": null}}, {"name": "ESSENTIALS W KEPLEY SKY", "color": "BLACK LEATHER", "qty": 120, "price": 4990, "bu": "Essentials", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 89, "total": 89, "stock": 31, "st_pct": 74.2, "dc_now": 30.0, "avg_dc": 28.0, "art_color": "CZPABE02LBLK", "tiers": {"counter": 30.0, "xclusive": 40.0, "bau": 15.0, "a": 20.0, "a_plus": 25.0, "mega": 30.0, "fs": 40.0, "seek": null}}, {"name": "ORIGINALS M WALLALOAFERGTX", "color": "MAPLE SUEDE", "qty": 12, "price": 9590, "bu": "Originals", "gender": "MEN", "season": "SS 2025", "sale_type": "WHOLESALE", "seeding": null, "sale_total": 5, "total": 5, "stock": 7, "st_pct": 41.7, "dc_now": 30.0, "avg_dc": 21.0, "art_color": "CZSABR10SMAP", "tiers": {"counter": 30.0, "xclusive": 30.0, "bau": 10.0, "a": 15.0, "a_plus": 25.0, "mega": 30.0, "fs": 35.0, "seek": null}}, {"name": "CLOUDSTEPPERS W SOLEVANA STRAP", "color": "BLACK", "qty": 60, "price": 3290, "bu": "Cloudsteppers", "gender": "WOMEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 45, "total": 45, "stock": 15, "st_pct": 75.0, "dc_now": 5.0, "avg_dc": 16.0, "art_color": "CZJADC01TBLK", "tiers": {"counter": 5.0, "xclusive": null, "bau": 2.0, "a": 4.0, "a_plus": 5.0, "mega": 10.0, "fs": null, "seek": null}}, {"name": "ORIGINALS M WALLABEE BOOT", "color": "GREEN CAMOUFLAGE", "qty": 15, "price": 7990, "bu": "Originals", "gender": "MEN", "season": "SS 2025", "sale_type": "WHOLESALE", "seeding": null, "sale_total": 8, "total": 8, "stock": 7, "st_pct": 53.3, "dc_now": 50.0, "avg_dc": 46.0, "art_color": "CZHAAR04TGCF", "tiers": {"counter": 50.0, "xclusive": 50.0, "bau": 30.0, "a": 35.0, "a_plus": 38.0, "mega": 40.0, "fs": 50.0, "seek": null}}, {"name": "PREMIUM M CRAFTJAMES CAP", "color": "BLACK LEATHER", "qty": 24, "price": 9970, "bu": "Premium", "gender": "MEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 17, "total": 17, "stock": 7, "st_pct": 70.8, "dc_now": 20.0, "avg_dc": 18.0, "art_color": "CZLADP01LBLK", "tiers": {"counter": 20.0, "xclusive": 25.0, "bau": 8.0, "a": 12.0, "a_plus": 15.0, "mega": 20.0, "fs": 25.0, "seek": null}}, {"name": "ORIGINALS M WALLABEE GORE-TEX", "color": "MAPLE SUEDE", "qty": 24, "price": 9590, "bu": "Originals", "gender": "MEN", "season": "AW 2025", "sale_type": "WHOLE SALE/SFG", "seeding": null, "sale_total": 17, "total": 17, "stock": 7, "st_pct": 70.8, "dc_now": 5.0, "avg_dc": 12.0, "art_color": "CZSACR10SMAP", "tiers": {"counter": 5.0, "xclusive": null, "bau": null, "a": null, "a_plus": null, "mega": null, "fs": null, "seek": null}}, {"name": "ESSENTIALS W SOLEVANA LACE", "color": "WHITE", "qty": 72, "price": 3590, "bu": "Cloudsteppers", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 54, "total": 54, "stock": 18, "st_pct": 75.0, "dc_now": 30.0, "avg_dc": 16.0, "art_color": "CZSACE01TWHT", "tiers": {"counter": 30.0, "xclusive": 30.0, "bau": 15.0, "a": 18.0, "a_plus": 22.0, "mega": 30.0, "fs": 35.0, "seek": null}}, {"name": "ESSENTIALS M BERWICK SEAM", "color": "BLACK LEATHER", "qty": 36, "price": 4990, "bu": "Essentials", "gender": "MEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 29, "total": 29, "stock": 7, "st_pct": 80.6, "dc_now": 10.0, "avg_dc": 11.0, "art_color": "CZLACE07LBLK", "tiers": {"counter": 10.0, "xclusive": 20.0, "bau": 2.0, "a": 3.0, "a_plus": 5.0, "mega": 10.0, "fs": 20.0, "seek": null}}, {"name": "PREMIUM M MARTOCK LO", "color": "DARK SAND SUEDE", "qty": 48, "price": 7990, "bu": "Premium", "gender": "MEN", "season": "SS 2025", "sale_type": "SFG", "seeding": 2, "sale_total": 39, "total": 41, "stock": 7, "st_pct": 85.4, "dc_now": 50.0, "avg_dc": 29.0, "art_color": "CZRABP01SDAS", "tiers": {"counter": 50.0, "xclusive": 50.0, "bau": 25.0, "a": 30.0, "a_plus": 40.0, "mega": 50.0, "fs": 55.0, "seek": null}}, {"name": "ORIGINALS M WALLALOAFERGTX", "color": "BLACK SUEDE", "qty": 12, "price": 9590, "bu": "Originals", "gender": "MEN", "season": "SS 2025", "sale_type": "WHOLESALE", "seeding": 1, "sale_total": 5, "total": 6, "stock": 6, "st_pct": 50.0, "dc_now": 30.0, "avg_dc": 9.0, "art_color": "CZSABR10SBLK", "tiers": {"counter": 30.0, "xclusive": 30.0, "bau": 10.0, "a": 15.0, "a_plus": 25.0, "mega": 30.0, "fs": 35.0, "seek": null}}, {"name": "ORIGINALS W WALLABEE", "color": "BLACK WHITE GINGHAM", "qty": 12, "price": 7590, "bu": "Originals", "gender": "WOMEN", "season": "SS 2025", "sale_type": "WHOLESALE", "seeding": null, "sale_total": 9, "total": 9, "stock": 3, "st_pct": 75.0, "dc_now": 30.0, "avg_dc": 18.0, "art_color": "CZSABR17TBWG", "tiers": {"counter": 30.0, "xclusive": 30.0, "bau": 10.0, "a": 15.0, "a_plus": 25.0, "mega": 30.0, "fs": 35.0, "seek": 30.0}}, {"name": "PREMIUM W ADELA SLING", "color": "BLACK INTEREST", "qty": 120, "price": 6290, "bu": "Premium", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": 2, "sale_total": 90, "total": 92, "stock": 28, "st_pct": 76.7, "dc_now": 50.0, "avg_dc": 29.0, "art_color": "CZPABP02LIBK", "tiers": {"counter": 50.0, "xclusive": 50.0, "bau": 35.0, "a": 40.0, "a_plus": 45.0, "mega": 50.0, "fs": 55.0, "seek": null}}, {"name": "ESSENTIALS W KEPLEY SKY", "color": "OFF WHITE LEATHER", "qty": 120, "price": 4990, "bu": "Essentials", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 92, "total": 92, "stock": 28, "st_pct": 76.7, "dc_now": 30.0, "avg_dc": 28.0, "art_color": "CZPABE02LOFW", "tiers": {"counter": 30.0, "xclusive": 40.0, "bau": 15.0, "a": 20.0, "a_plus": 25.0, "mega": 30.0, "fs": 40.0, "seek": null}}, {"name": "ESSENTIALS W JAYLAN DUSK", "color": "TAN LEATHER", "qty": 108, "price": 4990, "bu": "Essentials", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 83, "total": 83, "stock": 25, "st_pct": 76.9, "dc_now": 50.0, "avg_dc": 32.0, "art_color": "CZEABE01LTAN", "tiers": {"counter": 50.0, "xclusive": 55.0, "bau": 30.0, "a": 35.0, "a_plus": 40.0, "mega": 50.0, "fs": 53.0, "seek": null}}, {"name": "ESSENTIALS W KEPLEY VINE", "color": "BLACK LEATHER", "qty": 120, "price": 5490, "bu": "Essentials", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 93, "total": 93, "stock": 27, "st_pct": 77.5, "dc_now": 50.0, "avg_dc": 36.0, "art_color": "CZPABE01LBLK", "tiers": {"counter": 50.0, "xclusive": 55.0, "bau": 33.0, "a": 37.0, "a_plus": 45.0, "mega": 53.0, "fs": 55.0, "seek": null}}, {"name": "ORIGINALS M WALLABEE", "color": "BROWN SNAKE PRINT", "qty": 12, "price": 7390, "bu": "Originals", "gender": "MEN", "season": "SS 2025", "sale_type": "WHOLESALE", "seeding": 1, "sale_total": 5, "total": 6, "stock": 6, "st_pct": 50.0, "dc_now": 50.0, "avg_dc": 40.0, "art_color": "CZSAAR02LBSP", "tiers": {"counter": 50.0, "xclusive": 50.0, "bau": 30.0, "a": 35.0, "a_plus": 38.0, "mega": 40.0, "fs": 50.0, "seek": null}}, {"name": "PREMIUM W ADELA COURT", "color": "BLACK LEATHER", "qty": 120, "price": 6290, "bu": "Premium", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": 1, "sale_total": 93, "total": 94, "stock": 26, "st_pct": 78.3, "dc_now": 50.0, "avg_dc": 28.0, "art_color": "CZPABP01LBLK", "tiers": {"counter": 50.0, "xclusive": 50.0, "bau": 35.0, "a": 40.0, "a_plus": 45.0, "mega": 50.0, "fs": 55.0, "seek": null}}, {"name": "PREMIUM W ORINOCO3 EDGE", "color": "BLACK LEATHER", "qty": 24, "price": 5990, "bu": "Premium", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 19, "total": 19, "stock": 5, "st_pct": 79.2, "dc_now": 20.0, "avg_dc": 17.0, "art_color": "CZRACP01LBLK", "tiers": {"counter": 20.0, "xclusive": 30.0, "bau": 10.0, "a": 15.0, "a_plus": 20.0, "mega": 25.0, "fs": 30.0, "seek": null}}, {"name": "PREMIUM W STRAVEN EDGE", "color": "BLACK COMBINATION LEATHER", "qty": 48, "price": 6990, "bu": "Premium", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": 6, "sale_total": 32, "total": 38, "stock": 10, "st_pct": 79.2, "dc_now": 50.0, "avg_dc": 35.0, "art_color": "CZRABP03LBKC", "tiers": {"counter": 50.0, "xclusive": 50.0, "bau": 40.0, "a": 45.0, "a_plus": 50.0, "mega": 52.0, "fs": 55.0, "seek": null}}, {"name": "ESSENTIALS W IRIDESSA SKY", "color": "BLACK LEATHER", "qty": 24, "price": 5190, "bu": "Essentials", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 19, "total": 19, "stock": 5, "st_pct": 79.2, "dc_now": 20.0, "avg_dc": 25.0, "art_color": "CZRACE02LBLK", "tiers": {"counter": 20.0, "xclusive": 30.0, "bau": 15.0, "a": 20.0, "a_plus": 25.0, "mega": 30.0, "fs": 35.0, "seek": null}}, {"name": "ORIGINALS M DESERT BOOT", "color": "SAND SUEDE", "qty": 24, "price": 6170, "bu": "Originals", "gender": "MEN", "season": "SS 2025", "sale_type": "WHOLESALE", "seeding": null, "sale_total": 18, "total": 18, "stock": 6, "st_pct": 75.0, "dc_now": 5.0, "avg_dc": 9.0, "art_color": "CZSABR02SSND", "tiers": {"counter": 5.0, "xclusive": 20.0, "bau": 2.0, "a": 3.0, "a_plus": 5.0, "mega": 10.0, "fs": 20.0, "seek": null}}, {"name": "PREMIUM M POLDEN MOC", "color": "NAVY SUEDE", "qty": 24, "price": 6590, "bu": "Premium", "gender": "MEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 18, "total": 18, "stock": 6, "st_pct": 75.0, "dc_now": 50.0, "avg_dc": 25.0, "art_color": "CZSABP09SNAV", "tiers": {"counter": 50.0, "xclusive": 50.0, "bau": 25.0, "a": 30.0, "a_plus": 40.0, "mega": 50.0, "fs": 55.0, "seek": null}}, {"name": "ORIGINALS M SANDFORD 2", "color": "BLUE MULTI", "qty": 24, "price": 10990, "bu": "Originals", "gender": "MEN", "season": "SS 2025", "sale_type": "WHOLESALE", "seeding": null, "sale_total": 18, "total": 18, "stock": 6, "st_pct": 75.0, "dc_now": 50.0, "avg_dc": 45.0, "art_color": "CZSAAR11SBLM", "tiers": {"counter": 50.0, "xclusive": 50.0, "bau": 30.0, "a": 35.0, "a_plus": 45.0, "mega": 50.0, "fs": 55.0, "seek": 50.0}}, {"name": "ORIGINALS M WALLABEE BOOT", "color": "BLACK CROCODILE DISTRESS", "qty": 15, "price": 7990, "bu": "Originals", "gender": "MEN", "season": "SS 2025", "sale_type": "WHOLESALE", "seeding": null, "sale_total": 10, "total": 10, "stock": 5, "st_pct": 66.7, "dc_now": 50.0, "avg_dc": 38.0, "art_color": "CZHAAR02LBCD", "tiers": {"counter": 50.0, "xclusive": 50.0, "bau": 30.0, "a": 35.0, "a_plus": 38.0, "mega": 40.0, "fs": 50.0, "seek": null}}, {"name": "ESSENTIALS M MARKMAN PLAIN", "color": "BLACK LEATHER", "qty": 24, "price": 4570, "bu": "Essentials", "gender": "MEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 19, "total": 19, "stock": 5, "st_pct": 79.2, "dc_now": 15.0, "avg_dc": 18.0, "art_color": "CZLACE04LBLK", "tiers": {"counter": 15.0, "xclusive": 20.0, "bau": 10.0, "a": 15.0, "a_plus": 18.0, "mega": 20.0, "fs": 25.0, "seek": null}}, {"name": "ORIGINALS M SUNDERLAND", "color": "BROWN GREEN", "qty": 24, "price": 10990, "bu": "Originals", "gender": "MEN", "season": "SS 2025", "sale_type": "WHOLESALE", "seeding": null, "sale_total": 19, "total": 19, "stock": 5, "st_pct": 79.2, "dc_now": 50.0, "avg_dc": 45.0, "art_color": "CZSAAR13SBRG", "tiers": {"counter": 50.0, "xclusive": 50.0, "bau": 30.0, "a": 35.0, "a_plus": 45.0, "mega": 50.0, "fs": 55.0, "seek": 50.0}}, {"name": "PREMIUM M POLDEN MOC", "color": "DARK GREY SUEDE", "qty": 24, "price": 6590, "bu": "Premium", "gender": "MEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 19, "total": 19, "stock": 5, "st_pct": 79.2, "dc_now": 10.0, "avg_dc": 22.0, "art_color": "CZSACP04SDKG", "tiers": {"counter": 10.0, "xclusive": 20.0, "bau": 10.0, "a": 12.0, "a_plus": 15.0, "mega": 20.0, "fs": 25.0, "seek": null}}, {"name": "PREMIUM W TORHILL BEE", "color": "APPLE SUEDE", "qty": 24, "price": 6590, "bu": "Premium", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 20, "total": 20, "stock": 4, "st_pct": 83.3, "dc_now": 50.0, "avg_dc": 20.0, "art_color": "CZSABP04SAPP", "tiers": {"counter": 50.0, "xclusive": 50.0, "bau": 25.0, "a": 30.0, "a_plus": 35.0, "mega": 40.0, "fs": 50.0, "seek": null}}, {"name": "ESSENTIALS M FLEXWAY STEP", "color": "BLACK SMOOTH", "qty": 36, "price": 4990, "bu": "Essentials", "gender": "MEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 31, "total": 31, "stock": 5, "st_pct": 86.1, "dc_now": 30.0, "avg_dc": 19.0, "art_color": "CZLACE03LBLS", "tiers": {"counter": 30.0, "xclusive": 40.0, "bau": 15.0, "a": 20.0, "a_plus": 25.0, "mega": 30.0, "fs": 40.0, "seek": null}}, {"name": "ESSENTIALS W IRIDESSA RAE", "color": "BLACK LEATHER", "qty": 24, "price": 4990, "bu": "Essentials", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 20, "total": 20, "stock": 4, "st_pct": 83.3, "dc_now": 30.0, "avg_dc": 17.0, "art_color": "CZPACE03LBLK", "tiers": {"counter": 30.0, "xclusive": 35.0, "bau": 15.0, "a": 20.0, "a_plus": 25.0, "mega": 30.0, "fs": 35.0, "seek": null}}, {"name": "PREMIUM M SOLSBURY STRAP", "color": "BEESWAX LEATHER", "qty": 48, "price": 6590, "bu": "Premium", "gender": "MEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 43, "total": 43, "stock": 5, "st_pct": 89.6, "dc_now": 50.0, "avg_dc": 40.0, "art_color": "CZDABP04LBEW", "tiers": {"counter": 50.0, "xclusive": 60.0, "bau": 30.0, "a": 35.0, "a_plus": 40.0, "mega": 50.0, "fs": 60.0, "seek": null}}, {"name": "ESSENTIALS W JAZMYNN IRIS", "color": "BLACK LEATHER", "qty": 48, "price": 4290, "bu": "Essentials", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": 1, "sale_total": 39, "total": 40, "stock": 8, "st_pct": 83.3, "dc_now": 30.0, "avg_dc": 13.0, "art_color": "CZJACE01LBLK", "tiers": {"counter": 30.0, "xclusive": 30.0, "bau": 15.0, "a": 20.0, "a_plus": 25.0, "mega": 30.0, "fs": 35.0, "seek": null}}, {"name": "PREMIUM M CUR TORVIEW", "color": "BLACK LEATHER", "qty": 20, "price": 7590, "bu": "Premium", "gender": "MEN", "season": "SS 2025", "sale_type": "WHOLESALE", "seeding": 3, "sale_total": 13, "total": 16, "stock": 4, "st_pct": 80.0, "dc_now": 40.0, "avg_dc": 28.0, "art_color": "CZSABP07LBLK", "tiers": {"counter": 40.0, "xclusive": 40.0, "bau": 20.0, "a": 25.0, "a_plus": 30.0, "mega": 35.0, "fs": 40.0, "seek": 40.0}}, {"name": "PREMIUM M TORHILL HI", "color": "BLACK SUEDE", "qty": 24, "price": 7570, "bu": "Premium", "gender": "MEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 20, "total": 20, "stock": 4, "st_pct": 83.3, "dc_now": 20.0, "avg_dc": 18.0, "art_color": "CZSABP05SBLK", "tiers": {"counter": 20.0, "xclusive": 25.0, "bau": 10.0, "a": 12.0, "a_plus": 15.0, "mega": 20.0, "fs": 25.0, "seek": null}}, {"name": "PREMIUM M ALDWIN LACE", "color": "BLACK LEATHER", "qty": 24, "price": 7290, "bu": "Premium", "gender": "MEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 20, "total": 20, "stock": 4, "st_pct": 83.3, "dc_now": 20.0, "avg_dc": 16.0, "art_color": "CZLACP01LBLK", "tiers": {"counter": 20.0, "xclusive": 30.0, "bau": 5.0, "a": 10.0, "a_plus": 15.0, "mega": 20.0, "fs": 30.0, "seek": null}}, {"name": "ORIGINALS M WALLABEE", "color": "BLACK SUEDE", "qty": 24, "price": 7590, "bu": "Originals", "gender": "MEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 20, "total": 20, "stock": 4, "st_pct": 83.3, "dc_now": 5.0, "avg_dc": 1.0, "art_color": "CZSACR04SBLK", "tiers": {"counter": 5.0, "xclusive": null, "bau": 0, "a": 0, "a_plus": 0, "mega": 0, "fs": null, "seek": null}}, {"name": "PREMIUM W NARINI EDGE", "color": "SAND SUEDE", "qty": 100, "price": 5490, "bu": "Premium", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": 3, "sale_total": 81, "total": 84, "stock": 16, "st_pct": 84.0, "dc_now": 10.0, "avg_dc": 19.0, "art_color": "CZRABP02SSND", "tiers": {"counter": 10.0, "xclusive": 20.0, "bau": 2.0, "a": 3.0, "a_plus": 5.0, "mega": 10.0, "fs": 15.0, "seek": null}}, {"name": "PREMIUM M TORHILL LO", "color": "ECRU SUEDE", "qty": 48, "price": 6570, "bu": "Premium", "gender": "MEN", "season": "SS 2025", "sale_type": "SFG", "seeding": 1, "sale_total": 43, "total": 44, "stock": 4, "st_pct": 91.7, "dc_now": 30.0, "avg_dc": 20.0, "art_color": "CZSABP06SECR", "tiers": {"counter": 50.0, "xclusive": 50.0, "bau": 25.0, "a": 30.0, "a_plus": 40.0, "mega": 50.0, "fs": 55.0, "seek": null}}, {"name": "ORIGINALS M WALLABEE GORE-TEX", "color": "MAPLE SUEDE", "qty": 12, "price": 9590, "bu": "Originals", "gender": "MEN", "season": "SS 2025", "sale_type": "WHOLESALE", "seeding": 1, "sale_total": 8, "total": 9, "stock": 3, "st_pct": 75.0, "dc_now": 5.0, "avg_dc": 7.0, "art_color": "CZSAAR09SMAP", "tiers": {"counter": 5.0, "xclusive": null, "bau": null, "a": null, "a_plus": null, "mega": null, "fs": null, "seek": null}}, {"name": "ESSENTIALS W JULIET ECHO", "color": "BLACK LEATHER", "qty": 24, "price": 4590, "bu": "Essentials", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 21, "total": 21, "stock": 3, "st_pct": 87.5, "dc_now": 30.0, "avg_dc": 15.0, "art_color": "CZRACE01LBLK", "tiers": {"counter": 30.0, "xclusive": 30.0, "bau": 15.0, "a": 20.0, "a_plus": 25.0, "mega": 30.0, "fs": 35.0, "seek": null}}, {"name": "PREMIUM M TORVIEW", "color": "DARK SAND SUEDE", "qty": 24, "price": 6590, "bu": "Premium", "gender": "MEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 21, "total": 21, "stock": 3, "st_pct": 87.5, "dc_now": 10.0, "avg_dc": 17.0, "art_color": "CZSACP07SDAS", "tiers": {"counter": 10.0, "xclusive": 20.0, "bau": 10.0, "a": 12.0, "a_plus": 15.0, "mega": 20.0, "fs": 25.0, "seek": null}}, {"name": "PREMIUM M CRAFTJAMES CAP", "color": "BLACK LEATHER", "qty": 24, "price": 9970, "bu": "Premium", "gender": "MEN", "season": "SS 2025", "sale_type": "SFG", "seeding": 1, "sale_total": 20, "total": 21, "stock": 3, "st_pct": 87.5, "dc_now": 20.0, "avg_dc": 14.0, "art_color": "CZLABP01LBLK", "tiers": {"counter": 20.0, "xclusive": 25.0, "bau": 8.0, "a": 12.0, "a_plus": 15.0, "mega": 20.0, "fs": 25.0, "seek": null}}, {"name": "PREMIUM M TORHILL LO", "color": "DARK SAND SUEDE", "qty": 35, "price": 6590, "bu": "Premium", "gender": "MEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 32, "total": 32, "stock": 3, "st_pct": 91.4, "dc_now": 5.0, "avg_dc": 10.0, "art_color": "CZSACP06SDAS", "tiers": {"counter": 5.0, "xclusive": null, "bau": 2.0, "a": 3.0, "a_plus": 5.0, "mega": 10.0, "fs": 12.0, "seek": null}}, {"name": "ESSENTIALS W JAZMYNN GEM", "color": "BLACK LEATHER", "qty": 72, "price": 4290, "bu": "Essentials", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 65, "total": 65, "stock": 7, "st_pct": 90.3, "dc_now": 30.0, "avg_dc": 14.0, "art_color": "CZFACE01LBLK", "tiers": {"counter": 30.0, "xclusive": 30.0, "bau": 15.0, "a": 20.0, "a_plus": 25.0, "mega": 30.0, "fs": 35.0, "seek": null}}, {"name": "PREMIUM M TORHILL HI", "color": "DARK SAND SUEDE", "qty": 48, "price": 7570, "bu": "Premium", "gender": "MEN", "season": "SS 2025", "sale_type": "SFG", "seeding": 3, "sale_total": 42, "total": 45, "stock": 3, "st_pct": 93.8, "dc_now": 5.0, "avg_dc": 15.0, "art_color": "CZSABP05SDAS", "tiers": {"counter": 5.0, "xclusive": null, "bau": 2.0, "a": 3.0, "a_plus": 5.0, "mega": 10.0, "fs": 12.0, "seek": null}}, {"name": "ORIGINALS M DESERT TREK", "color": "SAND SUEDE", "qty": 12, "price": 6170, "bu": "Originals", "gender": "MEN", "season": "SS 2026", "sale_type": "SFG", "seeding": null, "sale_total": 10, "total": 10, "stock": 2, "st_pct": 83.3, "dc_now": 10.0, "avg_dc": 8.0, "art_color": "CZSADR02SSND", "tiers": {"counter": 10.0, "xclusive": null, "bau": 0, "a": 3.0, "a_plus": 5.0, "mega": 10.0, "fs": 12.0, "seek": null}}, {"name": "ORIGINALS M WALLABEE GORE-TEX", "color": "BLACK SUEDE", "qty": 12, "price": 9590, "bu": "Originals", "gender": "MEN", "season": "SS 2025", "sale_type": "WHOLESALE", "seeding": null, "sale_total": 10, "total": 10, "stock": 2, "st_pct": 83.3, "dc_now": 5.0, "avg_dc": 4.0, "art_color": "CZSAAR08SBLK", "tiers": {"counter": 5.0, "xclusive": null, "bau": null, "a": null, "a_plus": null, "mega": null, "fs": null, "seek": null}}, {"name": "ESSENTIALS W JULIET ECHO", "color": "TAN LEATHER", "qty": 24, "price": 4590, "bu": "Essentials", "gender": "WOMEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 22, "total": 22, "stock": 2, "st_pct": 91.7, "dc_now": 30.0, "avg_dc": 17.0, "art_color": "CZRACE01LTAN", "tiers": {"counter": 30.0, "xclusive": 30.0, "bau": 15.0, "a": 20.0, "a_plus": 25.0, "mega": 30.0, "fs": 35.0, "seek": null}}, {"name": "ESSENTIALS M MARKMAN PLAIN", "color": "DARK TAN LEATHER", "qty": 24, "price": 4570, "bu": "Essentials", "gender": "MEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 22, "total": 22, "stock": 2, "st_pct": 91.7, "dc_now": 15.0, "avg_dc": 13.0, "art_color": "CZLACE04LDAT", "tiers": {"counter": 15.0, "xclusive": 20.0, "bau": 10.0, "a": 15.0, "a_plus": 18.0, "mega": 20.0, "fs": 25.0, "seek": null}}, {"name": "ORIGINALS M WALLABEEGTX", "color": "GREY NUBUCK", "qty": 12, "price": 9570, "bu": "Originals", "gender": "MEN", "season": "SS 2025", "sale_type": "WHOLESALE", "seeding": null, "sale_total": 11, "total": 11, "stock": 1, "st_pct": 91.7, "dc_now": 30.0, "avg_dc": 14.0, "art_color": "CZSABR08NGRY", "tiers": {"counter": 30.0, "xclusive": 30.0, "bau": 10.0, "a": 15.0, "a_plus": 25.0, "mega": 30.0, "fs": 35.0, "seek": 30.0}}, {"name": "ORIGINALS M WALLABEEGTX", "color": "MAPLE SUEDE", "qty": 12, "price": 9570, "bu": "Originals", "gender": "MEN", "season": "SS 2025", "sale_type": "WHOLESALE", "seeding": null, "sale_total": 11, "total": 11, "stock": 1, "st_pct": 91.7, "dc_now": 5.0, "avg_dc": 17.0, "art_color": "CZSABR08SMAP", "tiers": {"counter": 5.0, "xclusive": null, "bau": null, "a": null, "a_plus": null, "mega": null, "fs": null, "seek": null}}, {"name": "PREMIUM W CRAFT SPEED", "color": "OFF WHITE LEATHER", "qty": 60, "price": 7570, "bu": "Premium", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": 2, "sale_total": 54, "total": 56, "stock": 4, "st_pct": 93.3, "dc_now": 50.0, "avg_dc": 25.0, "art_color": "CZSABP01LOFW", "tiers": {"counter": 50.0, "xclusive": 50.0, "bau": 30.0, "a": 40.0, "a_plus": 45.0, "mega": 50.0, "fs": 52.0, "seek": null}}, {"name": "ESSENTIALS W NATALYN STEP", "color": "OFF WHITE LEATHER", "qty": 120, "price": 3990, "bu": "Essentials", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 112, "total": 112, "stock": 8, "st_pct": 93.3, "dc_now": 30.0, "avg_dc": 21.0, "art_color": "CZFABE01LOFW", "tiers": {"counter": 30.0, "xclusive": 40.0, "bau": 15.0, "a": 20.0, "a_plus": 25.0, "mega": 30.0, "fs": 35.0, "seek": null}}, {"name": "ORIGINALS M WALLABEE BOOT", "color": "BROWN SNAKE COMBINATION", "qty": 12, "price": 7990, "bu": "Originals", "gender": "MEN", "season": "SS 2025", "sale_type": "WHOLESALE", "seeding": null, "sale_total": 11, "total": 11, "stock": 1, "st_pct": 91.7, "dc_now": 50.0, "avg_dc": 46.0, "art_color": "CZHAAR03SBSC", "tiers": {"counter": 50.0, "xclusive": 50.0, "bau": 30.0, "a": 35.0, "a_plus": 38.0, "mega": 40.0, "fs": 50.0, "seek": null}}, {"name": "ORIGINALS W WALLABEE", "color": "LEOPARD PRINT", "qty": 16, "price": 7390, "bu": "Originals", "gender": "WOMEN", "season": "SS 2025", "sale_type": "WHOLESALE", "seeding": 1, "sale_total": 14, "total": 15, "stock": 1, "st_pct": 93.8, "dc_now": 50.0, "avg_dc": 34.0, "art_color": "CZSAAR05SLPP", "tiers": {"counter": 50.0, "xclusive": 50.0, "bau": 30.0, "a": 35.0, "a_plus": 38.0, "mega": 40.0, "fs": 50.0, "seek": null}}, {"name": "ORIGINALS W WALLABEE", "color": "MAPLE SUEDE", "qty": 60, "price": 7590, "bu": "Originals", "gender": "WOMEN", "season": "SS 2025", "sale_type": "SFG", "seeding": 1, "sale_total": 56, "total": 57, "stock": 3, "st_pct": 95.0, "dc_now": 0, "avg_dc": 16.0, "art_color": "CZSABR05SMAP", "tiers": {"counter": 0, "xclusive": null, "bau": 0, "a": 0, "a_plus": 0, "mega": 0, "fs": 5.0, "seek": null}}, {"name": "ORIGINALS M WALLABEE BOOT", "color": "BLACK SUEDE", "qty": 24, "price": 8270, "bu": "Originals", "gender": "MEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 23, "total": 23, "stock": 1, "st_pct": 95.8, "dc_now": 0, "avg_dc": 11.0, "art_color": "CZSABR07SBLK", "tiers": {"counter": 0, "xclusive": null, "bau": 0, "a": 0, "a_plus": 0, "mega": 5.0, "fs": 10.0, "seek": null}}, {"name": "PREMIUM M SOLSBURY MULE", "color": "GREY SUEDE", "qty": 24, "price": 6590, "bu": "Premium", "gender": "MEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 23, "total": 23, "stock": 1, "st_pct": 95.8, "dc_now": 30.0, "avg_dc": 15.0, "art_color": "CZDABP03SGRY", "tiers": {"counter": 30.0, "xclusive": 40.0, "bau": 15.0, "a": 20.0, "a_plus": 25.0, "mega": 30.0, "fs": 40.0, "seek": null}}, {"name": "ESSENTIALS M TILDEN WALK", "color": "BLACK LEATHER", "qty": 36, "price": 4890, "bu": "Essentials", "gender": "MEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 35, "total": 35, "stock": 1, "st_pct": 97.2, "dc_now": 30.0, "avg_dc": 19.0, "art_color": "CZLABE01LBLK", "tiers": {"counter": 30.0, "xclusive": 30.0, "bau": 15.0, "a": 20.0, "a_plus": 25.0, "mega": 30.0, "fs": 35.0, "seek": null}}, {"name": "ESSENTIALS M MARKMAN PLAIN", "color": "DARK TAN LEATHER", "qty": 36, "price": 4570, "bu": "Essentials", "gender": "MEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 35, "total": 35, "stock": 1, "st_pct": 97.2, "dc_now": 15.0, "avg_dc": 22.0, "art_color": "CZRABE01LDAT", "tiers": {"counter": 15.0, "xclusive": 20.0, "bau": 10.0, "a": 15.0, "a_plus": 18.0, "mega": 20.0, "fs": 25.0, "seek": null}}, {"name": "PREMIUM M SOLSBURY MULE", "color": "DARK SAND SUEDE", "qty": 48, "price": 6590, "bu": "Premium", "gender": "MEN", "season": "SS 2025", "sale_type": "SFG", "seeding": 1, "sale_total": 46, "total": 47, "stock": 1, "st_pct": 97.9, "dc_now": 10.0, "avg_dc": 15.0, "art_color": "CZDABP03SDAS", "tiers": {"counter": 10.0, "xclusive": 20.0, "bau": 2.0, "a": 3.0, "a_plus": 5.0, "mega": 10.0, "fs": 12.0, "seek": null}}, {"name": "ORIGINALS M WALLABEE", "color": "MAPLE SUEDE", "qty": 84, "price": 7590, "bu": "Originals", "gender": "MEN", "season": "AW 2025", "sale_type": "WHOLE SALE/SFG", "seeding": null, "sale_total": 83, "total": 83, "stock": 1, "st_pct": 98.8, "dc_now": 5.0, "avg_dc": 24.0, "art_color": "CZSACR04SMAP", "tiers": {"counter": 5.0, "xclusive": null, "bau": 0, "a": 0, "a_plus": 0, "mega": 0, "fs": null, "seek": null}}, {"name": "PREMIUM M TORHILL LO", "color": "BLACK  SUEDE", "qty": 1, "price": 6590, "bu": "Premium", "gender": "MEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 1, "total": 1, "stock": 0, "st_pct": 1, "dc_now": 10.0, "avg_dc": 25.0, "art_color": "CZSACP06SBLK", "tiers": {"counter": 10.0, "xclusive": 30.0, "bau": null, "a": null, "a_plus": null, "mega": null, "fs": null, "seek": null}}, {"name": "ORIGINALS M DESERT TREK", "color": "APPLE SUEDE", "qty": 22, "price": 6170, "bu": "Originals", "gender": "MEN", "season": "SS 2025", "sale_type": "WHOLESALE", "seeding": null, "sale_total": 22, "total": 22, "stock": 0, "st_pct": 1, "dc_now": 30.0, "avg_dc": 38.0, "art_color": "CZSABR03SAPP", "tiers": {"counter": 30.0, "xclusive": 40.0, "bau": null, "a": null, "a_plus": null, "mega": null, "fs": null, "seek": null}}, {"name": "ORIGINALS M WALLABEE", "color": "MAPLE SUEDE", "qty": 190, "price": 7590, "bu": "Originals", "gender": "MEN", "season": "SS 2025", "sale_type": "SFG", "seeding": 12, "sale_total": 178, "total": 190, "stock": 0, "st_pct": 1, "dc_now": 5.0, "avg_dc": 22.0, "art_color": "CZSABR01SMAP", "tiers": {"counter": 5.0, "xclusive": null, "bau": 0, "a": 0, "a_plus": 0, "mega": 0, "fs": null, "seek": null}}, {"name": "ORIGINALS W WALLABEE", "color": "TAUPE EMB", "qty": 20, "price": 7590, "bu": "Originals", "gender": "WOMEN", "season": "SS 2025", "sale_type": "WHOLESALE", "seeding": 1, "sale_total": 19, "total": 20, "stock": 0, "st_pct": 1, "dc_now": 30.0, "avg_dc": 27.0, "art_color": "CZSABR05STEB", "tiers": {"counter": 30.0, "xclusive": 30.0, "bau": 10.0, "a": 15.0, "a_plus": 25.0, "mega": 30.0, "fs": 35.0, "seek": 30.0}}, {"name": "PREMIUM M TORHILL LO", "color": "BLACK SUEDE", "qty": 24, "price": 6570, "bu": "Premium", "gender": "MEN", "season": "SS 2025", "sale_type": "SFG", "seeding": 1, "sale_total": 23, "total": 24, "stock": 0, "st_pct": 1, "dc_now": 10.0, "avg_dc": 16.0, "art_color": "CZSABP06SBLK", "tiers": {"counter": 10.0, "xclusive": 30.0, "bau": null, "a": null, "a_plus": null, "mega": null, "fs": null, "seek": null}}, {"name": "ORIGINALS W WALLABEE GORE-TEX", "color": "MAPLE SUEDE", "qty": 12, "price": 9590, "bu": "Originals", "gender": "WOMEN", "season": "SS 2025", "sale_type": "WHOLESALE", "seeding": null, "sale_total": 12, "total": 12, "stock": 0, "st_pct": 1, "dc_now": 5.0, "avg_dc": 6.0, "art_color": "CZSAAR07SMAP", "tiers": {"counter": 5.0, "xclusive": null, "bau": 0, "a": 3.0, "a_plus": 5.0, "mega": 10.0, "fs": 12.0, "seek": 10.0}}, {"name": "PREMIUM M TORHILL LO", "color": "BLACK LEATHER", "qty": 24, "price": 6590, "bu": "Premium", "gender": "MEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 24, "total": 24, "stock": 0, "st_pct": 1, "dc_now": 30.0, "avg_dc": 16.0, "art_color": "CZSACP06LBLK", "tiers": {"counter": 30.0, "xclusive": 40.0, "bau": 15.0, "a": 20.0, "a_plus": 25.0, "mega": 30.0, "fs": 40.0, "seek": null}}, {"name": "ORIGINALS M WALLABEE BOOT", "color": "GOLDEN TAN SUEDE", "qty": 22, "price": 7590, "bu": "Originals", "gender": "MEN", "season": "SS 2025", "sale_type": "WHOLESALE", "seeding": null, "sale_total": 22, "total": 22, "stock": 0, "st_pct": 1, "dc_now": 30.0, "avg_dc": 30.0, "art_color": "CZSABR15SGDT", "tiers": {"counter": 30.0, "xclusive": 30.0, "bau": 10.0, "a": 15.0, "a_plus": 25.0, "mega": 30.0, "fs": 35.0, "seek": 30.0}}, {"name": "ORIGINALS M DESERT RAIN", "color": "MAPLE CORD", "qty": 91, "price": 7590, "bu": "Originals", "gender": "MEN", "season": "SS 2025", "sale_type": "WHOLE SALE/SFG", "seeding": 1, "sale_total": 90, "total": 91, "stock": 0, "st_pct": 1, "dc_now": 30.0, "avg_dc": 33.0, "art_color": "CZSABR18CMAP", "tiers": {"counter": 30.0, "xclusive": null, "bau": null, "a": null, "a_plus": null, "mega": null, "fs": null, "seek": null}}, {"name": "ORIGINALS M DESERT TREK", "color": "BEESWAX", "qty": 13, "price": 6170, "bu": "Originals", "gender": "MEN", "season": "SS 2026", "sale_type": "WHOLE SALE/SFG", "seeding": null, "sale_total": 13, "total": 13, "stock": 0, "st_pct": 1, "dc_now": "NO", "avg_dc": 45.0, "art_color": "CZSADR02LBWX", "tiers": {"counter": null, "xclusive": null, "bau": null, "a": null, "a_plus": null, "mega": null, "fs": null, "seek": null}}, {"name": "PREMIUM M TORHILL LO", "color": "SAGE SUEDE", "qty": 24, "price": 6590, "bu": "Premium", "gender": "MEN", "season": "AW 2025", "sale_type": "SFG", "seeding": null, "sale_total": 24, "total": 24, "stock": 0, "st_pct": 1, "dc_now": 10.0, "avg_dc": 11.0, "art_color": "CZSACP06SSAG", "tiers": {"counter": 10.0, "xclusive": 20.0, "bau": 5.0, "a": 10.0, "a_plus": 15.0, "mega": 20.0, "fs": 25.0, "seek": null}}, {"name": "ORIGINALS M DESERT TREK", "color": "SAND SUEDE", "qty": 22, "price": 6170, "bu": "Originals", "gender": "MEN", "season": "SS 2025", "sale_type": "WHOLESALE", "seeding": null, "sale_total": 22, "total": 22, "stock": 0, "st_pct": 1, "dc_now": 10.0, "avg_dc": 28.0, "art_color": "CZSABR03SSND", "tiers": {"counter": 10.0, "xclusive": null, "bau": 0, "a": 3.0, "a_plus": 5.0, "mega": 10.0, "fs": 12.0, "seek": null}}, {"name": "PREMIUM M TORHILL LO", "color": "GOLDEN TAN SUEDE", "qty": 48, "price": 6570, "bu": "Premium", "gender": "MEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 48, "total": 48, "stock": 0, "st_pct": 1, "dc_now": 30.0, "avg_dc": 22.0, "art_color": "CZSABP06SGDT", "tiers": {"counter": 30.0, "xclusive": 40.0, "bau": 15.0, "a": 20.0, "a_plus": 25.0, "mega": 30.0, "fs": 40.0, "seek": null}}, {"name": "PREMIUM M TORHILL LO", "color": "DARK SAND SUEDE", "qty": 60, "price": 6570, "bu": "Premium", "gender": "MEN", "season": "SS 2025", "sale_type": "SFG", "seeding": 3, "sale_total": 57, "total": 60, "stock": 0, "st_pct": 1, "dc_now": 5.0, "avg_dc": 15.0, "art_color": "CZSABP06SDAS", "tiers": {"counter": 5.0, "xclusive": null, "bau": 2.0, "a": 3.0, "a_plus": 5.0, "mega": 10.0, "fs": 12.0, "seek": null}}, {"name": "ORIGINALS M TORHILL DRGNLO", "color": "OLIVE SUEDE", "qty": 24, "price": 6490, "bu": "Originals", "gender": "MEN", "season": "SS 2025", "sale_type": "WHOLESALE", "seeding": null, "sale_total": 24, "total": 24, "stock": 0, "st_pct": 1, "dc_now": 50.0, "avg_dc": 33.0, "art_color": "CZSAAR01SOLV", "tiers": {"counter": 50.0, "xclusive": 50.0, "bau": 30.0, "a": 35.0, "a_plus": 38.0, "mega": 40.0, "fs": 50.0, "seek": null}}, {"name": "ORIGINALS M WALLABEE BOAT", "color": "MAPLE SUEDE", "qty": 12, "price": 7590, "bu": "Originals", "gender": "MEN", "season": "SS 2025", "sale_type": "WHOLESALE", "seeding": null, "sale_total": 12, "total": 12, "stock": 0, "st_pct": 1, "dc_now": "NO", "avg_dc": 6.0, "art_color": "CZSABR15SMAP", "tiers": {"counter": null, "xclusive": null, "bau": 0, "a": 10.0, "a_plus": 15.0, "mega": 20.0, "fs": 25.0, "seek": null}}, {"name": "ORIGINALS M WALLABEE BOOT", "color": "MAPLE SUEDE", "qty": 24, "price": 8270, "bu": "Originals", "gender": "MEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 24, "total": 24, "stock": 0, "st_pct": 1, "dc_now": 0, "avg_dc": 1.0, "art_color": "CZSABR07SMAP", "tiers": {"counter": 0, "xclusive": null, "bau": 0, "a": 0, "a_plus": 0, "mega": 5.0, "fs": 10.0, "seek": null}}, {"name": "ORIGINALS M TORHILL WOVEN", "color": "BLACK SUEDE", "qty": 24, "price": 7490, "bu": "Originals", "gender": "MEN", "season": "SS 2025", "sale_type": "WHOLESALE", "seeding": 2, "sale_total": 22, "total": 24, "stock": 0, "st_pct": 1, "dc_now": 50.0, "avg_dc": 35.0, "art_color": "CZHAAR01SBLK", "tiers": {"counter": 50.0, "xclusive": 50.0, "bau": 30.0, "a": 35.0, "a_plus": 38.0, "mega": 40.0, "fs": 50.0, "seek": null}}, {"name": "PREMIUM M SOLSBURY MULE", "color": "COLA SUEDE", "qty": 24, "price": 6590, "bu": "Premium", "gender": "MEN", "season": "SS 2025", "sale_type": "SFG", "seeding": null, "sale_total": 24, "total": 24, "stock": 0, "st_pct": 1, "dc_now": 10.0, "avg_dc": 12.0, "art_color": "CZDABP03SCOL", "tiers": {"counter": 10.0, "xclusive": 20.0, "bau": 2.0, "a": 3.0, "a_plus": 5.0, "mega": 10.0, "fs": 12.0, "seek": null}}, {"name": "ORIGINALS M WALLABEE 2604", "color": "GREEN SUEDE", "qty": 22, "price": 7990, "bu": "Originals", "gender": "MEN", "season": "SS 2025", "sale_type": "WHOLE SALE/SFG", "seeding": 2, "sale_total": 20, "total": 22, "stock": 0, "st_pct": 1, "dc_now": "NO", "avg_dc": 26.0, "art_color": "CZSABR22SGRE", "tiers": {"counter": null, "xclusive": 20.0, "bau": null, "a": null, "a_plus": null, "mega": null, "fs": null, "seek": null}}, {"name": "ORIGINALS M WALLABEE BOAT", "color": "COLA SUEDE", "qty": 10, "price": 7590, "bu": "Originals", "gender": "MEN", "season": "SS 2025", "sale_type": "WHOLESALE", "seeding": null, "sale_total": 10, "total": 10, "stock": 0, "st_pct": 1, "dc_now": "NO", "avg_dc": 8.0, "art_color": "CZSABR15SCOL", "tiers": {}}, {"name": "ORIGINALS M WALLABEE", "color": "BLACK SUEDE", "qty": 70, "price": 7590, "bu": "Originals", "gender": "MEN", "season": "SS 2025", "sale_type": "SFG", "seeding": 1, "sale_total": 69, "total": 70, "stock": 0, "st_pct": 1, "dc_now": "NO", "avg_dc": 16.0, "art_color": "CZSABR01SBLK", "tiers": {}}, {"name": "ORIGINALS M WALLABEE 2604", "color": "SAND SUEDE", "qty": 22, "price": 7990, "bu": "Originals", "gender": "MEN", "season": "SS 2025", "sale_type": "WHOLE SALE/SFG", "seeding": null, "sale_total": 22, "total": 22, "stock": 0, "st_pct": 1, "dc_now": "NO", "avg_dc": 22.0, "art_color": "CZSABR22SSND", "tiers": {}}];
 
+// ── State ─────────────────────────────────────────────
+var sel = new Set();
+var filt = {bu:'ALL', gender:'ALL', dc:'ALL'};
+var sortCol = 'name', sortDir = 1;
+var tier = {type:'none', key:'none', label:'DC NOW เดิม'};
+var steps = [];
+var stepN = 0;
 
-// ── State ──────────────────────────────────────────────
-let selected = new Set();
-let filters = { bu: 'ALL', gender: 'ALL', dc: 'ALL' };
-let sortState = { col: 'name', dir: 1 };
-let selectedTier = { type: 'none', key: 'none', label: 'DC NOW เดิม' };
-let plannerStepIds = [];
-let plannerStepCount = 0;
-let plannerBundleRowCounts = {};
+// ── Utils ─────────────────────────────────────────────
+function fmt(n){ return n==null?'—':Number(n).toLocaleString('th-TH'); }
+function pct(n){ return n==null?'—':(+n).toFixed(1)+'%'; }
+function gv(id){ var el=document.getElementById(id); return el?parseFloat(el.value)||0:0; }
+function sv(id){ var el=document.getElementById(id); return el?el.value:''; }
 
-const MIX_TYPES = [
-  {val:'ontop',     label:'ส่วนลด On Top (% จากราคาปัจจุบัน)'},
-  {val:'addpct',    label:'เพิ่ม % ส่วนลด (สะสมจากตั้งต้น)'},
-  {val:'cash',      label:'Cash Voucher (หัก ฿)'},
-  {val:'gwp_clarks',label:'GWP-Clarks (ต้นทุน = ราคาป้าย ÷ 3.7)'},
-  {val:'gwp_other', label:'GWP (Other) — กรอกต้นทุนเอง'},
-  {val:'bundle',    label:'Bundle Deal'},
-  {val:'redeem',    label:'แลกซื้อ'},
-];
-
-// ── Utility ────────────────────────────────────────────
-function fmt(n){ if(n==null||isNaN(n))return '—'; return Math.round(n).toLocaleString(); }
-function pct(n){ if(n==null||isNaN(n))return '—'; return n.toFixed(1)+'%'; }
-
-// ── Filters ────────────────────────────────────────────
-function toggleFilter(btn, type, val) {
-  filters[type] = val;
-  document.querySelectorAll('[id^="'+type+'-"]').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderTable();
-}
-
-function getFiltered() {
-  const search = (document.getElementById('searchInput').value || '').toLowerCase();
-  return PRODUCTS.filter(p => {
-    if (search && !p.name.toLowerCase().includes(search) && !p.color.toLowerCase().includes(search)) return false;
-    if (filters.bu !== 'ALL' && (p.bu||'').toLowerCase() !== filters.bu.toLowerCase()) return false;
-    if (filters.gender !== 'ALL' && (p.gender||'').toUpperCase().trim() !== filters.gender) return false;
-    if (filters.dc !== 'ALL') {
-      const dc = p.dc_now || 0;
-      if (filters.dc === 'low' && !(dc <= 15)) return false;
-      if (filters.dc === 'mid' && !(dc > 15 && dc <= 30)) return false;
-      if (filters.dc === 'high' && !(dc > 30)) return false;
+// ── Filtering ─────────────────────────────────────────
+function getFiltered(){
+  var q = (document.getElementById('search').value||'').toLowerCase();
+  return PRODUCTS.filter(function(p){
+    if(q && !p.name.toLowerCase().includes(q) && !(p.color||'').toLowerCase().includes(q)) return false;
+    if(filt.bu!=='ALL' && (p.bu||'').toLowerCase() !== filt.bu.toLowerCase()) return false;
+    if(filt.gender!=='ALL' && (p.gender||'').toUpperCase().trim() !== filt.gender) return false;
+    if(filt.dc!=='ALL'){
+      var d=p.dc_now||0;
+      if(filt.dc==='low' && d>15) return false;
+      if(filt.dc==='mid' && (d<=15||d>30)) return false;
+      if(filt.dc==='hi' && d<=30) return false;
     }
     return true;
   });
 }
 
+function setFilter(dim, val, btn){
+  // deactivate all chips in same group
+  var prefix = dim==='bu'?'f-bu-':dim==='gender'?'f-g-':'f-dc-';
+  document.querySelectorAll('[id^="'+prefix+'"]').forEach(function(b){ b.classList.remove('on'); });
+  btn.classList.add('on');
+  filt[dim]=val;
+  render();
+}
+
 // ── Sort ──────────────────────────────────────────────
-function sortTable(col) {
-  if (sortState.col === col) sortState.dir *= -1;
-  else { sortState.col = col; sortState.dir = 1; }
-  renderTable();
+function sortBy(col){
+  if(sortCol===col) sortDir*=-1; else { sortCol=col; sortDir=1; }
+  render();
 }
 
 // ── Render table ──────────────────────────────────────
-function renderTable() {
-  const filtered = getFiltered();
-  const col = sortState.col, dir = sortState.dir;
-  filtered.sort(function(a,b){
-    const av = a[col], bv = b[col];
-    if (av == null) return 1; if (bv == null) return -1;
-    if (typeof av === 'string') return dir * av.localeCompare(bv);
-    return dir * (av - bv);
+function render(){
+  var list = getFiltered();
+  list.sort(function(a,b){
+    var av=a[sortCol], bv=b[sortCol];
+    if(av==null) return 1; if(bv==null) return -1;
+    if(typeof av==='string') return sortDir*av.localeCompare(bv);
+    return sortDir*(av-bv);
   });
 
-  const tbody = document.getElementById('productTbody');
-  let html = '';
-  filtered.forEach(function(p) {
-    const isSel = selected.has(p.art_color);
-    const stPct = p.st_pct || 0;
-    const rowClass = isSel ? 'selected' : (stPct >= 50 ? 'st-high' : stPct >= 20 ? 'st-mid' : 'st-low');
+  var rows = '';
+  list.forEach(function(p){
+    var isSel = sel.has(p.art_color);
+    var st = p.st_pct||0;
+    var rc = isSel?'sel':(st>=50?'st-hi':st>=20?'st-mi':'st-lo');
+    var t = p.tiers||{};
 
-    // Tier availability dots
-    const tiers = p.tiers || {};
-    const offDots = [
-      tiers.counter != null ? '<span class="badge bg-blue" title="Counter '+tiers.counter+'%">Cnt '+tiers.counter+'%</span>' : '<span style="color:#cbd5e1;font-size:10px">Cnt—</span>',
-      tiers.xclusive != null ? '<span class="badge bg-blue" title="X Clusive '+tiers.xclusive+'%">Xcl '+tiers.xclusive+'%</span>' : '<span style="color:#cbd5e1;font-size:10px">Xcl—</span>',
-    ].join(' ');
-    const onDots = ['bau','a','a_plus','mega','fs'].map(function(k){
-      const labels = {bau:'BAU',a:'A',a_plus:'A+',mega:'Mega',fs:'FS'};
-      return tiers[k] != null
-        ? '<span class="badge bg-green" title="'+labels[k]+' '+tiers[k]+'%">'+labels[k]+' '+tiers[k]+'%</span>'
-        : '<span style="color:#cbd5e1;font-size:10px">'+labels[k]+'—</span>';
-    }).join(' ');
+    // Offline dots
+    var off = '';
+    off += t.counter!=null ? '<span class="b b-b">Cnt '+t.counter+'%</span> ' : '<span style="color:#cbd5e1;font-size:10px">Cnt—</span> ';
+    off += t.xclusive!=null ? '<span class="b b-b">Xcl '+t.xclusive+'%</span>' : '<span style="color:#cbd5e1;font-size:10px">Xcl—</span>';
 
-    const dcBadge = (p.dc_now||0) > 30 ? 'bg-red' : (p.dc_now||0) > 15 ? 'bg-amber' : 'bg-green';
+    // Online dots
+    var onl = '';
+    ['bau','a','a_plus','mega','fs'].forEach(function(k){
+      var lbl = {bau:'BAU',a:'A',a_plus:'A+',mega:'Mega',fs:'FS'}[k];
+      onl += t[k]!=null ? '<span class="b b-g">'+lbl+' '+t[k]+'%</span> ' : '<span style="color:#cbd5e1;font-size:10px">'+lbl+'—</span> ';
+    });
 
-    html += '<tr class="'+rowClass+'" onclick="toggleRow(''+p.art_color+'')" style="cursor:pointer">' +
-      '<td onclick="event.stopPropagation()"><input type="checkbox" '+(isSel?'checked':'')+' onchange="toggleRow(''+p.art_color+'')"></td>' +
-      '<td style="font-weight:600;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+p.name+'">'+p.name+'</td>' +
-      '<td style="color:#64748b;white-space:nowrap">'+p.color+'</td>' +
-      '<td style="text-align:right;font-weight:700">'+fmt(p.price)+'</td>' +
-      '<td><span class="badge '+(p.bu==='Originals'?'bg-purple':p.bu==='Premium'?'bg-blue':p.bu==='Cloudsteppers'?'bg-green':'bg-amber')+'">'+p.bu+'</span></td>' +
-      '<td>'+((p.gender||'').trim())+'</td>' +
-      '<td style="text-align:right">'+fmt(p.stock)+'</td>' +
-      '<td style="text-align:right"><span class="badge '+(stPct>=50?'bg-green':stPct>=20?'bg-amber':'bg-red')+'">'+pct(stPct)+'</span></td>' +
-      '<td style="text-align:right"><span class="badge '+dcBadge+'">'+pct(p.dc_now||0)+'</span></td>' +
-      '<td style="text-align:right;color:#94a3b8">'+pct(p.avg_dc||0)+'</td>' +
-      '<td style="text-align:right">'+fmt(p.total)+'</td>' +
-      '<td style="font-size:10px;white-space:nowrap">'+offDots+'<br>'+onDots+'</td>' +
-      '</tr>';
+    var dcCls = (p.dc_now||0)>30?'b-r':(p.dc_now||0)>15?'b-y':'b-g';
+    var buCls = p.bu==='Originals'?'b-p':p.bu==='Premium'?'b-b':p.bu==='Cloudsteppers'?'b-g':'b-y';
+
+    rows += '<tr class="'+rc+'" data-key="'+p.art_color+'" style="cursor:pointer">';
+    rows += '<td style="width:30px"><input type="checkbox"'+(isSel?' checked':'')+'></td>';
+    rows += '<td style="font-weight:600;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+p.name+'">'+p.name+'</td>';
+    rows += '<td style="color:#64748b;white-space:nowrap">'+p.color+'</td>';
+    rows += '<td style="text-align:right;font-weight:700">'+fmt(p.price)+'</td>';
+    rows += '<td><span class="b '+buCls+'">'+p.bu+'</span></td>';
+    rows += '<td>'+(p.gender||'')+'</td>';
+    rows += '<td style="text-align:right">'+fmt(p.stock)+'</td>';
+    rows += '<td style="text-align:right"><span class="b '+(st>=50?'b-g':st>=20?'b-y':'b-r')+'">'+pct(st)+'</span></td>';
+    rows += '<td style="text-align:right"><span class="b '+dcCls+'">'+pct(p.dc_now||0)+'</span></td>';
+    rows += '<td style="text-align:right;color:#94a3b8">'+pct(p.avg_dc||0)+'</td>';
+    rows += '<td style="text-align:right">'+fmt(p.total)+'</td>';
+    rows += '<td style="font-size:10px;white-space:nowrap">'+off+'<br>'+onl+'</td>';
+    rows += '</tr>';
   });
-  tbody.innerHTML = html;
-  document.getElementById('tableFooter').textContent = 'แสดง ' + filtered.length + ' / ' + PRODUCTS.length + ' รายการ';
-  updateSelCount();
+
+  document.getElementById('tbody').innerHTML = rows;
+  document.getElementById('tblFoot').textContent = 'แสดง '+list.length+' / '+PRODUCTS.length+' รายการ';
+
+  // Re-attach row click via event delegation (set on tbody once in init, not here)
+  updateCounts();
 }
 
-function toggleRow(key) {
-  if (selected.has(key)) selected.delete(key);
-  else selected.add(key);
-  updateSelCount();
-  renderTable();
+// ── Row selection ─────────────────────────────────────
+function toggleKey(key){
+  if(sel.has(key)) sel.delete(key); else sel.add(key);
+  updateCounts();
+  render();
   calcResults();
 }
 
-function toggleSelectAll(cb) {
-  const filtered = getFiltered();
-  if (cb.checked) filtered.forEach(p => selected.add(p.art_color));
-  else filtered.forEach(p => selected.delete(p.art_color));
-  updateSelCount();
-  renderTable();
+function toggleAll(cb){
+  var list = getFiltered();
+  if(cb.checked) list.forEach(function(p){ sel.add(p.art_color); });
+  else list.forEach(function(p){ sel.delete(p.art_color); });
+  updateCounts();
+  render();
   calcResults();
 }
 
-function clearSelection() {
-  selected.clear();
-  updateSelCount();
-  renderTable();
+function clearSel(){
+  sel.clear();
+  updateCounts();
+  render();
   calcResults();
 }
 
-function updateSelCount() {
-  const n = selected.size;
-  document.getElementById('selCount').textContent = n > 0 ? 'เลือกแล้ว ' + n + ' รายการ' : 'ยังไม่ได้เลือก';
-  document.getElementById('sideSelCount').textContent = n;
-  // Unlock step 2,3,4 when has selection
-  const locked = n === 0;
-  ['step2card','step3card','step4card'].forEach(function(id) {
-    const el = document.getElementById(id);
-    el.style.opacity = locked ? '.5' : '1';
-    el.style.pointerEvents = locked ? 'none' : 'auto';
+function updateCounts(){
+  var n = sel.size;
+  document.getElementById('selCount').textContent = n>0 ? n+' รายการที่เลือก' : 'ยังไม่ได้เลือก';
+  document.getElementById('sideCount').textContent = n;
+  // Unlock steps 2-4 if n>0
+  ['card2','card3','card4'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(n>0) el.classList.remove('locked'); else el.classList.add('locked');
   });
 }
 
-// ── Tier selection ────────────────────────────────────
-function selectTier(btn, type, key, label) {
-  // Clear all
-  document.querySelectorAll('.tier-btn').forEach(function(b) {
-    b.classList.remove('offline-active','online-active');
+// ── Tier ──────────────────────────────────────────────
+function pickTier(btn, type, key, label){
+  // reset all tier buttons
+  document.querySelectorAll('.tier-btn').forEach(function(b){
+    b.classList.remove('t-offline','t-online','t-none');
   });
-  // Activate
-  if (type === 'offline') btn.classList.add('offline-active');
-  else if (type === 'online') btn.classList.add('online-active');
-  else btn.classList.add('offline-active');
-  selectedTier = { type, key, label };
-  // Preview
-  const selProds = PRODUCTS.filter(p => selected.has(p.art_color));
-  const hasAll = selProds.every(p => key === 'none' || (p.tiers && p.tiers[key] != null));
-  const noTier = selProds.filter(p => key !== 'none' && !(p.tiers && p.tiers[key] != null));
-  let preview = '<strong>'+label+'</strong> เลือกแล้ว';
-  if (key !== 'none' && noTier.length > 0) {
-    preview += ' · <span style="color:#ef4444">⚠ ' + noTier.length + ' รายการไม่มี Tier นี้ (จะใช้ DC NOW แทน)</span>';
-  }
-  document.getElementById('tierPreview').innerHTML = preview;
+  if(type==='offline') btn.classList.add('t-offline');
+  else if(type==='online') btn.classList.add('t-online');
+  else btn.classList.add('t-none');
+
+  tier = {type:type, key:key, label:label};
+  document.getElementById('sideTier').textContent = label;
+
+  // Build preview message
+  var selArr = PRODUCTS.filter(function(p){ return sel.has(p.art_color); });
+  var noTier = selArr.filter(function(p){ return key!=='none' && !(p.tiers && p.tiers[key]!=null); });
+  var msg = '<strong>'+label+'</strong>';
+  if(key!=='none') msg += ' &mdash; จะใช้เป็น Discount Tier';
+  if(noTier.length>0) msg += ' &nbsp;<span style="color:#ef4444">⚠ '+noTier.length+' รายการไม่มี Tier นี้ (ใช้ DC NOW แทน)</span>';
+  document.getElementById('tierMsg').innerHTML = msg;
   calcResults();
 }
 
-// ── Planner Steps (Mix Promo) ─────────────────────────
-function addPlannerStep() {
-  if (plannerStepIds.length >= 5) { alert('สูงสุด 5 Step'); return; }
-  plannerStepCount++;
-  const sid = plannerStepCount;
-  plannerStepIds.push(sid);
-  const cont = document.getElementById('plannerSteps');
-  const div = document.createElement('div');
-  div.className = 'mix-step-card';
-  div.id = 'pStep_' + sid;
-  const typeOpts = MIX_TYPES.map(t => '<option value="'+t.val+'">'+t.label+'</option>').join('');
+// ── Steps (Mix Promo) ─────────────────────────────────
+var MIX = [
+  {v:'ontop',    l:'On Top (% จากราคาปัจจุบัน)'},
+  {v:'addpct',   l:'เพิ่ม % ส่วนลด (สะสมจากราคาตั้งต้น)'},
+  {v:'cash',     l:'Cash Voucher (หัก ฿)'},
+  {v:'gwp_clarks',l:'GWP-Clarks (ต้นทุน = ราคาป้าย ÷ 3.7)'},
+  {v:'gwp_other',l:'GWP (Other) — กรอกต้นทุนเอง'},
+  {v:'bundle',   l:'Bundle Deal'},
+  {v:'redeem',   l:'แลกซื้อ'},
+];
+
+function addStep(){
+  if(steps.length>=5) return;
+  var sid = ++stepN;
+  steps.push(sid);
+  updateStepCount();
+
+  var opts = MIX.map(function(m){ return '<option value="'+m.v+'">'+m.l+'</option>'; }).join('');
+  var div = document.createElement('div');
+  div.className='mcard'; div.id='step-'+sid;
   div.innerHTML =
     '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">' +
-      '<span style="width:22px;height:22px;border-radius:50%;background:#8b5cf6;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0" id="pStepNum_'+sid+'">'+plannerStepIds.length+'</span>' +
-      '<select id="pType_'+sid+'" style="flex:1;font-size:12px" onchange="renderPlannerInputs('+sid+');calcResults()">'+typeOpts+'</select>' +
-      '<button onclick="removePlannerStep('+sid+')" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:16px;padding:0">✕</button>' +
+    '<span style="width:22px;height:22px;border-radius:50%;background:#8b5cf6;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">'+steps.length+'</span>' +
+    '<select id="stype-'+sid+'" onchange="renderStepInputs('+sid+')" style="flex:1">'+opts+'</select>' +
+    '<button onclick="removeStep('+sid+')" style="padding:2px 8px;background:#fee2e2;border:1px solid #fca5a5;border-radius:6px;color:#dc2626;font-size:11px">× ลบ</button>' +
     '</div>' +
-    '<div id="pInputs_'+sid+'"></div>';
-  cont.appendChild(div);
-  renderPlannerInputs(sid);
-  updatePlannerNums();
-  calcResults();
+    '<div id="sinp-'+sid+'"></div>';
+  document.getElementById('stepArea').appendChild(div);
+  renderStepInputs(sid);
 }
 
-function removePlannerStep(sid) {
-  const idx = plannerStepIds.indexOf(sid);
-  if (idx > -1) plannerStepIds.splice(idx, 1);
-  const el = document.getElementById('pStep_' + sid);
-  if (el) el.remove();
-  updatePlannerNums();
-  calcResults();
-}
-
-function clearPlannerSteps() {
-  plannerStepIds = [];
-  document.getElementById('plannerSteps').innerHTML = '';
-  calcResults();
-}
-
-function updatePlannerNums() {
-  plannerStepIds.forEach(function(sid, i) {
-    const el = document.getElementById('pStepNum_' + sid);
-    if (el) el.textContent = i + 1;
+function removeStep(sid){
+  steps = steps.filter(function(s){ return s!==sid; });
+  var el = document.getElementById('step-'+sid);
+  if(el) el.remove();
+  // Re-number remaining steps
+  steps.forEach(function(s,i){
+    var num = document.querySelector('#step-'+s+' span');
+    if(num) num.textContent = (i+1);
   });
-  document.getElementById('plannerStepCount').textContent = plannerStepIds.length > 0 ? plannerStepIds.length + '/5' : '';
+  updateStepCount();
+  calcResults();
 }
 
-function renderPlannerInputs(sid) {
-  const typeEl = document.getElementById('pType_' + sid);
-  if (!typeEl) return;
-  const type = typeEl.value;
-  const cont = document.getElementById('pInputs_' + sid);
-  if (!cont) return;
-  cont.innerHTML = '';
-  if (type === 'ontop' || type === 'addpct') {
-    cont.innerHTML = '<div style="display:flex;align-items:center;gap:8px"><label style="font-size:11px;color:#64748b;min-width:80px">ส่วนลด (%):</label><input type="number" id="pVal_'+sid+'" value="10" min="0" max="100" style="width:90px" oninput="calcResults()"></div>';
-  } else if (type === 'cash') {
-    cont.innerHTML = '<div style="display:flex;align-items:center;gap:8px"><label style="font-size:11px;color:#64748b;min-width:80px">จำนวน (฿):</label><input type="number" id="pVal_'+sid+'" value="200" min="0" style="width:100px" oninput="calcResults()"></div>';
-  } else if (type === 'gwp_clarks') {
-    cont.innerHTML = '<div style="display:flex;align-items:center;gap:8px"><label style="font-size:11px;color:#64748b;min-width:80px">ราคาป้าย GWP (฿):</label><input type="number" id="pVal_'+sid+'" value="0" min="0" style="width:110px" oninput="calcResults()"><span style="font-size:10px;color:#94a3b8">ต้นทุน = ÷ 3.7</span></div>';
-  } else if (type === 'gwp_other') {
-    cont.innerHTML = '<div style="display:flex;align-items:center;gap:8px"><label style="font-size:11px;color:#64748b;min-width:80px">ต้นทุน GWP (฿):</label><input type="number" id="pVal_'+sid+'" value="0" min="0" style="width:110px" oninput="calcResults()"></div>';
-  } else if (type === 'bundle') {
-    const wr = document.createElement('div');
-    wr.innerHTML = '<label style="font-size:10px;color:#64748b">Bundle Price (฿) — ราคา Bundle รวมทุกชิ้น</label><br><input type="number" id="pBundlePrice_'+sid+'" value="0" min="0" style="width:130px;margin-top:3px" oninput="calcResults()">';
-    cont.appendChild(wr);
-  } else if (type === 'redeem') {
-    cont.innerHTML =
-      '<div style="display:flex;flex-direction:column;gap:6px">' +
-        '<div style="display:flex;align-items:center;gap:8px"><label style="font-size:11px;color:#64748b;min-width:130px">ลูกค้าจ่ายแลก (฿):</label><input type="number" id="pRedeemPay_'+sid+'" value="0" min="0" style="width:110px" oninput="calcResults()"></div>' +
-        '<div style="display:flex;align-items:center;gap:8px"><label style="font-size:11px;color:#64748b;min-width:130px">ประเภทสินค้าแลก:</label>' +
-          '<select id="pRedeemType_'+sid+'" style="font-size:11px" onchange="renderRedeemArea('+sid+');calcResults()">' +
-            '<option value="clarks">Clarks (ราคาป้าย ÷ 3.7)</option>' +
-            '<option value="other">สินค้าอื่น (กรอกต้นทุน)</option>' +
-          '</select>' +
-        '</div>' +
-        '<div id="pRedeemArea_'+sid+'"></div>' +
-      '</div>';
-    setTimeout(function(){ renderRedeemArea(sid); }, 0);
-  }
+function updateStepCount(){
+  document.getElementById('stepCount').textContent = steps.length+'/5';
 }
 
-function renderRedeemArea(sid) {
-  const typeEl = document.getElementById('pRedeemType_' + sid);
-  const area = document.getElementById('pRedeemArea_' + sid);
-  if (!typeEl || !area) return;
-  if (typeEl.value === 'clarks') {
-    area.innerHTML = '<div style="display:flex;align-items:center;gap:8px"><label style="font-size:11px;color:#64748b;min-width:130px">ราคาป้ายสินค้าแลก (฿):</label><input type="number" id="pRedeemClarksPrice_'+sid+'" value="0" min="0" style="width:110px" oninput="calcResults()"><span style="font-size:10px;color:#94a3b8">ต้นทุน = ÷ 3.7</span></div>';
-  } else {
-    area.innerHTML = '<div style="display:flex;align-items:center;gap:8px"><label style="font-size:11px;color:#64748b;min-width:130px">ต้นทุนสินค้าแลก (฿):</label><input type="number" id="pRedeemOtherCost_'+sid+'" value="0" min="0" style="width:110px" oninput="calcResults()"></div>';
-  }
-}
-
-// ── Calculate results per product ─────────────────────
-function getVal(id) { const el = document.getElementById(id); return el ? (parseFloat(el.value) || 0) : 0; }
-
-function applyMixSteps(baseNet, steps) {
-  // steps = already-applied tier, now add promo steps
-  // baseNet = price after tier discount
-  let net = baseNet;
-  let accPct = 0;
-  let extraCost = 0;
-
-  steps.forEach(function(sid) {
-    const typeEl = document.getElementById('pType_' + sid);
-    if (!typeEl) return;
-    const type = typeEl.value;
-    const val = getVal('pVal_' + sid);
-
-    if (type === 'ontop') {
-      net = net * (1 - val/100);
-    } else if (type === 'addpct') {
-      accPct += val;
-      net = baseNet * (1 - accPct/100);
-    } else if (type === 'cash') {
-      net = Math.max(0, net - val);
-    } else if (type === 'gwp_clarks') {
-      extraCost += val / 3.7;
-    } else if (type === 'gwp_other') {
-      extraCost += val;
-    } else if (type === 'bundle') {
-      const bp = getVal('pBundlePrice_' + sid);
-      net = bp;
-    } else if (type === 'redeem') {
-      const pay = getVal('pRedeemPay_' + sid);
-      net = net + pay;
-      const rtypeEl = document.getElementById('pRedeemType_' + sid);
-      if (rtypeEl && rtypeEl.value === 'clarks') {
-        extraCost += getVal('pRedeemClarksPrice_' + sid) / 3.7;
-      } else {
-        extraCost += getVal('pRedeemOtherCost_' + sid);
-      }
-    }
-  });
-  return { net, extraCost };
-}
-
-function calcResults() {
-  const selProds = PRODUCTS.filter(p => selected.has(p.art_color));
-  if (selProds.length === 0) {
-    document.getElementById('resultsArea').innerHTML = '<span style="color:#94a3b8;font-size:12px">เลือกสินค้าเพื่อดูผลลัพธ์</span>';
+function renderStepInputs(sid){
+  var t = sv('stype-'+sid);
+  var el = document.getElementById('sinp-'+sid);
+  if(!el) return;
+  var h = '';
+  if(t==='ontop'||t==='addpct'){
+    h = '<div style="display:flex;align-items:center;gap:6px"><span style="font-size:11px;color:#64748b">ส่วนลด %</span><input id="sv1-'+sid+'" type="number" min="0" max="100" value="0" style="width:70px" oninput="calcResults()"></div>';
+  } else if(t==='cash'){
+    h = '<div style="display:flex;align-items:center;gap:6px"><span style="font-size:11px;color:#64748b">หัก ฿</span><input id="sv1-'+sid+'" type="number" min="0" value="0" style="width:90px" oninput="calcResults()"></div>';
+  } else if(t==='gwp_clarks'){
+    h = '<div style="display:flex;align-items:center;gap:6px"><span style="font-size:11px;color:#64748b">ราคาป้าย GWP ฿</span><input id="sv1-'+sid+'" type="number" min="0" value="0" style="width:100px" oninput="calcResults()"><span style="font-size:11px;color:#94a3b8">ต้นทุน = ราคา÷3.7</span></div>';
+  } else if(t==='gwp_other'){
+    h = '<div style="display:flex;align-items:center;gap:6px"><span style="font-size:11px;color:#64748b">ต้นทุน GWP ฿</span><input id="sv1-'+sid+'" type="number" min="0" value="0" style="width:100px" oninput="calcResults()"></div>';
+  } else if(t==='bundle'){
+    h = '<div id="brows-'+sid+'"></div>' +
+        '<button onclick="addBRow('+sid+')" style="padding:3px 10px;background:#f1f5f9;border:1px solid #cbd5e1;border-radius:6px;font-size:11px;color:#475569;margin-top:4px">+ เพิ่มสินค้าใน Bundle</button>';
+    el.innerHTML = h;
+    addBRow(sid);
+    return;
+  } else if(t==='redeem'){
+    h = '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">' +
+        '<span style="font-size:11px;color:#64748b">ลูกค้าจ่าย ฿</span><input id="sv1-'+sid+'" type="number" min="0" value="0" style="width:90px" oninput="calcResults()">' +
+        '<span style="font-size:11px;color:#64748b">ประเภทสินค้า</span>' +
+        '<select id="rtype-'+sid+'" onchange="renderRedeemCost('+sid+')">' +
+        '<option value="clarks">Clarks (ราคาป้าย÷3.7)</option>' +
+        '<option value="other">Others (กรอกต้นทุน)</option>' +
+        '</select></div>' +
+        '<div id="rcost-'+sid+'" style="margin-top:6px"></div>';
+    el.innerHTML = h;
+    renderRedeemCost(sid);
     return;
   }
-
-  const gp = getVal('plannerGP');
-  const vAmt = getVal('plannerVoucherAmt');
-  const vPct = getVal('plannerVoucherPct');
-  const tierKey = selectedTier.key;
-  const tierLabel = selectedTier.label;
-
-  let tableHtml =
-    '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">' +
-    '<thead><tr style="background:#1e293b;color:#e2e8f0">' +
-    '<th style="padding:7px 8px;text-align:left;white-space:nowrap">รุ่น / สี</th>' +
-    '<th style="padding:7px 8px;text-align:right;white-space:nowrap">ราคาป้าย</th>' +
-    '<th style="padding:7px 8px;text-align:right;white-space:nowrap">Tier Disc</th>' +
-    '<th style="padding:7px 8px;text-align:right;white-space:nowrap">Net หลัง Tier</th>' +
-    '<th style="padding:7px 8px;text-align:right;white-space:nowrap">Net หลังโปร</th>' +
-    '<th style="padding:7px 8px;text-align:right;white-space:nowrap">Voucher+GP</th>' +
-    '<th style="padding:7px 8px;text-align:right;white-space:nowrap">Net แบรนด์</th>' +
-    '<th style="padding:7px 8px;text-align:right;white-space:nowrap">Eff Disc%</th>' +
-    '</tr></thead><tbody>';
-
-  let sumPrice = 0, sumNetBrand = 0, sumNetAfterPromo = 0;
-
-  selProds.forEach(function(p) {
-    const price = p.price || 0;
-    // Tier discount
-    let tierPct = 0;
-    if (tierKey === 'none') {
-      tierPct = p.dc_now || 0;
-    } else {
-      tierPct = (p.tiers && p.tiers[tierKey] != null) ? p.tiers[tierKey] : (p.dc_now || 0);
-    }
-    const netAfterTier = price * (1 - tierPct/100);
-
-    // Mix steps
-    const { net: netAfterPromo, extraCost } = applyMixSteps(netAfterTier, plannerStepIds);
-
-    // Voucher + GP
-    const voucherTotal = vAmt + (netAfterPromo * vPct/100);
-    const gpAmt = netAfterPromo * gp/100;
-    const deductions = voucherTotal + gpAmt + extraCost;
-    const netBrand = netAfterPromo - deductions;
-
-    // Effective disc from full price
-    const effDisc = price > 0 ? (price - netBrand)/price*100 : 0;
-
-    sumPrice += price;
-    sumNetAfterPromo += netAfterPromo;
-    sumNetBrand += netBrand;
-
-    const effColor = effDisc >= 50 ? '#ef4444' : effDisc >= 30 ? '#f97316' : '#16a34a';
-    const tierBadge = tierKey === 'none' ? 'DC NOW' : tierLabel;
-    const usedFallback = tierKey !== 'none' && (!(p.tiers && p.tiers[tierKey] != null));
-
-    tableHtml += '<tr style="border-bottom:1px solid #f1f5f9">' +
-      '<td style="padding:5px 8px"><div style="font-weight:600;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+p.name+'</div><div style="font-size:10px;color:#94a3b8">'+p.color+'</div></td>' +
-      '<td style="padding:5px 8px;text-align:right;font-weight:700">'+fmt(price)+'</td>' +
-      '<td style="padding:5px 8px;text-align:right;color:#1d4ed8">'+tierPct.toFixed(1)+'% <span style="font-size:9px;color:#94a3b8">'+(usedFallback?'⚠fallback':tierBadge)+'</span></td>' +
-      '<td style="padding:5px 8px;text-align:right">'+fmt(netAfterTier)+'</td>' +
-      '<td style="padding:5px 8px;text-align:right;font-weight:600">'+fmt(netAfterPromo)+'</td>' +
-      '<td style="padding:5px 8px;text-align:right;color:#ef4444;font-size:11px">-'+fmt(deductions)+'</td>' +
-      '<td style="padding:5px 8px;text-align:right;font-weight:700;color:'+(netBrand<0?'#ef4444':'#16a34a')+'">'+fmt(netBrand)+'</td>' +
-      '<td style="padding:5px 8px;text-align:right;font-weight:700;color:'+effColor+'">'+effDisc.toFixed(1)+'%</td>' +
-      '</tr>';
-  });
-
-  // Summary row
-  const avgEffDisc = sumPrice > 0 ? (sumPrice - sumNetBrand)/sumPrice*100 : 0;
-  const avgNetDisc = sumPrice > 0 ? (sumPrice - sumNetAfterPromo)/sumPrice*100 : 0;
-  tableHtml +=
-    '<tr style="background:#0f172a;font-weight:700;color:#f1f5f9">' +
-    '<td style="padding:7px 8px">📊 รวม ('+selProds.length+' รายการ)</td>' +
-    '<td style="padding:7px 8px;text-align:right">'+fmt(sumPrice)+'</td>' +
-    '<td style="padding:7px 8px;text-align:right">—</td>' +
-    '<td style="padding:7px 8px;text-align:right">—</td>' +
-    '<td style="padding:7px 8px;text-align:right">'+fmt(sumNetAfterPromo)+' <span style="font-size:9px;color:#94a3b8">(ลด '+avgNetDisc.toFixed(1)+'%)</span></td>' +
-    '<td style="padding:7px 8px;text-align:right">—</td>' +
-    '<td style="padding:7px 8px;text-align:right;color:#4ade80">'+fmt(sumNetBrand)+'</td>' +
-    '<td style="padding:7px 8px;text-align:right;color:#fb923c">'+avgEffDisc.toFixed(1)+'%</td>' +
-    '</tr>';
-
-  tableHtml += '</tbody></table></div>';
-
-  // Summary cards
-  tableHtml +=
-    '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px">' +
-      '<div style="background:#f0fdf4;border-radius:8px;padding:10px;border:1px solid #bbf7d0">' +
-        '<div style="font-size:10px;color:#64748b">Tier ที่เลือก</div>' +
-        '<div style="font-size:16px;font-weight:800;color:#1d4ed8">'+tierLabel+'</div>' +
-        '<div style="font-size:10px;color:#64748b">'+selProds.length+' สินค้า</div>' +
-      '</div>' +
-      '<div style="background:#eff6ff;border-radius:8px;padding:10px;border:1px solid #bfdbfe">' +
-        '<div style="font-size:10px;color:#64748b">Net หลังโปรโมชั่น</div>' +
-        '<div style="font-size:16px;font-weight:800;color:#1d4ed8">'+fmt(sumNetAfterPromo)+' ฿</div>' +
-        '<div style="font-size:10px;color:#64748b">ลด '+avgNetDisc.toFixed(1)+'% จากป้าย</div>' +
-      '</div>' +
-      '<div style="background:'+(sumNetBrand<0?'#fef2f2':'#f0fdf4')+';border-radius:8px;padding:10px;border:1px solid '+(sumNetBrand<0?'#fecaca':'#bbf7d0')+'">' +
-        '<div style="font-size:10px;color:#64748b">Net ที่แบรนด์ได้จริง</div>' +
-        '<div style="font-size:16px;font-weight:800;color:'+(sumNetBrand<0?'#ef4444':'#16a34a')+'">'+fmt(sumNetBrand)+' ฿</div>' +
-        '<div style="font-size:10px;color:#64748b">'+(sumNetBrand<0?'⚠ ขาดทุน':'หักทุกค่าใช้จ่าย')+'</div>' +
-      '</div>' +
-      '<div style="background:#fff7ed;border-radius:8px;padding:10px;border:1px solid #fed7aa">' +
-        '<div style="font-size:10px;color:#64748b">Effective Disc% รวม</div>' +
-        '<div style="font-size:16px;font-weight:800;color:#f97316">'+avgEffDisc.toFixed(1)+'%</div>' +
-        '<div style="font-size:10px;color:#64748b">เฉลี่ยทุกสินค้า</div>' +
-      '</div>' +
-    '</div>';
-
-  document.getElementById('resultsArea').innerHTML = tableHtml;
+  el.innerHTML = h;
+  calcResults();
 }
 
-// ── Init ─────────────────────────────────────────────
-renderTable();
+function addBRow(sid){
+  var wrap = document.getElementById('brows-'+sid);
+  if(!wrap) return;
+  var ri = (wrap.children.length+1);
+  var row = document.createElement('div');
+  row.style.cssText='display:flex;gap:6px;align-items:center;margin-bottom:4px';
+  row.innerHTML='<span style="font-size:11px;color:#64748b">สินค้า '+ri+'</span>'+
+    '<input placeholder="ชื่อสินค้า" style="width:120px" oninput="calcResults()">'+
+    '<span style="font-size:11px;color:#64748b">ราคา ฿</span>'+
+    '<input id="bp-'+sid+'-'+ri+'" type="number" min="0" value="0" style="width:80px" oninput="calcResults()">'+
+    '<button onclick="this.parentNode.remove();calcResults()" style="padding:1px 6px;background:#fee2e2;border:1px solid #fca5a5;border-radius:4px;color:#dc2626;font-size:10px">×</button>';
+  wrap.appendChild(row);
+  calcResults();
+}
 
-// Auto-select "DC NOW เดิม" on init
-document.getElementById('tier-none').classList.add('offline-active');
+function renderRedeemCost(sid){
+  var t = sv('rtype-'+sid);
+  var el = document.getElementById('rcost-'+sid);
+  if(!el) return;
+  if(t==='clarks'){
+    el.innerHTML='<div style="display:flex;gap:6px;align-items:center"><span style="font-size:11px;color:#64748b">ราคาป้าย Clarks GWP ฿</span><input id="sv2-'+sid+'" type="number" min="0" value="0" style="width:100px" oninput="calcResults()"><span style="font-size:11px;color:#94a3b8">ต้นทุน=ราคา÷3.7</span></div>';
+  } else {
+    el.innerHTML='<div style="display:flex;gap:6px;align-items:center"><span style="font-size:11px;color:#64748b">ต้นทุนสินค้า ฿</span><input id="sv2-'+sid+'" type="number" min="0" value="0" style="width:100px" oninput="calcResults()"></div>';
+  }
+  calcResults();
+}
+
+// ── Apply Mix Steps ────────────────────────────────────
+function applyMix(base){
+  var net=base, accPct=0, extra=0;
+  steps.forEach(function(sid){
+    var t=sv('stype-'+sid);
+    var v1=gv('sv1-'+sid);
+    if(t==='ontop'){
+      net=net*(1-v1/100);
+    } else if(t==='addpct'){
+      accPct+=v1;
+      net=base*(1-accPct/100);
+    } else if(t==='cash'){
+      net=Math.max(0,net-v1);
+    } else if(t==='gwp_clarks'){
+      extra+=v1/3.7;
+    } else if(t==='gwp_other'){
+      extra+=v1;
+    } else if(t==='bundle'){
+      var bwrap=document.getElementById('brows-'+sid);
+      if(bwrap){
+        var total=0;
+        bwrap.querySelectorAll('input[id^="bp-"]').forEach(function(inp){ total+=parseFloat(inp.value)||0; });
+        if(total>0) net=total;
+      }
+    } else if(t==='redeem'){
+      var pay=gv('sv1-'+sid);
+      net=net+pay;
+      var rt=sv('rtype-'+sid);
+      var cv=gv('sv2-'+sid);
+      extra+=(rt==='clarks')?cv/3.7:cv;
+    }
+  });
+  return {net:net, extra:extra};
+}
+
+// ── Calc Results ──────────────────────────────────────
+function calcResults(){
+  var selArr = PRODUCTS.filter(function(p){ return sel.has(p.art_color); });
+  var tbody = document.getElementById('resTbody');
+  var sumArea = document.getElementById('sumArea');
+  var resEmpty = document.getElementById('resEmpty');
+
+  if(selArr.length===0){
+    tbody.innerHTML='';
+    sumArea.innerHTML='';
+    resEmpty.style.display='block';
+    return;
+  }
+  resEmpty.style.display='none';
+
+  var gp=gv('gpPct'), vAmt=gv('vAmt'), vPct=gv('vPct');
+  var rows='', totalNetBrand=0, totalPrice=0;
+  var minEff=Infinity, maxEff=-Infinity;
+
+  selArr.forEach(function(p){
+    var price=p.price||0;
+    var tierKey=tier.key;
+    var tierPct, tierLabel;
+    if(tierKey==='none'){
+      tierPct=p.dc_now||0; tierLabel='DC NOW '+pct(tierPct);
+    } else {
+      var tv = p.tiers && p.tiers[tierKey]!=null ? p.tiers[tierKey] : null;
+      if(tv!=null){ tierPct=tv; tierLabel=tier.label+' '+pct(tv); }
+      else { tierPct=p.dc_now||0; tierLabel='⚠ DC NOW '+pct(tierPct); }
+    }
+    var netTier=price*(1-tierPct/100);
+    var mix=applyMix(netTier);
+    var netPromo=mix.net, extra=mix.extra;
+    var vt=vAmt+(netPromo*vPct/100);
+    var gpAmt=netPromo*gp/100;
+    var netBrand=netPromo-vt-gpAmt-extra;
+    var effDisc=(price-netBrand)/price*100;
+
+    totalNetBrand+=netBrand; totalPrice+=price;
+    if(effDisc<minEff) minEff=effDisc;
+    if(effDisc>maxEff) maxEff=effDisc;
+
+    var effCls=effDisc>50?'b-r':effDisc>30?'b-y':'b-g';
+    rows+='<tr>';
+    rows+='<td style="font-weight:600">'+p.name+'<br><span style="font-size:10px;color:#94a3b8">'+p.color+'</span></td>';
+    rows+='<td style="text-align:right">'+fmt(price)+'</td>';
+    rows+='<td style="text-align:right;font-size:11px">'+tierLabel+'</td>';
+    rows+='<td style="text-align:right">'+fmt(Math.round(netTier))+'</td>';
+    rows+='<td style="text-align:right">'+fmt(Math.round(netPromo))+'</td>';
+    rows+='<td style="text-align:right;font-weight:700;color:#16a34a">'+fmt(Math.round(netBrand))+'</td>';
+    rows+='<td style="text-align:right"><span class="b '+effCls+'">'+effDisc.toFixed(1)+'%</span></td>';
+    rows+='</tr>';
+  });
+  tbody.innerHTML=rows;
+
+  var avgEff=totalPrice>0?(totalPrice-totalNetBrand)/totalPrice*100:0;
+  sumArea.innerHTML=
+    '<div class="sum-card"><div style="font-size:10px;color:#64748b;margin-bottom:4px">สินค้าที่เลือก</div><div style="font-size:24px;font-weight:800;color:#1e293b">'+selArr.length+'</div><div style="font-size:11px;color:#94a3b8">รายการ</div></div>'+
+    '<div class="sum-card"><div style="font-size:10px;color:#64748b;margin-bottom:4px">Avg Eff. Disc%</div><div style="font-size:24px;font-weight:800;color:#f97316">'+avgEff.toFixed(1)+'%</div><div style="font-size:11px;color:#94a3b8">ส่วนลดรวม</div></div>'+
+    '<div class="sum-card"><div style="font-size:10px;color:#64748b;margin-bottom:4px">Min Disc</div><div style="font-size:24px;font-weight:800;color:#16a34a">'+(minEff===Infinity?'—':minEff.toFixed(1)+'%')+'</div><div style="font-size:11px;color:#94a3b8">ต่ำสุด</div></div>'+
+    '<div class="sum-card"><div style="font-size:10px;color:#64748b;margin-bottom:4px">Max Disc</div><div style="font-size:24px;font-weight:800;color:#dc2626">'+(maxEff===-Infinity?'—':maxEff.toFixed(1)+'%')+'</div><div style="font-size:11px;color:#94a3b8">สูงสุด</div></div>';
+}
+
+// ── Init ──────────────────────────────────────────────
+// Event delegation for row clicks
+document.getElementById('tbody').addEventListener('click', function(e){
+  var tr = e.target.closest('tr');
+  if(!tr) return;
+  var key = tr.dataset.key;
+  if(!key) return;
+  if(e.target.tagName==='INPUT') {
+    // checkbox click - toggle
+    toggleKey(key);
+  } else {
+    toggleKey(key);
+  }
+});
+
+render();
+pickTier(document.getElementById('tbtn-none'),'none','none','DC NOW เดิม');
 </script>
 </body>
 </html>
