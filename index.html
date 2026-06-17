@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Promotion Calculator & KPI Tracker — Clarks</title>
+<title>Promotion Calculator & KPI Tracker</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
 <style>
@@ -36,16 +36,14 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
 
 <!-- Sidebar -->
 <div class="sidebar">
-  <div class="logo-text">CLARKS</div>
-  <div class="logo-sub">Promotion Tools</div>
+  <div class="logo-sub" style="padding:18px 20px 14px;font-size:14px;font-weight:700;color:#fff">Promotion Tools</div>
   <nav>
     <button class="tab-btn active" onclick="showTab('c')">🧮 Promo Calculator</button>
     <button class="tab-btn" onclick="showTab('d')">🎯 KPI Tracker</button>
-    <a href="promo-planner.html" style="display:block;width:100%;text-align:left;padding:11px 20px;color:#94a3b8;border-left:3px solid transparent;cursor:pointer;font-size:13px;transition:all .2s;text-decoration:none" onmouseover="this.style.color='#fff';this.style.background='rgba(249,115,22,.15)';this.style.borderLeftColor='#f97316'" onmouseout="this.style.color='#94a3b8';this.style.background='none';this.style.borderLeftColor='transparent'">🏷️ Promo Planner</a>
+    <a href="promo-planner.html" class="tab-btn" style="text-decoration:none;display:block">🏷️ Promo Planner</a>
   </nav>
   <div style="padding:20px;margin-top:auto;border-top:1px solid #1e293b">
-    <div style="color:#64748b;font-size:11px">Clarks Brand Team</div>
-    <div style="color:#94a3b8;font-size:12px;margin-top:4px">คำนวณโปรโมชั่น Real-time</div>
+    <div style="color:#94a3b8;font-size:12px">คำนวณโปรโมชั่น Real-time</div>
   </div>
 </div>
 
@@ -510,7 +508,7 @@ function renderMixRedeemProduct(sid) {
     sel.id = 'mixRedeemProd_' + sid;
     sel.style.width = '100%';
     area.innerHTML = '';
-    const label = document.createElement('label'); label.style='font-size:11px;color:#64748b'; label.textContent='สินค้า Clarks ที่แลกซื้อ';
+    const label = document.createElement('label'); label.style='font-size:11px;color:#64748b'; label.textContent='สินค้าที่แลกซื้อ';
     area.appendChild(label); area.appendChild(sel);
     const costLine = document.createElement('div');
     costLine.style='font-size:11px;color:#94a3b8;margin-top:3px';
@@ -1180,7 +1178,7 @@ function exportKPIExcel(){
   const ws=XLSX.utils.aoa_to_sheet([headers,...rows]);
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,'KPI Campaigns');
-  XLSX.writeFile(wb,'Clarks_KPI_Campaigns.xlsx');
+  XLSX.writeFile(wb,'KPI_Campaigns.xlsx');
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
