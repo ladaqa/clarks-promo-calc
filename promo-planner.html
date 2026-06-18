@@ -48,6 +48,12 @@ tr.st-lo td{background:#fee2e2}
 .rtbl th{background:#1e293b;color:#94a3b8;font-size:11px}
 .rtbl td{font-size:12px}
 .sum-card{background:#fff;border-radius:10px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.08);text-align:center;flex:1;min-width:120px}
+.upload-zone{border:2px dashed #cbd5e1;border-radius:10px;padding:14px;background:#fafafa;transition:border-color .2s}
+.upload-zone:hover{border-color:var(--accent)}
+.upload-zone.ok{border-color:#16a34a;background:#f0fdf4}
+.file-input-wrap{position:relative;overflow:hidden;display:inline-block}
+.file-input-wrap input[type=file]{position:absolute;left:0;top:0;opacity:0;width:100%;height:100%;cursor:pointer}
+.file-input-wrap .file-btn{padding:5px 12px;background:#1e293b;color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer}
 /* Modal */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:center;justify-content:center}
 .modal{background:#fff;border-radius:16px;padding:24px;width:520px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
@@ -79,7 +85,45 @@ tr.st-lo td{background:#fee2e2}
 <!-- Main -->
 <div class="main">
   <div style="font-size:20px;font-weight:800;margin-bottom:2px">🏷️ Promo Planner</div>
-  <div style="color:#64748b;font-size:12px;margin-bottom:18px">วางแผนโปรโมชั่นจากข้อมูล Slow Move &middot; 247 SKUs</div>
+  <div style="color:#64748b;font-size:12px;margin-bottom:18px">วางแผนโปรโมชั่นจากข้อมูล Slow Move &middot; <span id="productCount">247 SKUs</span></div>
+
+  <!-- ════ UPLOAD DATA ════ -->
+  <div class="card" id="uploadCard" style="border:2px dashed #cbd5e1;background:#fafafa;margin-bottom:16px">
+    <div style="display:flex;align-items:center;gap:10px;cursor:pointer" onclick="toggleUpload()">
+      <span style="font-size:18px">&#128228;</span>
+      <span style="font-weight:700;font-size:14px">อัปโหลดข้อมูลใหม่</span>
+      <span style="font-size:11px;color:#94a3b8">(ไม่อัปโหลด = ใช้ข้อมูล Embedded 247 SKUs)</span>
+      <span id="uploadChevron" style="margin-left:auto;color:#94a3b8;font-size:14px;transition:transform .2s">&#9660;</span>
+    </div>
+    <div id="uploadBody" style="display:none;margin-top:14px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <!-- Slow Move -->
+        <div class="upload-zone" id="smZone">
+          <div style="font-size:11px;font-weight:700;color:#1e293b;margin-bottom:4px">&#128202; Slow Move File (.xlsx)</div>
+          <div style="font-size:10px;color:#64748b;margin-bottom:8px">Header Row 2: Name_Inter, Color_Inter, article+color, QTY, PRICE, BU, GENDER, DC NOW, avg dc ...</div>
+          <div class="file-input-wrap">
+            <span class="file-btn">&#128196; เลือกไฟล์</span>
+            <input type="file" id="smFile" accept=".xlsx,.xls" onchange="loadSlowMove(this)">
+          </div>
+          <div id="smStatus" style="font-size:11px;color:#64748b;margin-top:6px">&#8212; ยังไม่ได้อัปโหลด</div>
+        </div>
+        <!-- Discount Tier -->
+        <div class="upload-zone" id="dtZone">
+          <div style="font-size:11px;font-weight:700;color:#1e293b;margin-bottom:4px">&#128176; Discount Tier File (.xlsx)</div>
+          <div style="font-size:10px;color:#64748b;margin-bottom:8px">Row 1: group headers, Row 2: col headers (article+color, counter, x clusive, bau, a, a+, mega, FS ...)</div>
+          <div class="file-input-wrap">
+            <span class="file-btn">&#128196; เลือกไฟล์</span>
+            <input type="file" id="dtFile" accept=".xlsx,.xls" onchange="loadDiscTier(this)">
+          </div>
+          <div id="dtStatus" style="font-size:11px;color:#64748b;margin-top:6px">&#8212; ยังไม่ได้อัปโหลด</div>
+        </div>
+      </div>
+      <div style="margin-top:12px;display:flex;align-items:center;gap:10px">
+        <button id="btnMerge" onclick="mergeAndReload()" disabled style="padding:7px 18px;background:#94a3b8;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:not-allowed">&#128260; โหลดข้อมูลใหม่</button>
+        <span id="mergeHint" style="font-size:11px;color:#94a3b8">อัปโหลดทั้ง 2 ไฟล์ก่อนกด</span>
+      </div>
+    </div>
+  </div>
 
   <!-- STEP 1 -->
   <div class="card" id="card1">
@@ -90,7 +134,12 @@ tr.st-lo td{background:#fee2e2}
       <button onclick="clearSel()" style="margin-left:auto;padding:4px 10px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;font-size:11px;color:#64748b">ล้างการเลือก</button>
     </div>
     <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:10px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;margin-bottom:8px">
-      <input id="search" type="text" placeholder="🔍 ค้นหาชื่อรุ่น/สี..." style="width:170px" oninput="render()">
+      <input id="search" type="text" placeholder="🔍 ค้นหาชื่อรุ่น/สี..." style="width:160px" oninput="render()">
+      <div style="display:flex;align-items:center;gap:4px">
+        <span style="font-size:10px;color:#64748b;font-weight:600;white-space:nowrap">ราคา &#8805;</span>
+        <input id="minPrice" type="number" min="0" step="100" placeholder="0" style="width:80px" oninput="render()" title="กรองสินค้าที่ราคาป้ายมากกว่าหรือเท่ากับค่าที่กรอก">
+        <span style="font-size:10px;color:#64748b">&#3647;</span>
+      </div>
       <div style="display:flex;flex-wrap:wrap;gap:2px;align-items:center">
         <span style="font-size:10px;color:#64748b;font-weight:600;margin-right:2px">BU:</span>
         <button class="chip on" id="f-bu-ALL" onclick="setFilter('bu','ALL',this)">ALL</button>
@@ -166,6 +215,16 @@ tr.st-lo td{background:#fee2e2}
         <button class="tier-btn" id="tbtn-mega" onclick="pickTier(this,'online','mega','Mega')">Mega</button>
         <button class="tier-btn" id="tbtn-fs" onclick="pickTier(this,'online','fs','Flash Sale')">Flash Sale</button>
         <button class="tier-btn" id="tbtn-seek" onclick="pickTier(this,'online','seek','SEEK')">SEEK</button>
+      </div>
+    </div>
+    <!-- Custom discount -->
+    <div style="margin-top:10px;padding-top:10px;border-top:1px solid #f1f5f9">
+      <div style="font-size:11px;font-weight:700;color:#475569;margin-bottom:6px">&#9999;&#65039; กำหนดส่วนลดเอง</div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <button class="tier-btn" id="tbtn-custom" onclick="pickTier(this,'custom','custom','กำหนดเอง')">กำหนดเอง</button>
+        <input id="customDisc" type="number" min="0" max="100" step="0.5" placeholder="0.0" style="width:75px" oninput="if(tier.key==='custom') calcResults()" title="ระบุ % ส่วนลดที่ต้องการ">
+        <span style="font-size:12px;color:#64748b">%</span>
+        <span style="font-size:11px;color:#94a3b8">(ใช้ % เดิมสำหรับทุกสินค้าที่เลือก)</span>
       </div>
     </div>
     <div id="tierMsg" style="margin-top:10px;font-size:12px;color:#64748b;padding:8px;background:#f8fafc;border-radius:6px;min-height:28px"></div>
@@ -358,8 +417,10 @@ function closeModal(id){ document.getElementById(id).style.display='none'; }
 // ── Filtering ─────────────────────────────────────────
 function getFiltered(){
   var q = (document.getElementById('search').value||'').toLowerCase();
+  var minP = parseFloat(document.getElementById('minPrice').value)||0;
   return PRODUCTS.filter(function(p){
     if(q && !p.name.toLowerCase().includes(q) && !(p.color||'').toLowerCase().includes(q)) return false;
+    if(minP > 0 && (p.price||0) < minP) return false;
     if(filt.bu!=='ALL' && (p.bu||'').toLowerCase() !== filt.bu.toLowerCase()) return false;
     if(filt.gender!=='ALL' && (p.gender||'').toUpperCase().trim() !== filt.gender) return false;
     if(filt.dc!=='ALL'){
@@ -662,6 +723,8 @@ function calcResults(){
     var tierPct, tierLabel;
     if(tierKey==='none'){
       tierPct=p.dc_now||0; tierLabel='DC NOW '+pct(tierPct);
+    } else if(tierKey==='custom'){
+      tierPct=gv('customDisc'); tierLabel='กำหนดเอง '+pct(tierPct);
     } else {
       var tv = p.tiers && p.tiers[tierKey]!=null ? p.tiers[tierKey] : null;
       if(tv!=null){ tierPct=tv; tierLabel=tier.label+' '+pct(tv); }
@@ -906,6 +969,200 @@ document.querySelectorAll('.modal-overlay').forEach(function(m){
 document.getElementById('exportName').addEventListener('input', function(){
   document.getElementById('exportFilename').textContent = (this.value.trim()||'')+'_Promo Planner.xlsx';
 });
+
+// ── Upload Data ───────────────────────────────────────
+var uploadData = {slowMove: null, discTier: null};
+
+function toggleUpload(){
+  var body = document.getElementById('uploadBody');
+  var chev = document.getElementById('uploadChevron');
+  var open = body.style.display === 'none';
+  body.style.display = open ? 'block' : 'none';
+  chev.style.transform = open ? 'rotate(180deg)' : '';
+}
+
+function parsePct(v){
+  if(v === null || v === undefined) return null;
+  var s = String(v).toUpperCase().trim();
+  if(s === 'NO' || s === '' || s === 'NULL' || s === 'NONE') return null;
+  var n = parseFloat(v);
+  if(isNaN(n)) return null;
+  // Convert decimal (0.05 → 5%) if value ≤ 1
+  if(n > 0 && n <= 1) n = +(n * 100).toFixed(4);
+  return n;
+}
+
+function findHeaderRow(rows, keyword){
+  for(var i = 0; i < Math.min(rows.length, 6); i++){
+    var r = rows[i];
+    if(r && r.some(function(c){ return c && String(c).toLowerCase().includes(keyword); })) return i;
+  }
+  return -1;
+}
+
+function loadSlowMove(inp){
+  var file = inp.files[0];
+  if(!file) return;
+  document.getElementById('smStatus').textContent = '⏳ กำลังโหลด...';
+  var reader = new FileReader();
+  reader.onload = function(e){
+    try {
+      var wb = XLSX.read(e.target.result, {type:'array'});
+      var ws = wb.Sheets[wb.SheetNames[0]];
+      var rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:null, raw:true});
+
+      var hdRow = findHeaderRow(rows, 'name_inter');
+      if(hdRow < 0){ hdRow = findHeaderRow(rows, 'article+color'); }
+      if(hdRow < 0){ document.getElementById('smStatus').textContent = '❌ ไม่พบ Header Row'; return; }
+
+      var hd = rows[hdRow].map(function(c){ return c ? String(c).toLowerCase().trim() : ''; });
+      var ci = function(kw){ return hd.findIndex(function(h){ return h.includes(kw); }); };
+      var cm = {
+        name:   ci('name_inter'),
+        color:  ci('color_inter'),
+        art:    ci('article+color'),
+        qty:    ci('qty'),
+        price:  ci('price'),
+        bu:     hd.indexOf('bu'),
+        gender: hd.indexOf('gender'),
+        season: hd.indexOf('season'),
+        stype:  ci('sale type'),
+        seed:   hd.indexOf('seeding'),
+        stotal: ci('sale total'),
+        total:  hd.indexOf('total'),
+        stock:  hd.indexOf('stock'),
+        stpct:  ci('st%'),
+        dcnow:  ci('dc now'),
+        avgdc:  ci('avg dc')
+      };
+
+      if(cm.art < 0){ document.getElementById('smStatus').textContent = '❌ ไม่พบคอลัมน์ article+color'; return; }
+
+      var products = [];
+      for(var i = hdRow+1; i < rows.length; i++){
+        var r = rows[i];
+        if(!r || r[cm.art] == null) continue;
+        var artColor = String(r[cm.art]).trim();
+        if(!artColor) continue;
+        var dcNow = parsePct(cm.dcnow>=0 ? r[cm.dcnow] : null);
+        if(dcNow === null) dcNow = 0;
+        var stPct = parsePct(cm.stpct>=0 ? r[cm.stpct] : null);
+        if(stPct === null) stPct = 0;
+        products.push({
+          name:      cm.name>=0 ? String(r[cm.name]||'').trim() : '',
+          color:     cm.color>=0 ? String(r[cm.color]||'').trim() : '',
+          art_color: artColor,
+          qty:       cm.qty>=0 ? (parseFloat(r[cm.qty])||0) : 0,
+          price:     cm.price>=0 ? (parseFloat(r[cm.price])||0) : 0,
+          bu:        cm.bu>=0 ? String(r[cm.bu]||'').trim() : '',
+          gender:    cm.gender>=0 ? String(r[cm.gender]||'').trim() : '',
+          season:    cm.season>=0 ? String(r[cm.season]||'').trim() : '',
+          sale_type: cm.stype>=0 ? String(r[cm.stype]||'').trim() : '',
+          seeding:   cm.seed>=0 ? (parseFloat(r[cm.seed])||null) : null,
+          sale_total:cm.stotal>=0 ? (parseFloat(r[cm.stotal])||0) : 0,
+          total:     cm.total>=0 ? (parseFloat(r[cm.total])||0) : 0,
+          stock:     cm.stock>=0 ? (parseFloat(r[cm.stock])||0) : 0,
+          st_pct:    stPct,
+          dc_now:    dcNow,
+          avg_dc:    cm.avgdc>=0 ? (parsePct(r[cm.avgdc])||0) : 0,
+          tiers:     {}
+        });
+      }
+
+      uploadData.slowMove = products;
+      document.getElementById('smStatus').textContent = '✅ โหลดสำเร็จ: '+products.length+' รายการ';
+      document.getElementById('smZone').classList.add('ok');
+      checkMergeReady();
+    } catch(err){
+      document.getElementById('smStatus').textContent = '❌ Error: '+err.message;
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function loadDiscTier(inp){
+  var file = inp.files[0];
+  if(!file) return;
+  document.getElementById('dtStatus').textContent = '⏳ กำลังโหลด...';
+  var reader = new FileReader();
+  reader.onload = function(e){
+    try {
+      var wb = XLSX.read(e.target.result, {type:'array', cellFormula:false});
+      var ws = wb.Sheets[wb.SheetNames[0]];
+      var rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:null, raw:true});
+
+      var hdRow = findHeaderRow(rows, 'article+color');
+      if(hdRow < 0){ document.getElementById('dtStatus').textContent = '❌ ไม่พบ Header Row (article+color)'; return; }
+
+      var hd = rows[hdRow].map(function(c){ return c ? String(c).toLowerCase().trim() : ''; });
+      var ci = function(kw){ return hd.findIndex(function(h){ return h.includes(kw); }); };
+      var cex = function(kw){ return hd.findIndex(function(h){ return h === kw; }); };
+
+      var artCol = ci('article+color');
+      var tierCols = {
+        counter:  Math.max(ci('counter'), cex('counter')),
+        xclusive: Math.max(ci('x clusive'), ci('xclusive')),
+        bau:      cex('bau'),
+        a:        cex('a'),
+        a_plus:   Math.max(cex('a+'), cex('a_plus')),
+        mega:     cex('mega'),
+        fs:       Math.max(cex('fs'), cex('flash sale'), ci('flash')),
+        seek:     cex('seek')
+      };
+
+      var tierMap = {};
+      for(var i = hdRow+1; i < rows.length; i++){
+        var r = rows[i];
+        if(!r || r[artCol] == null) continue;
+        var key = String(r[artCol]).trim();
+        if(!key) continue;
+        var t = {};
+        ['counter','xclusive','bau','a','a_plus','mega','fs','seek'].forEach(function(k){
+          t[k] = tierCols[k] >= 0 ? parsePct(r[tierCols[k]]) : null;
+        });
+        tierMap[key] = t;
+      }
+
+      uploadData.discTier = tierMap;
+      document.getElementById('dtStatus').textContent = '✅ โหลดสำเร็จ: '+Object.keys(tierMap).length+' รายการ';
+      document.getElementById('dtZone').classList.add('ok');
+      checkMergeReady();
+    } catch(err){
+      document.getElementById('dtStatus').textContent = '❌ Error: '+err.message;
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function checkMergeReady(){
+  var ready = uploadData.slowMove && uploadData.discTier;
+  var btn = document.getElementById('btnMerge');
+  var hint = document.getElementById('mergeHint');
+  btn.disabled = !ready;
+  btn.style.background = ready ? '#16a34a' : '#94a3b8';
+  btn.style.cursor = ready ? 'pointer' : 'not-allowed';
+  if(ready) hint.textContent = uploadData.slowMove.length+' Slow Move + '+Object.keys(uploadData.discTier).length+' Discount Tier — พร้อมโหลด!';
+}
+
+function mergeAndReload(){
+  var prods = uploadData.slowMove;
+  var tierMap = uploadData.discTier;
+  var empty = {counter:null,xclusive:null,bau:null,a:null,a_plus:null,mega:null,fs:null,seek:null};
+  var matched = 0;
+  prods.forEach(function(p){
+    if(tierMap[p.art_color]){ p.tiers = tierMap[p.art_color]; matched++; }
+    else p.tiers = Object.assign({}, empty);
+  });
+  PRODUCTS = prods;
+  sel.clear();
+  document.getElementById('productCount').textContent = PRODUCTS.length+' SKUs (อัปโหลดแล้ว)';
+  document.getElementById('uploadCard').style.borderColor = '#16a34a';
+  document.getElementById('uploadCard').style.background = '#f0fdf4';
+  document.getElementById('mergeHint').textContent = '✅ โหลดแล้ว: '+PRODUCTS.length+' SKUs · Tier matched '+matched+' รายการ';
+  toggleUpload();  // collapse
+  render();
+  calcResults();
+}
 
 // ── Init ──────────────────────────────────────────────
 render();
