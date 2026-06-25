@@ -45,8 +45,15 @@ tr.st-lo td{background:#fee2e2}
 #tblWrap{max-height:380px;overflow-y:auto;border:1px solid #e2e8f0;border-radius:8px}
 .locked{opacity:.45;pointer-events:none}
 .mcard{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:12px;margin-bottom:8px;position:relative}
-.rtbl th{background:#1e293b;color:#94a3b8;font-size:11px}
+.rtbl th{background:#1e293b;color:#94a3b8;font-size:11px;cursor:pointer;user-select:none;white-space:nowrap}
+.rtbl th:hover{background:#334155}
+.rtbl th .sort-icon{margin-left:4px;opacity:.4;font-size:10px}
+.rtbl th.sort-asc .sort-icon::after{content:'▲';opacity:1}
+.rtbl th.sort-desc .sort-icon::after{content:'▼';opacity:1}
+.rtbl th:not(.sort-asc):not(.sort-desc) .sort-icon::after{content:'⇅'}
 .rtbl td{font-size:12px}
+.del-btn{padding:1px 6px;background:transparent;border:1px solid #fca5a5;border-radius:4px;color:#ef4444;font-size:11px;cursor:pointer;line-height:1.4;transition:all .15s}
+.del-btn:hover{background:#fee2e2}
 .sum-card{background:#fff;border-radius:10px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.08);text-align:center;flex:1;min-width:120px}
 .upload-zone{border:2px dashed #cbd5e1;border-radius:10px;padding:14px;background:#fafafa;transition:border-color .2s}
 .upload-zone:hover{border-color:var(--accent)}
@@ -264,14 +271,15 @@ tr.st-lo td{background:#fee2e2}
     <div style="overflow-x:auto">
       <table class="rtbl" id="resTable">
         <thead>
-          <tr>
-            <th>รุ่น / สี</th>
-            <th style="text-align:right">ราคาป้าย</th>
-            <th style="text-align:right">Tier ที่ใช้</th>
-            <th style="text-align:right">Net after Tier</th>
-            <th style="text-align:right">Net after Promo</th>
-            <th style="text-align:right">Net Brand</th>
-            <th style="text-align:right">Eff. Disc%</th>
+          <tr id="resThead">
+            <th onclick="sortRes('name')" id="rh-name">รุ่น / สี<span class="sort-icon"></span></th>
+            <th onclick="sortRes('price')" id="rh-price" style="text-align:right">ราคาป้าย<span class="sort-icon"></span></th>
+            <th id="rh-tier" style="text-align:right">Tier ที่ใช้</th>
+            <th onclick="sortRes('netTier')" id="rh-netTier" style="text-align:right">Net after Tier<span class="sort-icon"></span></th>
+            <th onclick="sortRes('netPromo')" id="rh-netPromo" style="text-align:right">Net after Promo<span class="sort-icon"></span></th>
+            <th onclick="sortRes('netBrand')" id="rh-netBrand" style="text-align:right">Net Brand<span class="sort-icon"></span></th>
+            <th onclick="sortRes('effDisc')" id="rh-effDisc" style="text-align:right">Eff. Disc%<span class="sort-icon"></span></th>
+            <th style="text-align:center;width:36px"></th>
           </tr>
         </thead>
         <tbody id="resTbody"></tbody>
@@ -744,31 +752,88 @@ function calcResults(){
 
     lastResults.push({
       name:p.name, color:p.color, bu:p.bu, gender:p.gender,
+      art_color:p.art_color,
       price:price, tierLabel:tierLabel, tierPct:tierPct,
       netTier:Math.round(netTier), netPromo:Math.round(netPromo),
       netBrand:Math.round(netBrand), effDisc:+effDisc.toFixed(2),
       stock:p.stock, dc_now:p.dc_now, avg_dc:p.avg_dc, st_pct:p.st_pct
     });
+  });
 
-    var effCls=effDisc>50?'b-r':effDisc>30?'b-y':'b-g';
-    rows+='<tr>';
-    rows+='<td style="font-weight:600">'+p.name+'<br><span style="font-size:10px;color:#94a3b8">'+p.color+'</span></td>';
-    rows+='<td style="text-align:right">'+fmt(price)+'</td>';
-    rows+='<td style="text-align:right;font-size:11px">'+tierLabel+'</td>';
-    rows+='<td style="text-align:right">'+fmt(Math.round(netTier))+'</td>';
-    rows+='<td style="text-align:right">'+fmt(Math.round(netPromo))+'</td>';
-    rows+='<td style="text-align:right;font-weight:700;color:#16a34a">'+fmt(Math.round(netBrand))+'</td>';
-    rows+='<td style="text-align:right"><span class="b '+effCls+'">'+effDisc.toFixed(1)+'%</span></td>';
+  renderResTable();
+}
+
+var resSort = {col:'', dir:1};
+
+function renderResTable(){
+  var list = lastResults.slice();
+  if(resSort.col){
+    list.sort(function(a,b){
+      var av=a[resSort.col], bv=b[resSort.col];
+      if(typeof av==='string') return resSort.dir*av.localeCompare(bv);
+      return resSort.dir*(av-bv);
+    });
+  }
+
+  // Update sort icons
+  ['name','price','netTier','netPromo','netBrand','effDisc'].forEach(function(k){
+    var th=document.getElementById('rh-'+k);
+    if(!th) return;
+    th.classList.remove('sort-asc','sort-desc');
+    if(resSort.col===k) th.classList.add(resSort.dir===1?'sort-asc':'sort-desc');
+  });
+
+  var rows='';
+  list.forEach(function(r){
+    var effCls=r.effDisc>50?'b-r':r.effDisc>30?'b-y':'b-g';
+    rows+='<tr data-key="'+r.art_color+'">';
+    rows+='<td style="font-weight:600">'+r.name+'<br><span style="font-size:10px;color:#94a3b8">'+r.color+'</span></td>';
+    rows+='<td style="text-align:right">'+fmt(r.price)+'</td>';
+    rows+='<td style="text-align:right;font-size:11px">'+r.tierLabel+'</td>';
+    rows+='<td style="text-align:right">'+fmt(r.netTier)+'</td>';
+    rows+='<td style="text-align:right">'+fmt(r.netPromo)+'</td>';
+    rows+='<td style="text-align:right;font-weight:700;color:#16a34a">'+fmt(r.netBrand)+'</td>';
+    rows+='<td style="text-align:right"><span class="b '+effCls+'">'+r.effDisc.toFixed(1)+'%</span></td>';
+    rows+='<td style="text-align:center"><button class="del-btn" onclick="removeFromPromo(\''+r.art_color+'\')">&#215;</button></td>';
     rows+='</tr>';
   });
-  tbody.innerHTML=rows;
 
+  var totalNetBrand=0, totalPrice=0, minEff=Infinity, maxEff=-Infinity;
+  lastResults.forEach(function(r){
+    totalNetBrand+=r.netBrand; totalPrice+=r.price;
+    if(r.effDisc<minEff) minEff=r.effDisc;
+    if(r.effDisc>maxEff) maxEff=r.effDisc;
+  });
   var avgEff=totalPrice>0?(totalPrice-totalNetBrand)/totalPrice*100:0;
+
+  document.getElementById('resTbody').innerHTML=rows;
+
+  var sumArea = document.getElementById('sumArea');
   sumArea.innerHTML=
-    '<div class="sum-card"><div style="font-size:10px;color:#64748b;margin-bottom:4px">สินค้าที่เลือก</div><div style="font-size:24px;font-weight:800;color:#1e293b">'+selArr.length+'</div><div style="font-size:11px;color:#94a3b8">รายการ</div></div>'+
+    '<div class="sum-card"><div style="font-size:10px;color:#64748b;margin-bottom:4px">สินค้าที่เลือก</div><div style="font-size:24px;font-weight:800;color:#1e293b">'+lastResults.length+'</div><div style="font-size:11px;color:#94a3b8">รายการ</div></div>'+
     '<div class="sum-card"><div style="font-size:10px;color:#64748b;margin-bottom:4px">Avg Eff. Disc%</div><div style="font-size:24px;font-weight:800;color:#f97316">'+avgEff.toFixed(1)+'%</div><div style="font-size:11px;color:#94a3b8">ส่วนลดเฉลี่ย</div></div>'+
     '<div class="sum-card"><div style="font-size:10px;color:#64748b;margin-bottom:4px">Min Disc</div><div style="font-size:24px;font-weight:800;color:#16a34a">'+(minEff===Infinity?'—':minEff.toFixed(1)+'%')+'</div><div style="font-size:11px;color:#94a3b8">ต่ำสุด</div></div>'+
     '<div class="sum-card"><div style="font-size:10px;color:#64748b;margin-bottom:4px">Max Disc</div><div style="font-size:24px;font-weight:800;color:#dc2626">'+(maxEff===-Infinity?'—':maxEff.toFixed(1)+'%')+'</div><div style="font-size:11px;color:#94a3b8">สูงสุด</div></div>';
+}
+
+function sortRes(col){
+  if(resSort.col===col) resSort.dir*=-1;
+  else { resSort.col=col; resSort.dir=1; }
+  renderResTable();
+}
+
+function removeFromPromo(key){
+  sel.delete(key);
+  lastResults = lastResults.filter(function(r){ return r.art_color !== key; });
+  if(lastResults.length===0){
+    document.getElementById('resTbody').innerHTML='';
+    document.getElementById('sumArea').innerHTML='';
+    document.getElementById('resEmpty').style.display='block';
+  } else {
+    renderResTable();
+  }
+  updateCounts();
+  render();
 }
 
 // ── Build promo description string ───────────────────
