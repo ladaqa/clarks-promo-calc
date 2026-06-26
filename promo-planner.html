@@ -278,6 +278,7 @@ tr.st-lo td{background:#fee2e2}
             <th onclick="sortRes('netTier')" id="rh-netTier" style="text-align:right">Net after Tier<span class="sort-icon"></span></th>
             <th onclick="sortRes('netPromo')" id="rh-netPromo" style="text-align:right">Net after Promo<span class="sort-icon"></span></th>
             <th onclick="sortRes('netBrand')" id="rh-netBrand" style="text-align:right">Net Brand<span class="sort-icon"></span></th>
+            <th onclick="sortRes('netPromo')" id="rh-custPrice" style="text-align:right">ราคาลูกค้า (Net)<span class="sort-icon"></span></th>
             <th onclick="sortRes('effDisc')" id="rh-effDisc" style="text-align:right">Eff. Disc%<span class="sort-icon"></span></th>
             <th style="text-align:center;width:36px"></th>
           </tr>
@@ -793,6 +794,7 @@ function renderResTable(){
     rows+='<td style="text-align:right">'+fmt(r.netTier)+'</td>';
     rows+='<td style="text-align:right">'+fmt(r.netPromo)+'</td>';
     rows+='<td style="text-align:right;font-weight:700;color:#16a34a">'+fmt(r.netBrand)+'</td>';
+    rows+='<td style="text-align:right;font-weight:700;color:#1d4ed8">'+fmt(r.netPromo)+'</td>';
     rows+='<td style="text-align:right"><span class="b '+effCls+'">'+r.effDisc.toFixed(1)+'%</span></td>';
     rows+='<td style="text-align:center"><button class="del-btn" onclick="removeFromPromo(\''+r.art_color+'\')">&#215;</button></td>';
     rows+='</tr>';
@@ -903,9 +905,10 @@ function doExport(){
 
   // Sheet 2: Products
   var prodHeaders = [
-    'ชื่อรุ่น','สี','BU','Gender',
+    'Article','ชื่อรุ่น','สี','BU','Gender',
     'ราคาป้าย',
     'Tier ที่ใช้','Net after Tier','Net after Promo',
+    'ราคาลูกค้า (Net)',
     'GP ฿','Net Brand','Eff. Disc%',
     'Stock','%ST','DC NOW%','Avg DC%'
   ];
@@ -915,9 +918,10 @@ function doExport(){
     var vt = vAmt+(r.netPromo*vPct/100);
     var gpAmt = r.netPromo*gp/100;
     prodRows.push([
-      r.name, r.color, r.bu, r.gender,
+      r.art_color, r.name, r.color, r.bu, r.gender,
       r.price,
       r.tierLabel, r.netTier, r.netPromo,
+      r.netPromo,
       Math.round(gpAmt), r.netBrand, r.effDisc,
       r.stock, r.st_pct, r.dc_now, r.avg_dc
     ]);
